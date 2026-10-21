@@ -20,12 +20,12 @@ The following describes the local development work, not code available in this r
 
 | Area | Status |
 | --- | --- |
-| Main application | Based on a pinned NewPipe `refactor` snapshot; still uses ExoPlayer 2.19.1 |
+| Main application | Based on a pinned NewPipe `dev` snapshot dated 2026-10-21; still uses ExoPlayer 2.19.1 |
 | NewPlayer | Separate library and test app; integration research and a list of missing connections are prepared |
 | YouTube sign-in | Optional implementation adapted from PipePipe; under device debugging |
 | Session handling | Explicit capture/import and local storage; captured cookies are distinct from verified access and playback |
 | Authenticated playback | Experimental MWEB player backend; full SABR and PoToken support are not implemented |
-| Verification | Earlier snapshots built in an external WSL environment; the latest login changes have only passed static checks |
+| Verification | The current dev-base migration has only passed static checks; earlier snapshots built in an external WSL environment |
 
 **NewPlayer is not integrated into the main application yet.** End-to-end YouTube
 sign-in and authenticated playback are not confirmed. These are active development
