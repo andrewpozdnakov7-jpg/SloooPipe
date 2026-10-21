@@ -1,0 +1,27 @@
+# Local build inputs, outputs and credentials
+/sources/
+/work/
+/out/
+/cache/
+/signing/
+/offline-maven/
+**/local.properties
+**/.gradle/
+**/.kotlin/
+**/build/
+*.keystore
+*.jks
+keystore.properties
+
+# Private runtime diagnostics and local account exports
+/logcat*/
+/device-test*/
+/publication-audit*/
+**/logcat*.txt
+*.hprof
+*.p12
+*.pfx
+.env
+.env.*
+cookies.txt
+cookies.json

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<!-- NewPlayer
+
+    @author Jaime López
+
+    Copyright (C) Jaime López 2024 
+    https://jaim3.com
+
+    NewPlayer is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    NewPlayer is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with NewPlayer.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 179.79 200"><defs><style>.a{fill:#cd201f;}</style></defs><path class="a" d="M167.34,78.43,37.4,3.37A24.81,24.81,0,0,0,25,0h0A25,25,0,0,0,0,24.92L0,175.06A24.62,24.62,0,0,0,7.61,193a25.26,25.26,0,0,0,17.32,7,24.85,24.85,0,0,0,12.43-3.37l130-75.07a24.9,24.9,0,0,0,0-43.13Zm-16.79,29-14.15,8.24-22.59,13a8.66,8.66,0,0,1-8.64,0l-13.11-7.57a8.65,8.65,0,1,1,8.65-15l8.69,5L128.81,100,81.67,72.68v68.79a9.8,9.8,0,0,1-19,3.35L37.82,76.61l.09,90.82A8.66,8.66,0,0,1,33.39,175c-5.77,3.13-12.77-1.36-12.77-7.91l.05-132.51A9.95,9.95,0,0,1,40,31.26L51.31,62.81l12.83,34.8L64,70.23l.15-12.73a8.63,8.63,0,0,1,12.94-7.38c24,13.84,55.9,32.24,73.44,42.35A8.63,8.63,0,0,1,150.55,107.41Z"/></svg>

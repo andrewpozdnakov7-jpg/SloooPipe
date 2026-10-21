@@ -1,0 +1,9 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <application>
+        <!-- Separate CookieManager from anonymous PoToken and reCAPTCHA WebViews. -->
+        <activity android:name=".PipePipeLoginActivity" android:exported="false"
+            android:process=":youtube_auth" android:excludeFromRecents="true"
+            android:windowSoftInputMode="adjustResize" />
+    </application>
+</manifest>

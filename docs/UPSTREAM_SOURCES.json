@@ -1,0 +1,105 @@
+{
+  "checked_date": "2026-10-20",
+  "local_baseline_commit": "89ea1c8",
+  "scope": "static analysis only; no Gradle, builds or project tests",
+  "sources": [
+    {
+      "name": "NewPipe-dev",
+      "repository": "https://github.com/TeamNewPipe/NewPipe",
+      "commit": "9c398043ec1489d691c2f7fa9b9fbcd48f3b307c",
+      "archive_url": "https://codeload.github.com/TeamNewPipe/NewPipe/zip/9c398043ec1489d691c2f7fa9b9fbcd48f3b307c",
+      "archive_sha256": "722ce724e509d488d5f17e2aba101438d5e9e4aebdcc78d876a8bf4a4176523e",
+      "archive_bytes": 13851847,
+      "file_count": 4473,
+      "skipped_symlinks": [
+        {
+          "path": "NewPipe-9c398043ec1489d691c2f7fa9b9fbcd48f3b307c/app/src/main/res/values-iw",
+          "target": "values-he/"
+        }
+      ],
+      "source_directory": "sources/NewPipe-dev",
+      "commit_date": "2026-10-20T08:21:56Z",
+      "commit_title": "code refactor"
+    },
+    {
+      "name": "NewPipe-frankenpipe",
+      "repository": "https://github.com/TeamNewPipe/NewPipe",
+      "commit": "6c3f31a721083db03793f5eee61d3770e70da2b3",
+      "archive_url": "https://codeload.github.com/TeamNewPipe/NewPipe/zip/6c3f31a721083db03793f5eee61d3770e70da2b3",
+      "archive_sha256": "645a69a9d2012c5f2910ec391d02ca910b21f4b00226190eeed88ffac81f5bd0",
+      "archive_bytes": 12637918,
+      "file_count": 3168,
+      "skipped_symlinks": [
+        {
+          "path": "NewPipe-6c3f31a721083db03793f5eee61d3770e70da2b3/app/src/main/res/values-iw",
+          "target": "values-he/"
+        }
+      ],
+      "source_directory": "sources/NewPipe-frankenpipe",
+      "commit_date": "2024-12-25T17:33:49Z",
+      "commit_title": "WIP: integrate onBackPressed flow as callback"
+    },
+    {
+      "name": "NewPipe-master",
+      "repository": "https://github.com/TeamNewPipe/NewPipe",
+      "commit": "00acf2f318b0af7ffacbd687bba011b642cc01d0",
+      "archive_url": "https://codeload.github.com/TeamNewPipe/NewPipe/zip/00acf2f318b0af7ffacbd687bba011b642cc01d0",
+      "archive_sha256": "0ca1e4f8c9ec90c059647d30b600e9b13b47d88d7ac2eb49d3821a3e27b21cec",
+      "archive_bytes": 13702452,
+      "file_count": 4393,
+      "skipped_symlinks": [
+        {
+          "path": "NewPipe-00acf2f318b0af7ffacbd687bba011b642cc01d0/app/src/main/res/values-iw",
+          "target": "values-he/"
+        }
+      ],
+      "source_directory": "sources/NewPipe-master",
+      "commit_date": "2026-08-15T19:26:31Z",
+      "commit_title": "Bump NewPipe version to 0.29.1 (1015)"
+    },
+    {
+      "name": "NewPipe-refactor",
+      "repository": "https://github.com/TeamNewPipe/NewPipe",
+      "commit": "52886c235a210fa74806786697bac69f14ec7497",
+      "archive_url": "https://codeload.github.com/TeamNewPipe/NewPipe/zip/52886c235a210fa74806786697bac69f14ec7497",
+      "archive_sha256": "3b537e59b25ab8c1250791f36c93a162102f8f36600a7a87de89d31b06adf23a",
+      "archive_bytes": 13719713,
+      "file_count": 4403,
+      "skipped_symlinks": [
+        {
+          "path": "NewPipe-52886c235a210fa74806786697bac69f14ec7497/app/src/main/res/values-iw",
+          "target": "values-he/"
+        }
+      ],
+      "source_directory": "sources/NewPipe-refactor",
+      "commit_date": "2026-08-01T16:20:44Z",
+      "commit_title": "[Refactor] Convert playback buttons to segmented button (#13669)"
+    },
+    {
+      "name": "NewPlayer-dev",
+      "repository": "https://codeberg.org/TeamNewPipe/NewPlayer",
+      "commit": "212ca1c8d9419a19cb5aed7f0a61e22e8732a25c",
+      "archive_url": "https://codeberg.org/TeamNewPipe/NewPlayer/archive/212ca1c8d9419a19cb5aed7f0a61e22e8732a25c.zip",
+      "archive_sha256": "d3468229bc50266b123579d85b049e5e28c4057561fca1c220cc84ff12836549",
+      "archive_bytes": 11345691,
+      "file_count": 234,
+      "skipped_symlinks": [],
+      "source_directory": "sources/NewPlayer-dev",
+      "commit_date": "2026-10-20T11:10:11+02:00",
+      "commit_title": "Merge branch 'standalone' into dev"
+    },
+    {
+      "name": "NewPlayer-master",
+      "repository": "https://codeberg.org/TeamNewPipe/NewPlayer",
+      "commit": "89d6f16872f656dd62e47320d9cfd904f087b601",
+      "archive_url": "https://codeberg.org/TeamNewPipe/NewPlayer/archive/89d6f16872f656dd62e47320d9cfd904f087b601.zip",
+      "archive_sha256": "06817d19b41d3e39f9b5dd968995f0311e3026396e3ba72095f6e8a02193bab5",
+      "archive_bytes": 11230081,
+      "file_count": 173,
+      "skipped_symlinks": [],
+      "source_directory": "sources/NewPlayer-master",
+      "commit_date": "2024-10-28T22:12:29+01:00",
+      "commit_title": "Merge pull request #5 from TeamNewPipe/dev"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "upstream": "https://github.com/TeamNewPipe/NewPipeExtractor",
+  "tag": "dev (pinned commit)",
+  "commit": "2f7d9da4ce82248637fdd3f8025086bd345f7fc2",
+  "donor_client": "24db7c535d82edf1af30d1cdb201b51f21c1a48d",
+  "donor_extractor": "73442076c671ae09bd5c0f9635932a5a67bdd609",
+  "changed_upstream_files": [
+    "build.gradle.kts",
+    "extractor/build.gradle.kts",
+    "extractor/src/main/java/org/schabi/newpipe/extractor/services/youtube/AuthenticatedPlayerProvider.java",
+    "extractor/src/main/java/org/schabi/newpipe/extractor/services/youtube/extractors/YoutubeStreamExtractor.java",
+    "settings.gradle.kts"
+  ],
+  "omitted_directory": ".github",
+  "scope": "Optional authenticated MWEB provider and sanitized per-format decoder failure callback. Anonymous visionOS pipeline and current upstream decoder retained. SABR and full player PoToken support are not ported.",
+  "upstream_archive_sha256": "eb30e0a01fe6903b0c1f571aab9ac28fbe4b2bd4339a8f9994698cf57f258857",
+  "newpipe_consumer_commit": "f46290f28ab44fa514bac0a9f0252fd7d2afb66f"
+}

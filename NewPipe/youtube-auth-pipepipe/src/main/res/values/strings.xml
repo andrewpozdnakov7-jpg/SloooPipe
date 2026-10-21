@@ -1,0 +1,22 @@
+<resources>
+    <string name="youtube_auth_login">Вход в YouTube</string>
+    <string name="youtube_auth_import">Импорт cookies</string>
+    <string name="youtube_auth_import_hint">Cookies из собственной сессии YouTube. Это секретные данные. Пароль здесь не вводится.</string>
+    <string name="youtube_auth_capture">Передать сессию приложению</string>
+    <string name="youtube_auth_cancel">Отмена</string>
+    <string name="youtube_auth_invalid">Не получены необходимые cookies сессии YouTube.</string>
+    <string name="youtube_auth_version_hint">Версия клиента MWEB из браузера (INNERTUBE_CONTEXT.client.clientVersion)</string>
+    <string name="youtube_auth_visitor_hint">VISITOR_DATA из той же сессии (необязательно)</string>
+    <string name="youtube_auth_external_browser">Открыть обычный браузер</string>
+    <string name="youtube_auth_browser_help">Если Google отклоняет встроенный браузер, используйте обычный браузер и ручной импорт сессии.</string>
+    <string name="youtube_auth_external_help">Вход в обычном браузере не передаёт сессию автоматически. Вернитесь сюда и импортируйте cookies и версию MWEB-клиента.</string>
+    <string name="youtube_auth_no_browser">Не найден браузер для открытия YouTube.</string>
+    <string name="youtube_auth_cookie_missing">Нужен Cookie-заголовок авторизованной сессии YouTube с SAPISID или __Secure-3PAPISID. Войдите в YouTube или проверьте импортируемые данные.</string>
+    <string name="youtube_auth_version_missing">Не получена версия MWEB-клиента. Дождитесь загрузки m.youtube.com или укажите INNERTUBE_CONTEXT.client.clientVersion из той же сессии при импорте.</string>
+    <string name="youtube_auth_open_mobile">Открываем мобильный YouTube. После загрузки и входа нажмите «Передать сессию приложению» ещё раз.</string>
+    <string name="youtube_auth_navigation_blocked">Не разрешён переход входа на %1$s. Подробности записаны в диагностику.</string>
+    <string name="youtube_auth_google_step">Завершите вход и подтверждение Google. Затем дождитесь открытия YouTube.</string>
+    <string name="youtube_auth_youtube_transfer">Завершается переход из Google в YouTube…</string>
+    <string name="youtube_auth_session_ready">Сессия YouTube появилась в этом окне. Нажмите «Передать сессию приложению», затем проверьте получение видео.</string>
+    <string name="youtube_auth_session_continue">Сессионные cookies YouTube появились. Если страница остановилась, нажмите «Передать сессию приложению»: откроется мобильный YouTube. После загрузки нажмите эту кнопку ещё раз. Доступ к видео проверяется отдельно.</string>
+</resources>

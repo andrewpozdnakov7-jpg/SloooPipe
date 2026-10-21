@@ -1,0 +1,413 @@
+/*
+ * SPDX-FileCopyrightText: 2025 NewPipe e.V. <https://newpipe-ev.de>
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+import com.android.build.api.dsl.ApplicationExtension
+import java.util.regex.Pattern
+import java.util.zip.ZipFile
+import org.gradle.api.artifacts.component.ModuleComponentIdentifier
+import org.gradle.api.artifacts.component.ProjectComponentIdentifier
+import org.gradle.api.artifacts.type.ArtifactTypeDefinition
+
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.android.legacy.kapt)
+    alias(libs.plugins.google.ksp)
+    alias(libs.plugins.jetbrains.kotlin.parcelize)
+    alias(libs.plugins.jetbrains.kotlinx.serialization)
+    alias(libs.plugins.sonarqube)
+    alias(libs.plugins.about.libraries)
+    checkstyle
+}
+
+val withYoutubeAuth = providers.gradleProperty("slooopipe.withAuth").getOrElse("false").toBooleanStrict()
+
+val gitWorkingBranch = providers.exec {
+    commandLine("git", "rev-parse", "--abbrev-ref", "HEAD")
+}.standardOutput.asText.map { it.trim() }
+val defaultBranches = listOf("master", "dev")
+val workingBranch = gitWorkingBranch.getOrElse("")
+val normalizedWorkingBranch = workingBranch
+    .replaceFirst("^[^A-Za-z]+".toRegex(), "")
+    .replace("[^0-9A-Za-z]+".toRegex(), "")
+
+kotlin {
+    jvmToolchain(21)
+}
+
+configure<ApplicationExtension> {
+    buildToolsVersion = "36.0.0"
+    compileSdk {
+        version = release(NEWPIPE_VERSION_SDK_COMPILE_MAJOR) {
+            minorApiLevel = NEWPIPE_VERSION_SDK_COMPILE_MINOR
+        }
+    }
+    namespace = NEWPIPE_APPLICATION_ID_OLD
+
+    defaultConfig {
+        applicationId = NEWPIPE_APPLICATION_ID_OLD
+        resValue("string", "app_name", "SloooPipe")
+        minSdk {
+            version = release(NEWPIPE_VERSION_SDK_MIN)
+        }
+        targetSdk {
+            version = release(NEWPIPE_VERSION_SDK_TARGET)
+        }
+
+        versionCode = System.getProperty("versionCodeOverride")?.toInt() ?: NEWPIPE_VERSION_CODE
+
+        versionName = NEWPIPE_VERSION_NAME
+        System.getProperty("versionNameSuffix")?.let { versionNameSuffix = it }
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        debug {
+            isDebuggable = true
+
+            // Suffix the app id with the branch; inherit the SloooPipe display name.
+            if (normalizedWorkingBranch.isEmpty() || workingBranch in defaultBranches) {
+                applicationIdSuffix = ".debug"
+            } else {
+                applicationIdSuffix = ".debug.$normalizedWorkingBranch"
+            }
+        }
+
+        release {
+            System.getProperty("packageSuffix")?.let { suffix ->
+                applicationIdSuffix = suffix
+            }
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+
+        register("continuous") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
+            isDefault = true
+
+            // Suffix the app id with the branch; inherit the SloooPipe display name.
+            if (normalizedWorkingBranch.isEmpty() || workingBranch in defaultBranches) {
+                applicationIdSuffix = ".continuous"
+            } else {
+                applicationIdSuffix = ".continuous.$normalizedWorkingBranch"
+            }
+        }
+    }
+
+    lint {
+        lintConfig = file("lint.xml")
+        // Continue the debug build even when errors are found
+        abortOnError = false
+    }
+
+    compileOptions {
+        // Flag to enable support for the new language APIs
+        isCoreLibraryDesugaringEnabled = true
+        encoding = "utf-8"
+    }
+
+    sourceSets {
+        getByName("main").java.srcDir(if (withYoutubeAuth) "src/authEnabled/java" else "src/authDisabled/java")
+        getByName("androidTest") {
+            assets.directories += "$projectDir/schemas"
+        }
+    }
+
+    androidResources {
+        generateLocaleConfig = true
+    }
+
+    buildFeatures {
+        viewBinding = true
+        buildConfig = true
+        resValues = true
+    }
+
+    packaging {
+        resources {
+            // remove two files which belong to jsoup
+            // no idea how they ended up in the META-INF dir...
+            excludes += setOf(
+                "META-INF/README.md",
+                "META-INF/CHANGES",
+                "META-INF/COPYRIGHT" // "COPYRIGHT" belongs to RxJava...
+            )
+        }
+    }
+}
+
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
+// Custom dependency configuration for ktlint
+val ktlint by configurations.creating
+
+checkstyle {
+    configDirectory = rootProject.file("checkstyle")
+    isIgnoreFailures = false
+    isShowViolations = true
+    toolVersion = libs.versions.checkstyle.get()
+}
+
+tasks.register<Checkstyle>("runCheckstyle") {
+    source("src")
+    include("**/*.java")
+    exclude("**/gen/**")
+    exclude("**/R.java")
+    exclude("**/BuildConfig.java")
+    exclude("main/java/us/shandian/giga/**")
+
+    classpath = configurations.getByName("checkstyle")
+
+    isShowViolations = true
+
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+val outputDir = project.layout.buildDirectory.dir("reports/ktlint/")
+val inputFiles = fileTree("src") { include("**/*.kt") }
+
+tasks.register<JavaExec>("runKtlint") {
+    inputs.files(inputFiles)
+    outputs.dir(outputDir)
+    mainClass.set("com.pinterest.ktlint.Main")
+    classpath = configurations.getByName("ktlint")
+    args = listOf("--editorconfig=../.editorconfig", "src/**/*.kt")
+    jvmArgs = listOf("--add-opens", "java.base/java.lang=ALL-UNNAMED")
+}
+
+tasks.register<JavaExec>("formatKtlint") {
+    inputs.files(inputFiles)
+    outputs.dir(outputDir)
+    mainClass.set("com.pinterest.ktlint.Main")
+    classpath = configurations.getByName("ktlint")
+    args = listOf("--editorconfig=../.editorconfig", "-F", "src/**/*.kt")
+    jvmArgs = listOf("--add-opens", "java.base/java.lang=ALL-UNNAMED")
+}
+
+tasks.register<CheckDependenciesOrder>("checkDependenciesOrder") {
+    tomlFile = layout.projectDirectory.file("../gradle/libs.versions.toml")
+}
+
+afterEvaluate {
+    tasks.named("preDebugBuild").configure {
+        if (!System.getProperties().containsKey("skipFormatKtlint")) {
+            dependsOn("formatKtlint")
+        }
+        dependsOn("runCheckstyle", "runKtlint", "checkDependenciesOrder")
+    }
+}
+
+sonar {
+    properties {
+        property("sonar.projectKey", "TeamNewPipe_NewPipe")
+        property("sonar.organization", "teamnewpipe")
+        property("sonar.host.url", "https://sonarcloud.io")
+    }
+}
+
+dependencies {
+    implementation(project(":newplayer-local"))
+    implementation(newplayerLibs.androidx.media3.exoplayer.dash)
+    implementation(newplayerLibs.androidx.media3.exoplayer.hls)
+    implementation(project(":youtube-auth-api"))
+    if (withYoutubeAuth) {
+        implementation(project(":youtube-auth-pipepipe"))
+    }
+    // Desugaring
+    coreLibraryDesugaring(libs.android.desugar)
+
+    // NewPipe libraries
+    implementation(projects.shared)
+    implementation(libs.newpipe.nanojson)
+    implementation(libs.newpipe.extractor)
+    implementation(libs.newpipe.filepicker)
+
+    // Checkstyle
+    checkstyle(libs.puppycrawl.checkstyle)
+    debugImplementation(libs.leakcanary)
+    ktlint(libs.pinterest.ktlint)
+
+    // AndroidX
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.cardview)
+    implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.core)
+    implementation(libs.androidx.documentfile)
+    implementation(libs.androidx.fragment)
+    implementation(libs.androidx.lifecycle.livedata)
+    implementation(libs.androidx.lifecycle.viewmodel)
+    implementation(libs.androidx.localbroadcastmanager)
+    implementation(libs.androidx.media)
+    implementation(libs.androidx.preference)
+    implementation(libs.androidx.recyclerview)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.rxjava3)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.swiperefreshlayout)
+    implementation(libs.androidx.viewpager2)
+    implementation(libs.androidx.work.runtime)
+    implementation(libs.androidx.work.rxjava3)
+    implementation(libs.google.android.material)
+    implementation(libs.androidx.webkit)
+
+    // Coroutines interop
+    implementation(libs.kotlinx.coroutines.rx3)
+    implementation(libs.kotlinx.coroutines.android)
+
+    // Kotlinx Serialization
+    implementation(libs.kotlinx.serialization.json)
+
+    // Third-party libraries
+    implementation(libs.livefront.bridge)
+    implementation(libs.evernote.statesaver.core)
+    kapt(libs.evernote.statesaver.compiler)
+
+    // HTML parser
+    implementation(libs.jsoup)
+
+    // HTTP client
+    implementation(libs.squareup.okhttp)
+    implementation(libs.squareup.okhttp.brotli)
+
+    // Media player
+    implementation(libs.google.exoplayer.core)
+    implementation(libs.google.exoplayer.dash)
+    implementation(libs.google.exoplayer.database)
+    implementation(libs.google.exoplayer.datasource)
+    implementation(libs.google.exoplayer.hls)
+    implementation(libs.google.exoplayer.mediasession)
+    implementation(libs.google.exoplayer.smoothstreaming)
+    implementation(libs.google.exoplayer.ui)
+
+    // Manager for complex RecyclerView layouts
+    implementation(libs.lisawray.groupie.core)
+    implementation(libs.lisawray.groupie.viewbinding)
+
+    // Image loading
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
+
+    // Markdown library for Android
+    implementation(libs.noties.markwon.core)
+    implementation(libs.noties.markwon.linkify)
+
+    // Crash reporting
+    implementation(libs.acra.core)
+    compileOnly(libs.google.autoservice.annotations)
+    ksp(libs.zacsweers.autoservice.compiler)
+
+    // Properly restarting
+    implementation(libs.jakewharton.phoenix)
+
+    // Reactive extensions for Java VM
+    implementation(libs.reactivex.rxjava)
+    implementation(libs.reactivex.rxandroid)
+    // RxJava binding APIs for Android UI widgets
+    implementation(libs.jakewharton.rxbinding)
+
+    // Date and time formatting
+    implementation(libs.ocpsoft.prettytime)
+
+    // Debugging and memory leak detection
+    debugImplementation(libs.squareup.leakcanary.watcher)
+    debugImplementation(libs.squareup.leakcanary.plumber)
+    debugImplementation(libs.squareup.leakcanary.core)
+    // Debug bridge for Android
+    debugImplementation(libs.facebook.stetho.core)
+    debugImplementation(libs.facebook.stetho.okhttp3)
+
+    // Testing
+    testImplementation(libs.junit)
+    testImplementation(libs.mockito.core)
+
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.runner)
+    androidTestImplementation(libs.androidx.room.testing)
+    androidTestImplementation(libs.assertj.core)
+}
+
+aboutLibraries {
+    // License texts are bundled in config/aboutlibraries/licenses; do not contact SPDX.
+    offlineMode.set(true)
+    collect {
+        configPath = file("../config/aboutlibraries")
+    }
+    export {
+        outputFile = file("../shared/src/androidMain/assets/aboutlibraries.json")
+        prettyPrint = true
+        excludeFields.addAll("organization", "scm", "funding")
+    }
+    library {
+        exclusionPatterns = listOf(
+            Pattern.compile("^com\\.github\\.TeamNewPipe:NewPipeExtractor$"),
+            Pattern.compile("^com\\.evernote:android-state$")
+        )
+    }
+}
+
+// Reports the resolved graph and checks that exactly one Extractor is present.
+tasks.register("verifyAuthIsolation") {
+    val runtime = configurations.named("debugRuntimeClasspath")
+    // Resolve the complete graph, but request JARs only from the Extractor provider.
+    // Resolving runtime.files would also select Android secondary artifacts of
+    // :shared (classes, resources, metadata, etc.) without an artifactType.
+    val extractorArtifacts = runtime.map { configuration ->
+        configuration.incoming.artifactView {
+            componentFilter { component ->
+                when (component) {
+                    is ModuleComponentIdentifier ->
+                        component.group == "com.github.TeamNewPipe" &&
+                            component.module == "NewPipeExtractor"
+
+                    is ProjectComponentIdentifier -> component.projectPath == ":extractor"
+
+                    else -> false
+                }
+            }
+            attributes.attribute(
+                ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE,
+                ArtifactTypeDefinition.JAR_TYPE
+            )
+        }.files
+    }
+    inputs.files(extractorArtifacts)
+    val report = layout.buildDirectory.file("reports/auth/dependency-graph.txt")
+    outputs.file(report)
+    outputs.upToDateWhen { false }
+    doLast {
+        val graph = runtime.get().incoming.resolutionResult.allComponents
+            .map { it.id.displayName }.sorted()
+        val hasImplementation = graph.any { it.contains(":youtube-auth-pipepipe") }
+        check(hasImplementation == withYoutubeAuth) { "Auth implementation/classpath mismatch" }
+        var extractors = 0
+        var hooks = 0
+        extractorArtifacts.get().forEach { jar ->
+            ZipFile(jar).use { zip ->
+                if (zip.getEntry("org/schabi/newpipe/extractor/NewPipe.class") != null) {
+                    extractors++
+                }
+                if (zip.getEntry("org/schabi/newpipe/extractor/services/youtube/AuthenticatedPlayerProvider.class") != null) {
+                    hooks++
+                }
+            }
+        }
+        check(extractors == 1) { "Expected exactly one Extractor, got $extractors" }
+        check(hooks == if (withYoutubeAuth) 1 else 0) { "Wrong Extractor backend in runtime classpath" }
+        report.get().asFile.apply {
+            parentFile.mkdirs()
+            writeText("withAuth=$withYoutubeAuth\nextractors=$extractors\nhooks=$hooks\n" + graph.joinToString("\n"))
+        }
+    }
+}

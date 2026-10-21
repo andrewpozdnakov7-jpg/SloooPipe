@@ -1,0 +1,157 @@
+--- a/build.gradle.kts
++++ b/build.gradle.kts
+@@ -14,11 +14,12 @@
+ 
+     tasks.withType<JavaCompile> {
+         options.encoding = Charsets.UTF_8.toString()
++        options.release.set(17)
+     }
+ 
+     extensions.configure<JavaPluginExtension> {
+         toolchain {
+-            languageVersion.set(JavaLanguageVersion.of(11))
++            languageVersion.set(JavaLanguageVersion.of(21))
+         }
+     }
+ }
+--- a/extractor/build.gradle.kts
++++ b/extractor/build.gradle.kts
+@@ -11,9 +11,7 @@
+ val shouldSignCIRelease: Boolean
+     get() = !ciSigningKey.isNullOrEmpty() && !ciSigningPassword.isNullOrEmpty()
+ 
+-val lastCommitHash: String = providers.exec {
+-    commandLine("git", "rev-parse", "--short", "HEAD")
+-}.standardOutput.asText.map { it.trim() }.get()
++val lastCommitHash = "43f8e6e-slooopipe-auth1"
+ 
+ plugins {
+     alias(libs.plugins.google.protobuf)
+--- a/extractor/src/main/java/org/schabi/newpipe/extractor/services/youtube/AuthenticatedPlayerProvider.java
++++ b/extractor/src/main/java/org/schabi/newpipe/extractor/services/youtube/AuthenticatedPlayerProvider.java
+@@ -0,0 +1,23 @@
++// SPDX-License-Identifier: GPL-3.0-or-later
++package org.schabi.newpipe.extractor.services.youtube;
++import com.grack.nanojson.JsonObject;
++import java.io.IOException;
++import java.util.function.BooleanSupplier;
++import org.schabi.newpipe.extractor.exceptions.ExtractionException;
++
++/** Optional host-supplied MWEB backend. No account storage or UI in Extractor. */
++public interface AuthenticatedPlayerProvider {
++    Response fetch(String videoId) throws IOException, ExtractionException;
++    final class Response {
++        public final JsonObject player;
++        public final String cpn;
++        public final String streamingPoToken;
++        public final BooleanSupplier isCurrent;
++        public Response(JsonObject player, String cpn, String streamingPoToken,
++                BooleanSupplier isCurrent) {
++            this.player = player; this.cpn = cpn;
++            this.streamingPoToken = streamingPoToken; this.isCurrent = isCurrent;
++        }
++        @Override public String toString() { return "AuthenticatedPlayerResponse[REDACTED]"; }
++    }
++}
+--- a/extractor/src/main/java/org/schabi/newpipe/extractor/services/youtube/extractors/YoutubeStreamExtractor.java
++++ b/extractor/src/main/java/org/schabi/newpipe/extractor/services/youtube/extractors/YoutubeStreamExtractor.java
+@@ -102,6 +102,14 @@
+ import javax.annotation.Nullable;
+ 
+ public class YoutubeStreamExtractor extends StreamExtractor {
++    // SloooPipe: minimal optional hook, leaving the anonymous upstream path intact.
++    private static volatile org.schabi.newpipe.extractor.services.youtube.AuthenticatedPlayerProvider
++            authenticatedPlayerProvider;
++    public static void setAuthenticatedPlayerProvider(
++            org.schabi.newpipe.extractor.services.youtube.AuthenticatedPlayerProvider provider) {
++        authenticatedPlayerProvider = provider;
++    }
++
+ 
+     private static final String PREMIERED = "Premiered ";
+     private static final String PREMIERED_ON = "Premiered on ";
+@@ -840,6 +848,13 @@
+         final Localization localization = getExtractorLocalization();
+         final ContentCountry contentCountry = getExtractorContentCountry();
+ 
++        final var authProvider = authenticatedPlayerProvider;
++        final var authenticated = authProvider == null ? null : authProvider.fetch(videoId);
++        if (authenticated != null) {
++            fetchAuthenticatedPlayer(authenticated, localization, contentCountry, videoId);
++            return;
++        }
++
+         final PoTokenProvider poTokenProviderInstance = poTokenProvider;
+         final boolean noPoTokenProviderSet = poTokenProviderInstance == null;
+ 
+@@ -868,6 +883,61 @@
+                         .done())
+                 .getBytes(StandardCharsets.UTF_8);
+         nextResponse = getJsonPostResponse(NEXT, nextBody, localization);
++    }
++
++    private void fetchAuthenticatedPlayer(
++            org.schabi.newpipe.extractor.services.youtube.AuthenticatedPlayerProvider.Response auth,
++            Localization localization, ContentCountry contentCountry, String videoId)
++            throws IOException, ExtractionException {
++        playerResponse = auth.player;
++        checkPlayabilityStatus(playerResponse.getObject(PLAYABILITY_STATUS));
++        if (isPlayerResponseNotValid(playerResponse, videoId)) {
++            throw new ExtractionException("AUTH_PLAYER_RESPONSE_MISMATCH");
++        }
++        androidCpn = auth.cpn;
++        androidStreamingUrlsPoToken = auth.streamingPoToken;
++        androidStreamingData = playerResponse.getObject(STREAMING_DATA);
++        // SABR is a session protocol, never treat its serverAbrStreamingUrl as a file URL.
++        if (androidStreamingData.containsKey("serverAbrStreamingUrl")
++                && !hasAuthenticatedDirectFormats(androidStreamingData)) {
++            throw new ExtractionException("AUTH_SABR_BACKEND_REQUIRED");
++        }
++        setStreamType();
++        playerCaptionsTracklistRenderer = playerResponse.getObject(CAPTIONS)
++                .getObject(PLAYER_CAPTIONS_TRACKLIST_RENDERER);
++        playerMicroFormatRenderer = playerResponse.getObject("microformat")
++                .getObject("playerMicroformatRenderer");
++        thumbnailsArray = playerResponse.getObject(VIDEO_DETAILS)
++                .getObject(THUMBNAIL).getArray(THUMBNAILS);
++        final byte[] nextBody = JsonWriter.string(
++                prepareDesktopJsonBuilder(localization, contentCountry)
++                        .value(VIDEO_ID, videoId).value(CONTENT_CHECK_OK, true)
++                        .value(RACY_CHECK_OK, true).done()).getBytes(StandardCharsets.UTF_8);
++        // Metadata browsing stays anonymous, matching the auth boundary.
++        try {
++            nextResponse = getJsonPostResponse(NEXT, nextBody, localization);
++        } catch (IOException | ExtractionException error) {
++            nextResponse = new JsonObject();
++            // Optional anonymous metadata failed; authenticated playback data remains usable.
++        }
++        if (!auth.isCurrent.getAsBoolean()) {
++            throw new ExtractionException("AUTH_SESSION_CHANGED");
++        }
++    }
++
++    private static boolean hasAuthenticatedDirectFormats(JsonObject data) {
++        for (String key : Arrays.asList(FORMATS, ADAPTIVE_FORMATS)) {
++            JsonArray formats = data.getArray(key);
++            if (formats == null) { continue; }
++            for (Object value : formats) {
++                if (!(value instanceof JsonObject)) { continue; }
++                JsonObject format = (JsonObject) value;
++                if (!format.getString("url", "").isEmpty()
++                        || !format.getString("signatureCipher", "").isEmpty()
++                        || !format.getString("cipher", "").isEmpty()) { return true; }
++            }
++        }
++        return false;
+     }
+ 
+     private static void checkPlayabilityStatus(@Nonnull final JsonObject playabilityStatus)
+--- a/settings.gradle.kts
++++ b/settings.gradle.kts
+@@ -18,5 +18,5 @@
+         maven(url = "https://jitpack.io")
+     }
+ }
+-include("extractor", "timeago-generator")
++include("extractor")
+ rootProject.name = "NewPipeExtractor"

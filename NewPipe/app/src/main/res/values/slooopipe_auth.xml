@@ -1,0 +1,16 @@
+<resources>
+    <string name="slooopipe_youtube_account">Аккаунт YouTube</string>
+    <string name="slooopipe_auth_login">Войти в YouTube</string>
+    <string name="slooopipe_auth_logout">Выйти</string>
+    <string name="slooopipe_auth_check">Проверить получение видео</string>
+    <string name="slooopipe_auth_video_url">HTTPS-ссылка на видео YouTube</string>
+    <string name="slooopipe_auth_anonymous">Просмотр без аккаунта.</string>
+    <string name="slooopipe_auth_captured">Сессия сохранена. Доступ к видео ещё не проверен.</string>
+    <string name="slooopipe_auth_verified">Получение источника видео с текущей сессией подтверждено. Воспроизведение проверяется отдельно.</string>
+    <string name="slooopipe_auth_reauth">Сессия отклонена. Требуется повторный вход.</string>
+    <string name="slooopipe_auth_unavailable">В этой сборке вход отключён.</string>
+    <string name="slooopipe_auth_capture_failed">Не удалось сохранить сессию. Вход не подтверждён.</string>
+    <string name="slooopipe_auth_checking">Проверяем доступ к выбранному видео…</string>
+    <string name="slooopipe_auth_check_failed">Не удалось подтвердить доступ к видео. Причиной может быть отказ сервиса, ограничение видео, сетевая ошибка или истёкшая сессия.</string>
+    <string name="slooopipe_auth_sabr_required">YouTube вернул поток, воспроизведение которого эта версия пока не поддерживает. Вход не считается решением проблемы.</string>
+</resources>

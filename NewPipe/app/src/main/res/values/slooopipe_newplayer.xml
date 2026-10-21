@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="slooopipe_newplayer_title">Playback with NewPlayer</string>
+    <string name="slooopipe_newplayer_retry">Retry</string>
+    <string name="slooopipe_newplayer_error">Could not play this video. Return to the video details or retry.</string>
+    <string name="slooopipe_newplayer_local_error">Could not play this file. Choose another video.</string>
+</resources>

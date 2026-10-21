@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="slooopipe_local_source">Local</string>
+    <string name="slooopipe_local_title">Local video playback</string>
+    <string name="slooopipe_local_back">Back to SloooPipe</string>
+    <string name="slooopipe_local_choose">Choose video</string>
+    <string name="slooopipe_local_hint">Choose a video stored on your device. Playback uses NewPlayer.</string>
+    <string name="slooopipe_local_loading">Opening video…</string>
+    <string name="slooopipe_local_playing">Playing</string>
+    <string name="slooopipe_local_paused">Paused</string>
+    <string name="slooopipe_local_ended">Playback finished</string>
+    <string name="slooopipe_local_error">Could not play this file (%1$s). Choose another video or check the SloooPipeLocal log.</string>
+</resources>

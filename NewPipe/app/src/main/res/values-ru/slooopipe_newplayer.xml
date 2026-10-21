@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="slooopipe_newplayer_title">Просмотр через NewPlayer</string>
+    <string name="slooopipe_newplayer_retry">Повторить</string>
+    <string name="slooopipe_newplayer_error">Не удалось воспроизвести видео. Вернитесь к ролику или повторите попытку.</string>
+    <string name="slooopipe_newplayer_local_error">Не удалось воспроизвести файл. Выберите другое видео.</string>
+</resources>

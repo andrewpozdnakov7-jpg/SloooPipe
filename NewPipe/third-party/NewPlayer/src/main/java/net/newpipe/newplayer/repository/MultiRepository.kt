@@ -1,0 +1,106 @@
+/* NewPlayer
+ *
+ * @author Christian Schabesberger
+ *
+ * Copyright (C) NewPipe e.V. 2024 <code(at)newpipe-ev.de>
+ *
+ * NewPlayer is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * NewPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with NewPlayer.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package net.newpipe.newplayer.repository
+
+import net.newpipe.newplayer.data.NewPlayerException
+
+/**
+ * @param key is concatenated to the beginning of an **item** that is issued to a [MultiRepository]
+ * this is used to identify which actual repository should handle the **item**
+ * @param repository the repository that should handle that key
+ */
+data class MultiRepoEntry(val key: String, val repository: MediaRepository)
+
+/**
+ * This repository can be used to combine multiple MediaRepositories.
+ * Be aware that the string identifying an **item** is extended by the **key** of the repository.
+ * This key is specified by [MultiRepoEntry.key].
+ * The string identifying an **item** called `item` would become `key:item` where repo key and
+ * item are separated by a `:` character.
+ * You need to take care yourself to encode the item strings accordingly when you are using a
+ * MediaRepository.
+ */
+class MultiRepository(val actualRepositories: List<MultiRepoEntry>) : MediaRepository {
+
+    val repos = run {
+        val repos = HashMap<String, MediaRepository>()
+        for (entry in actualRepositories) {
+            repos[entry.key] = entry.repository
+        }
+        repos
+    }
+
+    private data class RepoSelection (
+        val repo: MediaRepository,
+        val item: String
+    )
+
+    private fun getActualRepoAndItem(
+        item: String,
+    ): RepoSelection {
+        val decomposedItem = item.split(":", limit = 2)
+        if (decomposedItem.size != 2) {
+            throw NewPlayerException(
+                "Could not decompose the item $item into a repo key and an item. " +
+                        "Expected the format `key:item`."
+            )
+        }
+        val repoId = decomposedItem[0]
+        val repo = repos[repoId] ?: throw NewPlayerException(
+            "Could find a MediaRepository matching the item $item. Its repo key was apparently: $repoId"
+        )
+        return RepoSelection(repo, decomposedItem[1])
+    }
+
+    override suspend fun getMetaInfo(item: String) = getActualRepoAndItem(item).let {
+        it.repo.getMetaInfo(it.item)
+    }
+
+    override suspend fun getMediaItem(item: String) = getActualRepoAndItem(item).let {
+        it.repo.getMediaItem(it.item)
+    }
+
+
+    override suspend fun getPreviewThumbnail(item: String, timestampInMs: Long) =
+        getActualRepoAndItem(item).let {
+            it.repo.getPreviewThumbnail(it.item, timestampInMs)
+        }
+
+    override suspend fun getPreviewThumbnailsInfo(item: String) =
+        getActualRepoAndItem(item).let {
+            it.repo.getPreviewThumbnailsInfo(it.item)
+        }
+
+    override suspend fun getChapters(item: String) =
+        getActualRepoAndItem(item).let {
+            it.repo.getChapters(it.item)
+        }
+
+    override suspend fun getTimestampLink(item: String, timestampInSeconds: Long) =
+        getActualRepoAndItem(item).let {
+            it.repo.getTimestampLink(it.item, timestampInSeconds)
+        }
+
+    override suspend fun getLink(item: String) =
+        getActualRepoAndItem(item).let {
+            it.repo.getLink(it.item)
+        }
+}

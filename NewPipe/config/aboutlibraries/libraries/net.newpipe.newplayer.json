@@ -1,0 +1,9 @@
+{
+  "uniqueId": "net.newpipe:newplayer-local",
+  "artifactVersion": "212ca1c8d941",
+  "name": "NewPlayer",
+  "description": "NewPipe's Media3 player, embedded for local video playback in SloooPipe",
+  "website": "https://codeberg.org/TeamNewPipe/NewPlayer",
+  "developers": [{ "name": "NewPipe contributors" }],
+  "licenses": ["GPL-3.0-or-later"]
+}

@@ -1,0 +1,34 @@
+{
+  "updated": "2026-10-21",
+  "newpipe": {
+    "repo": "TeamNewPipe/NewPipe",
+    "commit": "f46290f28ab44fa514bac0a9f0252fd7d2afb66f",
+    "url": "https://codeload.github.com/TeamNewPipe/NewPipe/zip/f46290f28ab44fa514bac0a9f0252fd7d2afb66f",
+    "archive": "NewPipe-f46290f28ab4.zip",
+    "sha256": "c2bb38b3072d985d6957d0fb808571c70899855e3795fb1a87ee31aa103a19bf",
+    "directory": "NewPipe-f46290f28ab44fa514bac0a9f0252fd7d2afb66f"
+  },
+  "extractor": {
+    "repo": "TeamNewPipe/NewPipeExtractor",
+    "commit": "2f7d9da4ce82248637fdd3f8025086bd345f7fc2",
+    "url": "https://codeload.github.com/TeamNewPipe/NewPipeExtractor/zip/2f7d9da4ce82248637fdd3f8025086bd345f7fc2",
+    "archive": "NewPipeExtractor-2f7d9da4ce82.zip",
+    "sha256": "eb30e0a01fe6903b0c1f571aab9ac28fbe4b2bd4339a8f9994698cf57f258857",
+    "directory": "NewPipeExtractor-2f7d9da4ce82248637fdd3f8025086bd345f7fc2"
+  },
+  "extractor_matches_newpipe_pin": true,
+  "previous_source_checkpoint": "41a374e0f66cb945c86799b590d32b8d5a19debd",
+  "newplayer": {
+    "repository": "https://codeberg.org/TeamNewPipe/NewPlayer",
+    "branch": "dev",
+    "commit": "212ca1c8d9419a19cb5aed7f0a61e22e8732a25c",
+    "archive_url": "https://codeberg.org/TeamNewPipe/NewPlayer/archive/212ca1c8d9419a19cb5aed7f0a61e22e8732a25c.zip",
+    "archive_sha256": "d3468229bc50266b123579d85b049e5e28c4057561fca1c220cc84ff12836549",
+    "directory": "NewPipe/third-party/NewPlayer",
+    "module": ":newplayer-local",
+    "scope": "Main Play, cloned NewPipe queues/pagination, Media3 lazy sources and existing history DB integration; root standalone demo unchanged",
+    "live_branch_verified": "2026-10-21"
+  },
+  "source_branch": "base/newpipe-dev-20261021",
+  "verified": "APK22 LDPlayer14/Android14: standard Play VOD, pause/seek/back/mini, history resume and enqueue-next/MEDIA_NEXT verified. Native queue UI crashes on missing duration. ZIP23 duration/unknown-duration fix is static-only; external build, JVM tests and APK retest pending."
+}
