@@ -1,0 +1,72 @@
+ID,Сценарий,Кандидат,Статус,Примечание
+F01.1,обычный Play,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F01.2,другой/повторный Play,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F01.3,быстрые A→B,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F02.1,локальное видео,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F02.2,локальное аудио,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F02.3,сеть↔локальный repository/история,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F03.1,10 циклов из NewPlayer с/без выбора pause/play,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F03.2,10 циклов из мини-панели с/без выбора pause/play,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F04.1,embedded↔fullscreen portrait/landscape,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F04.2,Home/reopen/поворот,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F04.3,PiP/Surface bounds,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F05.1,Play all с середины,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F05.2,enqueue/next/дубликаты,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F05.3,reorder текущего,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F06.1,delete до текущего,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F06.2,delete текущего,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F06.3,delete последнего/всех,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F07.1,auto-next,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F07.2,repeat off/one/all,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F07.3,shuffle последовательность,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F08.1,длинный playlist lazy loading,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F08.2,pagination после reorder/enqueue/delete,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F09.1,отмена сохраняет сессию,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F09.2,согласие однократно,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F09.3,paused queue после Back,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F09.4,stale dialog после queue/account change,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F10.1,confirmation on/off,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F10.2,resume/enqueue без ложной замены,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F10.3,background/popup replacement,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F11.1,"history on/off, playback-only view",ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F11.2,resume/positions preferences,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F11.3,timestamp/zero/recovery/finished,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F11.4,old/new item event boundary,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F12.1,progressive muxed,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F12.2,split A/V/generated DASH,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F12.3,HLS,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F12.4,DASH manifest,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F12.5,audio-only/post-live audio,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F12.6,актуальный live/DVR,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F13.1,качество сохраняет position/play intent,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F13.2,audio track,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F13.3,subtitles,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F13.4,speed/pitch,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F13.5,chapters,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F13.6,preview NONE/LOW/HIGH,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F14.1,source error/Retry,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F14.2,краткая потеря сети,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F14.3,cancel/поздний ответ,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F15.1,фон↔полный/мини,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F15.2,popup↔полный/фон,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F15.3,PiP↔embedded,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F15.4,локальная мини-панель,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F16.1,notification/MediaSession,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F16.2,гарнитура/noisy,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F16.3,focus/resume preference,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F17.1,Activity recreation,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F17.2,Close/delete-all/reopen,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+F17.3,штатное queue restoration,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+A01.1,ownership/Kotlin,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+A01.2,generic/host boundary,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+A01.3,listeners/controllers/feeds/caches,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+A02.1,41 app/NewPlayer JVM cases,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+A02.2,auth with build/test/isolation,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+A02.3,auth without build/test/isolation/anonymous runtime,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+U01.1,official refs/refactor compatibility,ZIP26,PASS,Статическая проверка official refs/source 2026-10-22; UPSTREAM_PORTING_20261022.md
+U01.2,portable patches/apply check,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+U01.3,upstream review/acceptance,ZIP26,BLOCKED,PR не отправлялся; требуется поручение и решение upstream.
+U02.1,source/commit/SHA manifest,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+U02.2,APK provenance от внешней сборки,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+U02.3,device evidence нового APK,ZIP26,NOT RUN,APK26: playback-проверка заблокирована падением запуска. ZIP27 требует новой сборки и всей матрицы; PASS APK25 не переносится.
+STARTUP,открытие MainActivity,APK26,FAIL,Повторяемый colorSurface exception в LocalPlaybackMini.attach; см. APK26_STARTUP_CHECKPOINT.md.

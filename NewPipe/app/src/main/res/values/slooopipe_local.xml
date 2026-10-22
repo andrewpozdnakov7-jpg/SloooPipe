@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="slooopipe_local_source">Local</string>
-    <string name="slooopipe_local_title">Local video playback</string>
+    <string name="slooopipe_local_title">Local media playback</string>
     <string name="slooopipe_local_back">Back to SloooPipe</string>
-    <string name="slooopipe_local_choose">Choose video</string>
-    <string name="slooopipe_local_hint">Choose a video stored on your device. Playback uses NewPlayer.</string>
+    <string name="slooopipe_local_choose">Choose media</string>
+    <string name="slooopipe_local_hint">Choose a video or audio file stored on your device.</string>
     <string name="slooopipe_local_loading">Opening video…</string>
     <string name="slooopipe_local_playing">Playing</string>
     <string name="slooopipe_local_paused">Paused</string>

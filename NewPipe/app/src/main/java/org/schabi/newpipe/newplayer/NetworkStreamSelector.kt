@@ -11,6 +11,9 @@ import org.schabi.newpipe.extractor.stream.VideoStream
 
 /** Selection only: no Android, network requests, playback or account access. */
 internal object NetworkStreamSelector {
+    fun identity(stream: Stream): String = stream.id + if (stream is AudioStream) ":${stream.audioTrackId}:${stream.audioLocale?.toLanguageTag()}" else ""
+    fun isAudio(type: StreamType): Boolean = type == StreamType.AUDIO_STREAM || type == StreamType.AUDIO_LIVE_STREAM || type == StreamType.POST_LIVE_AUDIO_STREAM
+
     class Selection(val streams: List<Stream>, val manifestUrl: String?, val manifestType: DeliveryMethod?, val live: Boolean)
 
     fun select(
@@ -23,7 +26,7 @@ internal object NetworkStreamSelector {
         val live = info.streamType == StreamType.LIVE_STREAM || info.streamType == StreamType.AUDIO_LIVE_STREAM
         if (live) manifest(info, true)?.let { return it }
         val audio = audios.filter(::isProgressive)
-        if ((info.streamType == StreamType.AUDIO_STREAM || info.streamType == StreamType.AUDIO_LIVE_STREAM) && audio.isNotEmpty()) {
+        if (isAudio(info.streamType) && audio.isNotEmpty()) {
             return Selection(listOf(audio[audioIndex(audio).takeIf { it in audio.indices } ?: 0]), null, null, live)
         }
         // Never silently produce a mute video-only source when the checkpoint requires audio.

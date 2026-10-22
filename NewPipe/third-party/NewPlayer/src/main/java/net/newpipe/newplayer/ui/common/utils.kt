@@ -307,14 +307,7 @@ internal fun isInPowerSaveMode() =
 /** @hide */
 @OptIn(UnstableApi::class)
 internal fun getPlaylistDurationInMS(playlist: List<MediaItem>): Long? {
-    var duration = 0L
-    for (item in playlist) {
-        val itemDuration = item.mediaMetadata.durationMs ?: return null
-        // Live/unresolved entries and overflow make the aggregate unknown, not an error.
-        if (itemDuration < 0 || itemDuration > Long.MAX_VALUE - duration) return null
-        duration += itemDuration
-    }
-    return duration
+    return net.newpipe.newplayer.logic.PlaylistDuration.sum(playlist.map { it.mediaMetadata.durationMs })
 }
 
 

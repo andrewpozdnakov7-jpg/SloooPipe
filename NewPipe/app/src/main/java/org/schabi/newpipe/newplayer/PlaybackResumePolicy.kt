@@ -8,10 +8,12 @@ internal object PlaybackResumePolicy {
     fun position(durationSeconds: Long, explicitMillis: Long, timestampSeconds: Long, history: StreamStateEntity?): Long {
         val requested = when {
             explicitMillis >= 0 -> explicitMillis
-            timestampSeconds > 0 -> timestampSeconds * 1000
+            timestampSeconds > 0 -> milliseconds(timestampSeconds)
             history != null && !history.isFinished(durationSeconds) -> history.progressMillis
             else -> 0
         }
-        return if (durationSeconds > 0) requested.coerceIn(0, durationSeconds * 1000 - 1) else requested.coerceAtLeast(0)
+        return if (durationSeconds > 0) requested.coerceIn(0, milliseconds(durationSeconds) - 1) else requested.coerceAtLeast(0)
     }
+
+    private fun milliseconds(seconds: Long): Long = if (seconds > Long.MAX_VALUE / 1000) Long.MAX_VALUE else seconds * 1000
 }

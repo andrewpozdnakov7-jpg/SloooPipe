@@ -30,7 +30,7 @@ import org.schabi.newpipe.util.DependentPreferenceHelper
 /** One writer preserves pause/seek/transition ordering; local files never enter NewPipe history. */
 internal class PlaybackHistory(private val context: Context) {
     private sealed interface Work
-    private data class Write(val info: StreamInfo, val position: Long?, val viewed: Boolean) : Work
+    private data class Write(val info: StreamInfo, val position: Long?, val viewed: Boolean, val generation: Long = AuthRuntime.generation()) : Work
     private class Barrier(val done: CompletableDeferred<Unit>) : Work
     private val manager = HistoryRecordManager(context)
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -50,7 +50,7 @@ internal class PlaybackHistory(private val context: Context) {
                     continue
                 }
                 val write = work as Write
-                if (!enabled(context)) continue
+                if (!enabled(context) || write.generation != AuthRuntime.generation()) continue
                 try {
                     if (write.viewed) manager.onViewed(write.info).awaitValue()
                     write.position?.let { manager.saveStreamState(write.info, it).awaitCompletion() }
@@ -131,17 +131,25 @@ internal class PlaybackHistory(private val context: Context) {
                     Log.i(NewPlayerRuntime.TAG, "history.resume position=${entry.startPosition}")
                 }
             }
-            if (player.isPlaying && item != null && viewedId != item.mediaId) {
+            if (!enabled(context)) {
+                viewedId = null
+                viewedItems.clear()
+                lastSaved.clear()
+            }
+            if (enabled(context) && player.isPlaying && item != null && viewedId != item.mediaId) {
                 info(item)?.let {
                     viewedId = item.mediaId
                     viewedItems.add(item.mediaId)
+                    while (viewedItems.size > 32) viewedItems.remove(viewedItems.first())
+                    lastSaved.keys.retainAll(viewedItems)
                     if (enabled(context)) writes.trySend(Write(it, null, true))
                 }
             }
             if (!player.isPlaying) save(player)
             if (player.playbackState == Player.STATE_ENDED) {
                 val info = info(item)
-                if (info != null && info.duration > 0) save(item, (info.duration + 1) * 1000)
+                val duration = info?.let { NetworkMetadata.durationMs(it.streamType, it.duration) }
+                if (duration != null && duration < Long.MAX_VALUE - 1000) save(item, duration + 1000)
             }
         }
     }

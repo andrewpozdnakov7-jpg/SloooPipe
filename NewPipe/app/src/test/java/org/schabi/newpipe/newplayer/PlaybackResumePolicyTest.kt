@@ -35,4 +35,10 @@ class PlaybackResumePolicyTest {
     fun invalidTimestampCannotSeekPastTheVideo() {
         assertEquals(599999L, PlaybackResumePolicy.position(600, Long.MIN_VALUE, 900, null))
     }
+
+    @Test
+    fun extremeExtractorDurationAndTimestampCannotOverflow() {
+        assertEquals(Long.MAX_VALUE - 1, PlaybackResumePolicy.position(Long.MAX_VALUE, Long.MIN_VALUE, Long.MAX_VALUE, null))
+        assertEquals(599999L, PlaybackResumePolicy.position(600, Long.MIN_VALUE, Long.MAX_VALUE, null))
+    }
 }

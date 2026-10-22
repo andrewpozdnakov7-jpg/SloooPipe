@@ -1,8 +1,6 @@
 package org.schabi.newpipe.util.text;
 
 import android.content.Context;
-import android.content.Intent;
-import androidx.core.content.ContextCompat;
 
 import androidx.annotation.NonNull;
 import org.schabi.newpipe.extractor.NewPipe;
@@ -10,7 +8,7 @@ import org.schabi.newpipe.extractor.StreamingService;
 import org.schabi.newpipe.extractor.exceptions.ExtractionException;
 import org.schabi.newpipe.extractor.exceptions.ParsingException;
 import org.schabi.newpipe.extractor.linkhandler.LinkHandlerFactory;
-import org.schabi.newpipe.player.TimestampChangeData;
+import org.schabi.newpipe.newplayer.PlaybackRequests;
 import org.schabi.newpipe.util.NavigationHelper;
 
 import java.util.regex.Matcher;
@@ -90,13 +88,7 @@ public final class InternalUrlsHandler {
             return false;
         }
 
-        final Intent intent = NavigationHelper.getPlayerTimestampIntent(context,
-                new TimestampChangeData(
-                        service.getServiceId(),
-                        cleanUrl,
-                        seconds
-                ));
-        ContextCompat.startForegroundService(context, intent);
+        PlaybackRequests.timestamp(context, service.getServiceId(), cleanUrl, seconds);
 
         return true;
     }

@@ -17,7 +17,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
@@ -32,6 +31,8 @@ import org.schabi.newpipe.MainActivity;
 import org.schabi.newpipe.NewPipeDatabase;
 import org.schabi.newpipe.newplayer.NewPlayerActivity;
 import org.schabi.newpipe.newplayer.NewPlayerRuntime;
+import org.schabi.newpipe.newplayer.PlaybackPresentation;
+import org.schabi.newpipe.newplayer.PlaybackRequests;
 import org.schabi.newpipe.R;
 import org.schabi.newpipe.RouterActivity;
 import org.schabi.newpipe.database.feed.model.FeedGroupEntity;
@@ -149,70 +150,35 @@ public final class NavigationHelper {
             return;
         }
         NewPlayerActivity.openQueue(context, playQueue,
-                !switchingPlayers || PlayerHolder.getInstance().isPlaying());
+                !switchingPlayers || NewPlayerRuntime.isNetworkPlaying()
+                        || PlayerHolder.getInstance().isPlaying());
     }
 
     public static void playOnPopupPlayer(final Context context,
                                          final PlayQueue queue,
                                          final boolean resumePlayback) {
-        if (!PermissionHelper.isPopupEnabledElseAsk(context)) {
-            return;
-        }
-
-        NewPlayerRuntime.stopForLegacyPlayback();
-        Toast.makeText(context, R.string.popup_playing_toast, Toast.LENGTH_SHORT).show();
-
-        final var intent = getPlayerIntent(context, PlayerService.class, queue,
-                PlayerIntentType.AllOthers)
-                .putExtra(Player.PLAYER_TYPE, PlayerType.POPUP)
-                .putExtra(Player.RESUME_PLAYBACK, resumePlayback);
-        ContextCompat.startForegroundService(context, intent);
+        PlaybackRequests.play(context, queue, resumePlayback,
+                PlaybackPresentation.POPUP);
     }
 
     public static void playOnBackgroundPlayer(final Context context,
                                               final PlayQueue queue,
                                               final boolean resumePlayback) {
-        NewPlayerRuntime.stopForLegacyPlayback();
-        Toast.makeText(context, R.string.background_player_playing_toast, Toast.LENGTH_SHORT)
-                .show();
-
-        final Intent intent = getPlayerIntent(context, PlayerService.class, queue,
-                PlayerIntentType.AllOthers)
-                .putExtra(Player.PLAYER_TYPE, PlayerType.AUDIO)
-                .putExtra(Player.RESUME_PLAYBACK, resumePlayback);
-        ContextCompat.startForegroundService(context, intent);
+        PlaybackRequests.play(context, queue, resumePlayback,
+                PlaybackPresentation.AUDIO);
     }
 
     /* ENQUEUE */
     public static void enqueueOnPlayer(final Context context,
                                        final PlayQueue queue,
                                        final PlayerType playerType) {
-        if (playerType == PlayerType.MAIN) {
-            if (!NewPlayerRuntime.enqueueIfActive(queue, false)) {
-                NewPlayerActivity.openQueue(context, queue, false);
-            }
-            Toast.makeText(context, R.string.enqueued, Toast.LENGTH_SHORT).show();
-            return;
-        }
-        NewPlayerRuntime.stopForLegacyPlayback();
-        if (playerType == PlayerType.POPUP && !PermissionHelper.isPopupEnabledElseAsk(context)) {
-            return;
-        }
-
+        final var mode = playerType == PlayerType.AUDIO
+                ? PlaybackPresentation.AUDIO
+                : playerType == PlayerType.POPUP
+                ? PlaybackPresentation.POPUP
+                : PlaybackPresentation.VIDEO;
+        PlaybackRequests.enqueue(context, queue, false, mode);
         Toast.makeText(context, R.string.enqueued, Toast.LENGTH_SHORT).show();
-
-        // when enqueueing `resumePlayback` is always `false` since:
-        // - if there is a video already playing, the value of `resumePlayback` just doesn't make
-        //   any difference.
-        // - if there is nothing already playing, it is useful for the enqueue action to have a
-        //   slightly different behaviour than the normal play action: the latter resumes playback,
-        //   the former doesn't. (note that enqueue can be triggered when nothing is playing only
-        //   by long pressing the video detail fragment, playlist or channel controls
-        final Intent intent = getPlayerIntent(context, PlayerService.class, queue,
-                PlayerIntentType.Enqueue)
-                .putExtra(Player.RESUME_PLAYBACK, false)
-                .putExtra(Player.PLAYER_TYPE, playerType);
-        ContextCompat.startForegroundService(context, intent);
     }
 
     public static void enqueueOnPlayer(final Context context, final PlayQueue queue) {
@@ -226,23 +192,9 @@ public final class NavigationHelper {
 
     /* ENQUEUE NEXT */
     public static void enqueueNextOnPlayer(final Context context, final PlayQueue queue) {
-        if (NewPlayerRuntime.enqueueIfActive(queue, true)) {
-            Toast.makeText(context, R.string.enqueued_next, Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (PlayerHolder.getInstance().getType() == null) {
-            NewPlayerActivity.openQueue(context, queue, false);
-            return;
-        }
-        PlayerType playerType = PlayerHolder.getInstance().getType();
-        if (playerType == null) {
-            Log.e(TAG, "Enqueueing next but no player is open; defaulting to background player");
-            playerType = PlayerType.AUDIO;
-        }
+        PlaybackRequests.enqueue(context, queue, true,
+                PlaybackPresentation.VIDEO);
         Toast.makeText(context, R.string.enqueued_next, Toast.LENGTH_SHORT).show();
-        final Intent intent = getPlayerEnqueueNextIntent(context, PlayerService.class, queue)
-                .putExtra(Player.PLAYER_TYPE, playerType);
-        ContextCompat.startForegroundService(context, intent);
     }
 
     /*//////////////////////////////////////////////////////////////////////////

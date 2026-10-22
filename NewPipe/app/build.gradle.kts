@@ -221,6 +221,7 @@ dependencies {
     implementation(project(":newplayer-local"))
     implementation(newplayerLibs.androidx.media3.exoplayer.dash)
     implementation(newplayerLibs.androidx.media3.exoplayer.hls)
+    implementation(newplayerLibs.androidx.media3.ui)
     implementation(project(":youtube-auth-api"))
     if (withYoutubeAuth) {
         implementation(project(":youtube-auth-pipepipe"))

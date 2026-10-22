@@ -99,6 +99,15 @@ public final class PlayerHolder {
         return getPlayQueue().map(PlayQueue::getIndex).orElse(0);
     }
 
+    /**
+     * Read-only compatibility access while existing legacy sessions are being migrated.
+     * @return the queue owned by this holder, or null
+     */
+    @Nullable
+    public PlayQueue getQueueSnapshot() {
+        return getPlayQueue().orElse(null);
+    }
+
     public void setListener(@Nullable final PlayerServiceExtendedEventListener newListener) {
         listener = newListener;
 

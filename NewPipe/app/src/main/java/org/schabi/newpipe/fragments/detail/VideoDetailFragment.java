@@ -6,7 +6,6 @@ import static org.schabi.newpipe.extractor.stream.StreamExtractor.NO_AGE_LIMIT;
 import static org.schabi.newpipe.ktx.ViewUtils.animate;
 import static org.schabi.newpipe.ktx.ViewUtils.animateRotation;
 import static org.schabi.newpipe.player.helper.PlayerHelper.globalScreenOrientationLocked;
-import static org.schabi.newpipe.player.helper.PlayerHelper.isClearingQueueConfirmationRequired;
 import static org.schabi.newpipe.util.DependentPreferenceHelper.getResumePlaybackEnabled;
 import static org.schabi.newpipe.util.ExtractorHelper.showMetaInfoInTextView;
 import static org.schabi.newpipe.util.ListHelper.getUrlAndNonTorrentStreams;
@@ -208,6 +207,7 @@ public final class VideoDetailFragment
     protected boolean autoPlayEnabled = true;
     @State
     boolean newPlayerSelected = false;
+    private boolean hidingReleasedNewPlayer = false;
     private boolean forceFullscreen = false;
 
     @Nullable
@@ -1100,20 +1100,9 @@ public final class VideoDetailFragment
     }
 
     private void openBackgroundPlayer(final boolean append) {
-        NewPlayerRuntime.stopForLegacyPlayback();
-        newPlayerSelected = false;
-        final boolean useExternalAudioPlayer = PreferenceManager
-                .getDefaultSharedPreferences(activity)
+        final boolean external = PreferenceManager.getDefaultSharedPreferences(activity)
                 .getBoolean(activity.getString(R.string.use_external_audio_player_key), false);
-
-        toggleFullscreenIfInFullscreenMode();
-
-        if (isPlayerAvailable()) {
-            // FIXME Workaround #7427
-            player.setRecovery();
-        }
-
-        if (useExternalAudioPlayer) {
+        if (external) {
             showExternalAudioPlaybackDialog();
         } else {
             openNormalBackgroundPlayer(append);
@@ -1121,28 +1110,11 @@ public final class VideoDetailFragment
     }
 
     private void openPopupPlayer(final boolean append) {
-        if (!PermissionHelper.isPopupEnabledElseAsk(activity)) {
-            return;
-        }
-        NewPlayerRuntime.stopForLegacyPlayback();
-        newPlayerSelected = false;
-
-        // See UI changes while remote playQueue changes
-        if (!isPlayerAvailable()) {
-            playerHolder.startService(false, this);
-        } else {
-            // FIXME Workaround #7427
-            player.setRecovery();
-        }
-
-        toggleFullscreenIfInFullscreenMode();
-
         final PlayQueue queue = setupPlayQueueForIntent(append);
-        if (append) { //resumePlayback: false
+        if (append) {
             NavigationHelper.enqueueOnPlayer(activity, queue, PlayerType.POPUP);
         } else {
-            replaceQueueIfUserConfirms(() -> NavigationHelper
-                    .playOnPopupPlayer(activity, queue, true));
+            NavigationHelper.playOnPopupPlayer(activity, queue, true);
         }
     }
 
@@ -1154,14 +1126,13 @@ public final class VideoDetailFragment
      *                                       in landscape and screen orientation is locked
      */
     public void openVideoPlayer(final boolean directlyFullscreenIfApplicable) {
-        newPlayerSelected = false;
         if (PreferenceManager.getDefaultSharedPreferences(activity)
                 .getBoolean(getString(R.string.use_external_video_player_key), false)) {
             showExternalVideoPlaybackDialog();
         } else if (currentInfo != null) {
-            replaceQueueIfUserConfirms(() -> NewPlayerActivity.openNetwork(requireContext(),
-                    currentInfo, setupPlayQueueForIntent(false), autoPlayEnabled,
-                    directlyFullscreenIfApplicable));
+            NewPlayerActivity.openNetwork(requireContext(), currentInfo,
+                    setupPlayQueueForIntent(false), autoPlayEnabled,
+                    directlyFullscreenIfApplicable);
         }
     }
 
@@ -1192,17 +1163,11 @@ public final class VideoDetailFragment
     }
 
     private void openNormalBackgroundPlayer(final boolean append) {
-        // See UI changes while remote playQueue changes
-        if (!isPlayerAvailable()) {
-            playerHolder.startService(false, this);
-        }
-
         final PlayQueue queue = setupPlayQueueForIntent(append);
         if (append) {
             NavigationHelper.enqueueOnPlayer(activity, queue, PlayerType.AUDIO);
         } else {
-            replaceQueueIfUserConfirms(() -> NavigationHelper
-                    .playOnBackgroundPlayer(activity, queue, true));
+            NavigationHelper.playOnBackgroundPlayer(activity, queue, true);
         }
     }
 
@@ -1431,6 +1396,15 @@ public final class VideoDetailFragment
     }
 
     private void syncNewPlayerItem() {
+        if (newPlayerSelected && !NewPlayerRuntime.hasNetworkSession()) {
+            setOverlayPlayPauseImage(false);
+            if (bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_HIDDEN) {
+                hidingReleasedNewPlayer = true;
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+                Log.i("SloooPipeLocal", "network.mini_hide_released");
+            }
+            return;
+        }
         if ((!newPlayerSelected && !wasCleared())
                 || !NewPlayerRuntime.isNetworkQueueActive()) {
             return;
@@ -2222,31 +2196,6 @@ public final class VideoDetailFragment
         return item;
     }
 
-    private void replaceQueueIfUserConfirms(final Runnable onAllow) {
-        @Nullable final PlayQueue activeQueue = isPlayerAvailable() ? player.getPlayQueue() : null;
-
-        // Player will have STATE_IDLE when a user pressed back button
-        if (isClearingQueueConfirmationRequired(activity)
-                && playerIsNotStopped()
-                && activeQueue != null
-                && !activeQueue.equalStreams(playQueue)) {
-            showClearingQueueConfirmation(onAllow);
-        } else {
-            onAllow.run();
-        }
-    }
-
-    private void showClearingQueueConfirmation(final Runnable onAllow) {
-        new AlertDialog.Builder(activity)
-                .setTitle(R.string.clear_queue_confirmation_description)
-                .setNegativeButton(R.string.cancel, null)
-                .setPositiveButton(R.string.ok, (dialog, which) -> {
-                    onAllow.run();
-                    dialog.dismiss();
-                })
-                .show();
-    }
-
     private void showExternalVideoPlaybackDialog() {
         if (currentInfo == null) {
             return;
@@ -2335,7 +2284,7 @@ public final class VideoDetailFragment
      * Remove unneeded information while waiting for a next task
      * */
     private void cleanUp() {
-        NewPlayerRuntime.stopForLegacyPlayback();
+        NewPlayerRuntime.stopNetworkPlayback();
         // New beginning
         stack.clear();
         if (currentWorker != null) {
@@ -2438,6 +2387,15 @@ public final class VideoDetailFragment
 
                 switch (newState) {
                     case BottomSheetBehavior.STATE_HIDDEN:
+                        if (hidingReleasedNewPlayer) {
+                            hidingReleasedNewPlayer = false;
+                            // A replacement may have arrived during the hide animation.
+                            if (NewPlayerRuntime.hasNetworkSession()) {
+                                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                                syncNewPlayerItem();
+                                break;
+                            }
+                        }
                         moveFocusToMainFragment(true);
                         manageSpaceAtTheBottom(true);
 
@@ -2445,6 +2403,7 @@ public final class VideoDetailFragment
                         cleanUp();
                         break;
                     case BottomSheetBehavior.STATE_EXPANDED:
+                        hidingReleasedNewPlayer = false;
                         moveFocusToMainFragment(false);
                         manageSpaceAtTheBottom(false);
 
@@ -2465,6 +2424,7 @@ public final class VideoDetailFragment
                         setOverlayLook(binding.appBarLayout, behavior, 1);
                         break;
                     case BottomSheetBehavior.STATE_COLLAPSED:
+                        hidingReleasedNewPlayer = false;
                         moveFocusToMainFragment(true);
                         manageSpaceAtTheBottom(false);
 

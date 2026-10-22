@@ -33,9 +33,13 @@ internal class NetworkMediaRepository(private val context: Context) : MediaRepos
     class Plan(val sources: List<Source>, val live: Boolean)
     private class Entry(val info: StreamInfo, val generation: Long, @Volatile var mediaItem: MediaItem? = null)
     private val entries = LinkedHashMap<String, Entry>()
+    internal val details = NetworkMediaDetails(context)
 
     @Synchronized
-    fun clear() = entries.clear()
+    fun clear() {
+        entries.clear()
+        details.clear()
+    }
 
     @Synchronized
     fun offer(info: StreamInfo): String {
@@ -46,6 +50,7 @@ internal class NetworkMediaRepository(private val context: Context) : MediaRepos
     }
 
     suspend fun resolve(key: String?, serviceId: Int, url: String, forceLoad: Boolean = false): String = withContext(Dispatchers.IO) {
+        val generation = org.schabi.newpipe.auth.AuthRuntime.generation()
         if (!forceLoad && key != null && synchronized(this@NetworkMediaRepository) { entries.containsKey(key) }) {
             entry(key) // Reject a handoff from a previous account generation.
             return@withContext key
@@ -57,6 +62,7 @@ internal class NetworkMediaRepository(private val context: Context) : MediaRepos
             )
             continuation.invokeOnCancellation { request.dispose() }
         }
+        check(generation == org.schabi.newpipe.auth.AuthRuntime.generation()) { "AUTH_SESSION_CHANGED" }
         offer(info)
     }
 
@@ -71,16 +77,18 @@ internal class NetworkMediaRepository(private val context: Context) : MediaRepos
 
     fun info(key: String): StreamInfo = entry(key).info
 
-    override suspend fun getMediaItem(item: String): MediaItem = withContext(Dispatchers.IO) {
+    override suspend fun getMediaItem(item: String): MediaItem = mediaItem(item, null, null)
+
+    suspend fun mediaItem(item: String, videoChoice: String?, audioChoice: String?): MediaItem = withContext(Dispatchers.IO) {
         val entry = entry(item)
-        entry.mediaItem?.let { return@withContext it }
+        if (videoChoice == null && audioChoice == null) entry.mediaItem?.let { return@withContext it }
         val info = entry.info
         // Filter before preference grouping/deduplication, so an unsupported format cannot
         // displace a usable alternative (including a muxed video when separate audio is absent).
-        val audios = ListHelper.getFilteredAudioStreams(
-            context,
-            ListHelper.getPlayableStreams(info.audioStreams, info.serviceId).filter(NetworkStreamSelector::isProgressive)
-        )
+        val allAudios = ListHelper.getPlayableStreams(info.audioStreams, info.serviceId).filter(NetworkStreamSelector::isProgressive)
+        val audios = if (audioChoice == null) ListHelper.getFilteredAudioStreams(context, allAudios) else allAudios
+        val allVideos = ListHelper.getPlayableStreams(info.videoStreams.orEmpty() + info.videoOnlyStreams.orEmpty(), info.serviceId)
+            .filter { NetworkStreamSelector.isProgressive(it) && (!it.isVideoOnly || audios.isNotEmpty()) }
         val videos = ListHelper.getSortedStreamVideosList(
             context,
             ListHelper.getPlayableStreams(info.videoStreams, info.serviceId).filter(NetworkStreamSelector::isProgressive),
@@ -90,10 +98,12 @@ internal class NetworkMediaRepository(private val context: Context) : MediaRepos
         )
         val selection = NetworkStreamSelector.select(
             info,
-            videos,
+            (if (videoChoice == null) videos else allVideos).let { available ->
+                if (audioChoice != null && available.any { it.isVideoOnly }) available.filter { it.isVideoOnly } else available
+            },
             audios,
-            { ListHelper.getDefaultResolutionIndex(context, it) },
-            { ListHelper.getAudioFormatIndex(context, it, null) }
+            { streams -> streams.indexOfFirst { NetworkStreamSelector.identity(it) == videoChoice }.takeIf { it >= 0 } ?: ListHelper.getDefaultResolutionIndex(context, streams) },
+            { streams -> streams.indexOfFirst { NetworkStreamSelector.identity(it) == audioChoice }.takeIf { it >= 0 } ?: ListHelper.getAudioFormatIndex(context, streams, null) }
         )
         val youtube = info.serviceId == ServiceList.YouTube.serviceId
         val sources = if (selection.manifestUrl != null) {
@@ -116,10 +126,15 @@ internal class NetworkMediaRepository(private val context: Context) : MediaRepos
             }
         }
         Log.i(NewPlayerRuntime.TAG, "network.plan service=${info.serviceId} live=${selection.live} parts=${sources.size} kind=${selection.manifestType ?: "PROGRESSIVE"} inlineDash=${sources.count { it.inlineDash != null }}")
-        val mediaItem = MediaItem.Builder().setUri(sources.first().uri).setTag(Plan(sources, selection.live)).build()
+        val subtitles = info.subtitles.orEmpty().filter { it.isUrl && it.format?.mimeType != null }.map {
+            MediaItem.SubtitleConfiguration.Builder(Uri.parse(it.content)).setMimeType(it.format!!.mimeType)
+                .setLanguage(it.languageTag).setLabel(it.displayLanguageName).build()
+        }
+        val mediaItem = MediaItem.Builder().setUri(sources.first().uri).setTag(Plan(sources, selection.live))
+            .setSubtitleConfigurations(subtitles).build()
         // getMetaInfo/getMediaItem cannot publish across an account change.
         entry(item)
-        entry.mediaItem = mediaItem
+        if (videoChoice == null && audioChoice == null) entry.mediaItem = mediaItem
         mediaItem
     }
 
@@ -129,10 +144,10 @@ internal class NetworkMediaRepository(private val context: Context) : MediaRepos
             .setDurationMs(NetworkMetadata.durationMs(info.streamType, info.duration)).setIsPlayable(true).build()
     }
 
-    override suspend fun getPreviewThumbnail(item: String, timestampInMs: Long) = null
-    override suspend fun getPreviewThumbnailsInfo(item: String) = MediaRepository.PreviewThumbnailsInfo(0, 1)
-    override suspend fun getChapters(item: String) = emptyList<net.newpipe.newplayer.data.Chapter>()
-    override suspend fun getTimestampLink(item: String, timestampInSeconds: Long): URL? = null
+    override suspend fun getPreviewThumbnail(item: String, timestampInMs: Long) = details.preview(info(item), timestampInMs)
+    override suspend fun getPreviewThumbnailsInfo(item: String) = details.previewInfo(info(item))
+    override suspend fun getChapters(item: String) = details.chapters(info(item))
+    override suspend fun getTimestampLink(item: String, timestampInSeconds: Long): URL? = details.timestampLink(info(item), timestampInSeconds)
     override suspend fun getLink(item: String): URL = URL(entry(item).info.url)
 
     private fun manifestMime(method: DeliveryMethod?) = when (method) {

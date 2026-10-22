@@ -104,7 +104,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
@@ -530,6 +529,8 @@ public class MainActivity extends AppCompatActivity {
         // Change the date format to match the selected language on resume
         Localization.initPrettyTime(Localization.resolvePrettyTime());
         super.onResume();
+        NewPlayerRuntime.restoreIfNeeded(getApplication());
+        org.schabi.newpipe.newplayer.LocalPlaybackMini.attach(this);
         if (NewPlayerRuntime.isNetworkQueueActive()) {
             openMiniPlayerIfMissing();
         }
@@ -887,45 +888,39 @@ public class MainActivity extends AppCompatActivity {
             // started popup or background players without opening a stream inside the fragment.
             // Adding it in a collapsed state (only mini player will be visible).
             NavigationHelper.showMiniPlayer(getSupportFragmentManager());
+        } else if (NewPlayerRuntime.isNetworkQueueActive()) {
+            // Local playback hides the existing detail sheet. A later network queue can
+            // reuse that fragment, so its presence alone does not mean the mini is visible.
+            final BottomSheetBehavior<FragmentContainerView> sheet =
+                    BottomSheetBehavior.from(mainBinding.fragmentPlayerHolder);
+            if (sheet.getState() == BottomSheetBehavior.STATE_HIDDEN) {
+                sheet.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                Log.i("SloooPipeLocal", "network.mini_restored hidden_to_collapsed");
+            }
         }
     }
 
     private void openMiniPlayerUponPlayerStarted() {
-        if (getIntent().getSerializableExtra(Constants.KEY_LINK_TYPE)
-                == StreamingService.LinkType.STREAM) {
-            // handleIntent() already takes care of opening video detail fragment
-            // due to an intent containing a STREAM link
+        if (NewPlayerRuntime.isNetworkQueueActive() || PlayerHolder.getInstance().isPlayerOpen()) {
+            openMiniPlayerIfMissing();
+        }
+        if (broadcastReceiver != null) {
             return;
         }
-
-        if (PlayerHolder.getInstance().isPlayerOpen()) {
-            // if the player is already open, no need for a broadcast receiver
-            openMiniPlayerIfMissing();
-        } else {
-            // listen for player start intent being sent around
-            broadcastReceiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(final Context context, final Intent intent) {
-                    if (Objects.equals(intent.getAction(),
-                            VideoDetailFragment.ACTION_PLAYER_STARTED)
-                            && PlayerHolder.getInstance().isPlayerOpen()) {
-                        openMiniPlayerIfMissing();
-                        // At this point the player is added 100%, we can unregister. Other actions
-                        // are useless since the fragment will not be removed after that.
-                        unregisterReceiver(broadcastReceiver);
-                        broadcastReceiver = null;
-                    }
+        broadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(final Context context, final Intent intent) {
+                if (NewPlayerRuntime.isNetworkQueueActive()
+                        || PlayerHolder.getInstance().isPlayerOpen()) {
+                    openMiniPlayerIfMissing();
                 }
-            };
-            final IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction(VideoDetailFragment.ACTION_PLAYER_STARTED);
-            ContextCompat.registerReceiver(this, broadcastReceiver, intentFilter,
-                    ContextCompat.RECEIVER_EXPORTED);
-
-            // If the PlayerHolder is not bound yet, but the service is running, try to bind to it.
-            // Once the connection is established, the ACTION_PLAYER_STARTED will be sent.
-            PlayerHolder.getInstance().tryBindIfNeeded(this);
-        }
+            }
+        };
+        final IntentFilter filter = new IntentFilter(VideoDetailFragment.ACTION_PLAYER_STARTED);
+        filter.addAction(NewPlayerRuntime.QUEUE_CHANGED);
+        ContextCompat.registerReceiver(this, broadcastReceiver, filter,
+                ContextCompat.RECEIVER_NOT_EXPORTED);
+        PlayerHolder.getInstance().tryBindIfNeeded(this);
     }
 
     private void openDetailFragmentFromCommentReplies(

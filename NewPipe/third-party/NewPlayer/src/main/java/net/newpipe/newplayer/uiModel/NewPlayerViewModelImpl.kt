@@ -42,11 +42,14 @@ import androidx.media3.common.Player
 import androidx.media3.common.VideoSize
 import androidx.media3.common.util.UnstableApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -82,6 +85,7 @@ class NewPlayerViewModelImpl constructor(
     private var playlistItemToBeMoved: Int? = null
     private var playlistItemNewPosition: Int = 0
 
+    private var bindingJob: Job? = null
     private var hideUiDelayedJob: Job? = null
     private var progressUpdaterJob: Job? = null
     private var playlistProgressUpdaterJob: Job? = null
@@ -100,7 +104,7 @@ class NewPlayerViewModelImpl constructor(
 
     // The playlist position a fresh surface was already handed to, so a stream that simply can not
     // be decoded does not end up in a retry loop.
-    private var decoderInitRetriedFor: Int? = null
+    private var decoderInitRetriedFor: String? = null
 
     private val audioManager =
         getSystemService(application.applicationContext, AudioManager::class.java)!!
@@ -179,179 +183,205 @@ class NewPlayerViewModelImpl constructor(
         }
 
     private fun installNewPlayer() {
-        newPlayer?.let { newPlayer ->
-            viewModelScope.launch {
-                newPlayer.exoPlayer.collect { player ->
+        bindingJob?.cancel()
+        probeLinksJob?.cancel()
+        bindingJob = viewModelScope.launch {
+            newPlayer?.let { newPlayer ->
+                launch {
+                    newPlayer.exoPlayer.collectLatest { player ->
+                        if (player == null) {
+                            videoSurfaceWidth.value = 0
+                            return@collectLatest
+                        }
 
-                    Log.d(TAG, "Install player: ${player?.videoSize?.width}")
+                        Log.d(TAG, "Install player: ${player.videoSize.width}")
 
-                    player?.addListener(object : Player.Listener {
-                        override fun onIsPlayingChanged(isPlaying: Boolean) {
-                            super.onIsPlayingChanged(isPlaying)
-                            Log.d(TAG, "Playing state changed. Is Playing: $isPlaying")
+                        val listener = object : Player.Listener {
+                            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                                super.onIsPlayingChanged(isPlaying)
+                                Log.d(TAG, "Playing state changed. Is Playing: $isPlaying")
+                                mutableUiState.update {
+                                    it.copy(playing = isPlaying, isLoading = player.isBuffering)
+                                }
+                                if (isPlaying && uiState.value.uiMode.videoControllerUiVisible) {
+                                    resetHideDelayTimer()
+                                } else {
+                                    hideUiDelayedJob?.cancel()
+                                }
+                            }
+
+                            override fun onVideoSizeChanged(videoSize: VideoSize) {
+                                super.onVideoSizeChanged(videoSize)
+                                updateContentRatio(videoSize)
+                            }
+
+                            override fun onSurfaceSizeChanged(width: Int, height: Int) {
+                                super.onSurfaceSizeChanged(width, height)
+                                videoSurfaceWidth.value = width
+                            }
+
+                            override fun onPlaybackStateChanged(playbackState: Int) {
+                                super.onPlaybackStateChanged(playbackState)
+                                if (playbackState == Player.STATE_READY) {
+                                    decoderInitRetriedFor = null
+                                }
+                                updatePlaybackActive(player)
+                                updateIsLoading(player)
+                            }
+
+                            override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+                                super.onPlayWhenReadyChanged(playWhenReady, reason)
+                                updatePlaybackActive(player)
+                            }
+
+                            override fun onRepeatModeChanged(repeatMode: Int) {
+                                super.onRepeatModeChanged(repeatMode)
+                                mutableUiState.update {
+                                    it.copy(repeatMode = newPlayer.repeatMode)
+                                }
+                            }
+
+                            override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
+                                super.onShuffleModeEnabledChanged(shuffleModeEnabled)
+                                mutableUiState.update {
+                                    it.copy(shuffleEnabled = newPlayer.shuffle)
+                                }
+                            }
+
+                            override fun onPlaybackParametersChanged(playbackParameters: PlaybackParameters) {
+                                super.onPlaybackParametersChanged(playbackParameters)
+                                mutableUiState.update {
+                                    it.copy(playbackParameters = player.playbackParameters)
+                                }
+                            }
+
+                            override fun onSkipSilenceEnabledChanged(skipSilenceEnabled: Boolean) {
+                                super.onSkipSilenceEnabledChanged(skipSilenceEnabled)
+                                mutableUiState.update {
+                                    it.copy(skipSilence = skipSilenceEnabled)
+                                }
+                            }
+                        }
+                        try {
+                            player.addListener(listener)
+                            // Listeners report future changes, not the existing session's values.
+                            // A new UI can attach while background/popup playback keeps this player.
                             mutableUiState.update {
-                                it.copy(playing = isPlaying, isLoading = player.isBuffering)
+                                it.copy(
+                                    playing = player.isPlaying,
+                                    playbackActive = player.isPlaybackActive,
+                                    isLoading = player.isBuffering,
+                                    repeatMode = newPlayer.repeatMode,
+                                    shuffleEnabled = player.shuffleModeEnabled,
+                                    playbackParameters = player.playbackParameters,
+                                    skipSilence = newPlayer.skipSilence
+                                )
                             }
-                            if (isPlaying && uiState.value.uiMode.videoControllerUiVisible) {
-                                resetHideDelayTimer()
-                            } else {
-                                hideUiDelayedJob?.cancel()
-                            }
+                            videoSurfaceWidth.value = player.surfaceSize.width
+                            awaitCancellation()
+                        } finally {
+                            player.removeListener(listener)
                         }
-
-                        override fun onVideoSizeChanged(videoSize: VideoSize) {
-                            super.onVideoSizeChanged(videoSize)
-                            updateContentRatio(videoSize)
-                        }
-
-                        override fun onSurfaceSizeChanged(width: Int, height: Int) {
-                            super.onSurfaceSizeChanged(width, height)
-                            videoSurfaceWidth.value = width
-                        }
-
-                        override fun onPlaybackStateChanged(playbackState: Int) {
-                            super.onPlaybackStateChanged(playbackState)
-                            if (playbackState == Player.STATE_READY) {
-                                decoderInitRetriedFor = null
-                            }
-                            updatePlaybackActive(player)
-                            updateIsLoading(player)
-                        }
-
-                        override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
-                            super.onPlayWhenReadyChanged(playWhenReady, reason)
-                            updatePlaybackActive(player)
-                        }
-
-                        override fun onRepeatModeChanged(repeatMode: Int) {
-                            super.onRepeatModeChanged(repeatMode)
-                            mutableUiState.update {
-                                it.copy(repeatMode = newPlayer.repeatMode)
-                            }
-                        }
-
-                        override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
-                            super.onShuffleModeEnabledChanged(shuffleModeEnabled)
-                            mutableUiState.update {
-                                it.copy(shuffleEnabled = newPlayer.shuffle)
-                            }
-                        }
-
-                        override fun onPlaybackParametersChanged(playbackParameters: PlaybackParameters) {
-                            super.onPlaybackParametersChanged(playbackParameters)
-                            mutableUiState.update {
-                                it.copy(playbackParameters = player.playbackParameters)
-                            }
-                        }
-
-                        override fun onSkipSilenceEnabledChanged(skipSilenceEnabled: Boolean) {
-                            super.onSkipSilenceEnabledChanged(skipSilenceEnabled)
-                            mutableUiState.update {
-                                it.copy(skipSilence = skipSilenceEnabled)
-                            }
-                        }
-                    })
-
-                    // Nothing replays the size of an already attached surface.
-                    videoSurfaceWidth.value = player?.surfaceSize?.width ?: 0
-                }
-            }
-
-            viewModelScope.launch {
-                newPlayer.playBackMode.collect { newMode ->
-                    val currentMode = mutableUiState.value.uiMode.toPlayMode()
-
-                    if (currentMode != newMode) {
-                        changeUiMode(UIModeState.fromPlayMode(newMode), embeddedUiConfig)
                     }
                 }
-            }
 
-            viewModelScope.launch {
-                newPlayer.playlist.collect { playlist ->
-                    mutableUiState.update {
-                        it.copy(
-                            playList = playlist,
-                            currentPlaylistItemIndex = newPlayer.currentlyPlayingPlaylistItem
-                        )
+                launch {
+                    newPlayer.playBackMode.collect { newMode ->
+                        val currentMode = mutableUiState.value.uiMode.toPlayMode()
+
+                        if (currentMode != newMode) {
+                            changeUiMode(UIModeState.fromPlayMode(newMode), embeddedUiConfig)
+                        }
                     }
                 }
-            }
-            viewModelScope.launch {
-                newPlayer.currentlyPlaying.collect { playlistItem ->
-                    mutableUiState.update {
-                        it.copy(
-                            currentlyPlaying = playlistItem,
-                            currentPlaylistItemIndex = newPlayer.currentlyPlayingPlaylistItem
-                        )
-                    }
-                    probeLinks(playlistItem)
-                }
-            }
 
-            viewModelScope.launch {
-                newPlayer.currentChapters.collect { chapters ->
-                    mutableUiState.update {
-                        it.copy(chapters = chapters)
+                launch {
+                    newPlayer.playlist.collect { playlist ->
+                        mutableUiState.update {
+                            it.copy(
+                                playList = playlist,
+                                currentPlaylistItemIndex = newPlayer.currentlyPlayingPlaylistItem
+                            )
+                        }
                     }
                 }
-            }
-
-            viewModelScope.launch {
-                newPlayer.currentlyAvailableTracks.collect { availableTracks ->
-                    mutableUiState.update {
-                        it.copy(
-                            currentlyAvailableTracks = availableTracks
-                        )
+                launch {
+                    newPlayer.currentlyPlaying.collect { playlistItem ->
+                        updatePreviewThumbnailJob?.cancel()
+                        mutableUiState.update { it.copy(currentSeekPreviewThumbnail = null, currentSeekPreviewText = null, seekPreviewVisible = false) }
+                        mutableUiState.update {
+                            it.copy(
+                                currentlyPlaying = playlistItem,
+                                currentPlaylistItemIndex = newPlayer.currentlyPlayingPlaylistItem
+                            )
+                        }
+                        probeLinks(playlistItem)
                     }
                 }
-            }
 
-            viewModelScope.launch {
-                newPlayer.currentlyPlayingTracks.collect { playingTracks ->
-                    mutableUiState.update {
-                        it.copy(
-                            currentlyPlayingTracks = playingTracks
-                        )
+                launch {
+                    newPlayer.currentChapters.collect { chapters ->
+                        mutableUiState.update {
+                            it.copy(chapters = chapters)
+                        }
                     }
                 }
-            }
 
-            viewModelScope.launch {
-                newPlayer.pinnedVideoTrack.collect { pinned ->
-                    mutableUiState.update {
-                        it.copy(pinnedVideoTrack = pinned)
+                launch {
+                    newPlayer.currentlyAvailableTracks.collect { availableTracks ->
+                        mutableUiState.update {
+                            it.copy(
+                                currentlyAvailableTracks = availableTracks
+                            )
+                        }
                     }
                 }
-            }
 
-            mutableUiState.update {
-                it.copy(
-                    playing = newPlayer.exoPlayer.value?.isPlaying ?: false,
-                    playbackActive = newPlayer.exoPlayer.value.isPlaybackActive,
-                    isLoading = newPlayer.exoPlayer.value.isBuffering
-                )
+                launch {
+                    newPlayer.currentlyPlayingTracks.collect { playingTracks ->
+                        mutableUiState.update {
+                            it.copy(
+                                currentlyPlayingTracks = playingTracks
+                            )
+                        }
+                    }
+                }
+
+                launch {
+                    newPlayer.pinnedVideoTrack.collect { pinned ->
+                        mutableUiState.update {
+                            it.copy(pinnedVideoTrack = pinned)
+                        }
+                    }
+                }
+
+                mutableUiState.update {
+                    it.copy(
+                        playing = newPlayer.exoPlayer.value?.isPlaying ?: false,
+                        playbackActive = newPlayer.exoPlayer.value.isPlaybackActive,
+                        isLoading = newPlayer.exoPlayer.value.isBuffering
+                    )
+                }
             }
         }
     }
 
     private fun probeLinks(mediaItem: MediaItem?) {
         probeLinksJob?.cancel()
-        mutableUiState.update {
-            it.copy(linkAvailable = false, timestampLinkAvailable = false)
-        }
-
-        val item = mediaItem?.let { newPlayer?.getItemFromMediaItem(it) } ?: return
-        val repository = newPlayer?.repository ?: return
-
+        mutableUiState.update { it.copy(linkAvailable = false, timestampLinkAvailable = false) }
+        val owner = newPlayer ?: return
+        if (mediaItem == null) return
         probeLinksJob = viewModelScope.launch {
-            val linkAvailable = repository.getLink(item) != null
-            val timestampLinkAvailable = repository.getTimestampLink(item, 0) != null
-            mutableUiState.update {
-                it.copy(
-                    linkAvailable = linkAvailable,
-                    timestampLinkAvailable = timestampLinkAvailable
-                )
+            try {
+                val item = owner.getItemFromMediaItem(mediaItem)
+                val link = owner.repository.getLink(item) != null
+                val timestamp = owner.repository.getTimestampLink(item, 0) != null
+                if (newPlayer !== owner || owner.currentlyPlaying.value?.mediaId != mediaItem.mediaId) return@launch
+                mutableUiState.update { it.copy(linkAvailable = link, timestampLinkAvailable = timestamp) }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                Log.w(TAG, "Link metadata unavailable: ${error.javaClass.simpleName}")
             }
         }
     }
@@ -392,7 +422,9 @@ class NewPlayerViewModelImpl constructor(
     // Errors are handed over to the view model by NewPlayerImpl directly, since the hop is internal
     // to the library and has no business being part of the NewPlayer interface.
     private fun NewPlayer?.attachViewModel(viewModel: InternalNewPlayerViewModel?) {
-        (this as? NewPlayerImpl)?.attachedViewModel = viewModel
+        (this as? NewPlayerImpl)?.let { implementation ->
+            if (viewModel != null || implementation.attachedViewModel === this@NewPlayerViewModelImpl) implementation.attachedViewModel = viewModel
+        }
     }
 
     override fun onPlaybackError(exception: Exception): Boolean {
@@ -407,10 +439,12 @@ class NewPlayerViewModelImpl constructor(
             return false
         }
 
-        if (player.currentMediaItemIndex == decoderInitRetriedFor) {
+        val mediaId = player.currentMediaItem?.mediaId ?: return false
+        val playing = player.playWhenReady
+        if (mediaId == decoderInitRetriedFor) {
             return false
         }
-        decoderInitRetriedFor = player.currentMediaItemIndex
+        decoderInitRetriedFor = mediaId
 
         Log.d(TAG, "Decoder init failed. Retrying with a fresh video surface.")
 
@@ -431,8 +465,9 @@ class NewPlayerViewModelImpl constructor(
             if (freshSurfaceWidth == null) {
                 Log.d(TAG, "Timed out waiting for a fresh video surface. Retrying anyway.")
             }
+            if (newPlayer?.exoPlayer?.value !== player || player.currentMediaItem?.mediaId != mediaId) return@launch
             newPlayer?.prepare()
-            newPlayer?.play()
+            player.playWhenReady = playing
         }
 
         return true
@@ -668,33 +703,27 @@ class NewPlayerViewModelImpl constructor(
 
     private fun updateSeekPreview(seekPositionInMs: Long) {
         updatePreviewThumbnailJob?.cancel()
-
+        val owner = newPlayer ?: return
+        val media = owner.currentlyPlaying.value ?: return
+        val chapter = mutableUiState.value.chapters.lastOrNull { it.chapterStartInMs < seekPositionInMs }
         updatePreviewThumbnailJob = viewModelScope.launch {
-
-            val item = newPlayer?.currentlyPlaying?.value?.let {
-                newPlayer?.getItemFromMediaItem(it)
-            }
-
-            val chapters = mutableUiState.value.chapters
-            val chapter = chapters.lastOrNull {
-                it.chapterStartInMs < seekPositionInMs
-            }
-
-            item?.let {
-                val bitmap = newPlayer?.repository?.getPreviewThumbnail(item, seekPositionInMs)
-
+            try {
+                val item = owner.getItemFromMediaItem(media)
+                val bitmap = owner.repository.getPreviewThumbnail(item, seekPositionInMs)
+                if (newPlayer !== owner || owner.currentlyPlaying.value?.mediaId != media.mediaId) return@launch
                 mutableUiState.update {
-                    it.copy(
-                        currentSeekPreviewText = chapter?.chapterTitle,
-                        currentSeekPreviewThumbnail = bitmap?.asImageBitmap(),
-                        seekPreviewVisible = true
-                    )
+                    it.copy(currentSeekPreviewText = chapter?.chapterTitle, currentSeekPreviewThumbnail = bitmap?.asImageBitmap(), seekPreviewVisible = true)
                 }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                Log.w(TAG, "Preview unavailable: ${error.javaClass.simpleName}")
             }
         }
     }
 
     override fun seekingFinished() {
+        updatePreviewThumbnailJob?.cancel()
         newPlayer?.currentPosition = getSeekerPositionInMs(mutableUiState.value)
 
         mutableUiState.update {

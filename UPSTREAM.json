@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-21",
+  "updated": "2026-10-22",
   "newpipe": {
     "repo": "TeamNewPipe/NewPipe",
     "commit": "f46290f28ab44fa514bac0a9f0252fd7d2afb66f",
@@ -17,7 +17,7 @@
     "directory": "NewPipeExtractor-2f7d9da4ce82248637fdd3f8025086bd345f7fc2"
   },
   "extractor_matches_newpipe_pin": true,
-  "previous_source_checkpoint": "41a374e0f66cb945c86799b590d32b8d5a19debd",
+  "previous_source_checkpoint": "2612bad074b0224bbe747d1ba770fd4cd16abc5c",
   "newplayer": {
     "repository": "https://codeberg.org/TeamNewPipe/NewPlayer",
     "branch": "dev",
@@ -26,9 +26,17 @@
     "archive_sha256": "d3468229bc50266b123579d85b049e5e28c4057561fca1c220cc84ff12836549",
     "directory": "NewPipe/third-party/NewPlayer",
     "module": ":newplayer-local",
-    "scope": "Main Play, cloned NewPipe queues/pagination, Media3 lazy sources and existing history DB integration; root standalone demo unchanged",
-    "live_branch_verified": "2026-10-21"
+    "scope": "Embedded library coordinated by the Kotlin host for video/audio/background/popup/PiP, queue feeds, consent, sources and history. ZIP32 engine-release host fix is source/static only; root demo is independent.",
+    "live_branch_verified": "2026-10-22"
   },
   "source_branch": "base/newpipe-dev-20261021",
-  "verified": "APK22 LDPlayer14/Android14: standard Play VOD, pause/seek/back/mini, history resume and enqueue-next/MEDIA_NEXT verified. Native queue UI crashes on missing duration. ZIP23 duration/unknown-duration fix is static-only; external build, JVM tests and APK retest pending."
+  "verified": "APK31: repeat/shuffle reopen, engine release after last removal, mini hidden after Back, visible playback/pause after a new queue. Empty host auto-close failed. ZIP32 fix awaits external build/device retest. APK29 10+10 queue cycles and APK25 human sound confirmation are historical, not current acceptance.",
+  "live_refs_20261022": {
+    "newpipe_dev": "7436ba1010493515ff1a5f5d60aacdc6168c8500",
+    "newpipe_refactor": "455b6f0de6bbc135a51f2a77510863edee8b3cae",
+    "newplayer_codeberg_dev": "212ca1c8d9419a19cb5aed7f0a61e22e8732a25c",
+    "extractor_dev": "e8f89145a830b4d6cae32412007f24ea8b36c73a",
+    "newpipe_ahead_of_pin": "1 translation-only commit; pins unchanged",
+    "extractor_ahead_of_pin": "2 commits; pin still matches NewPipe"
+  }
 }

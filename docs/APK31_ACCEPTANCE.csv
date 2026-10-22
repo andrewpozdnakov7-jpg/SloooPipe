@@ -1,0 +1,94 @@
+ID,Сценарий,Кандидат,Статус,Примечание
+F01.1,обычный Play,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F01.2,другой/повторный Play,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F01.3,быстрые A→B,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F02.1,локальное видео,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F02.2,локальное аудио,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F02.3,сеть↔локальный repository/история,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F03.1,10 циклов из NewPlayer с/без выбора pause/play,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F03.2,10 циклов из мини-панели с/без выбора pause/play,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F04.1,embedded↔fullscreen portrait/landscape,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F04.2,Home/reopen/поворот,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F04.3,PiP/Surface bounds,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F05.1,Play all с середины,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F05.2,enqueue/next/дубликаты,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F05.3,reorder текущего,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F06.1,delete до текущего,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F06.2,delete текущего,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F06.3,delete последнего/всех,APK31,FAIL,"Engine released and mini hidden after Back, but empty host remains05/06. ZIP32 source fix pending."
+F07.1,auto-next,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F07.2,repeat off/one/all,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F07.3,shuffle последовательность,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F08.1,длинный playlist lazy loading,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F08.2,pagination после reorder/enqueue/delete,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F09.1,отмена сохраняет сессию,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F09.2,согласие однократно,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F09.3,paused queue после Back,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F09.4,stale dialog после queue/account change,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F10.1,confirmation on/off,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F10.2,resume/enqueue без ложной замены,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F10.3,background/popup replacement,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F11.1,"history on/off, playback-only view",APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F11.2,resume/positions preferences,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F11.3,timestamp/zero/recovery/finished,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F11.4,old/new item event boundary,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F12.1,progressive muxed,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F12.2,split A/V/generated DASH,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F12.3,HLS,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F12.4,DASH manifest,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F12.5,audio-only/post-live audio,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F12.6,актуальный live/DVR,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F13.1,качество сохраняет position/play intent,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F13.2,audio track,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F13.3,subtitles,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F13.4,speed/pitch,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F13.5,chapters,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F13.6,preview NONE/LOW/HIGH,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F14.1,source error/Retry,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F14.2,краткая потеря сети,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F14.3,cancel/поздний ответ,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F15.1,фон↔полный/мини,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F15.2,popup↔полный/фон,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F15.3,PiP↔embedded,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F15.4,локальная мини-панель,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F16.1,notification/MediaSession,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F16.2,гарнитура/noisy,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F16.3,focus/resume preference,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F17.1,Activity recreation,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F17.2,Close/delete-all/reopen,APK31,FAIL,"Engine released and mini hidden after Back, but empty host remains05/06. ZIP32 source fix pending."
+F17.3,штатное queue restoration,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+A01.1,ownership/Kotlin,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+A01.2,generic/host boundary,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+A01.3,listeners/controllers/feeds/caches,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+A02.1,51 app/NewPlayer JVM cases (source28),APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+A02.2,auth with build/test/isolation,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+A02.3,auth without build/test/isolation/anonymous runtime,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+U01.1,official refs/refactor compatibility,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+U01.2,portable patches/apply check,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+U01.3,upstream review/acceptance,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+U02.1,source/commit/SHA manifest,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+U02.2,APK provenance от внешней сборки,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+U02.3,device evidence нового APK,APK31,NOT RUN,Installed hash+markers+user source claim; build log/supplied APK/test XML unavailable.
+STARTUP,открытие MainActivity,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F04.HOME,background Home,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F05.FIRST,Play all из начала истории,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F16.KEYS,MediaSession play/pause keys,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F17.LOCAL_CLOSE,local mini Close,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F12.AUDIBLE,слышимый звук,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+PHONE16,физический Android16,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+POPUP_PERMISSION,overlay permission,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+UI_LABEL,PiP button wrapping,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F01.4,VOD через сведения с автозапуском,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F05.4,Play all из начала истории,APK31,PASS,Play all from start of history; restart after empty queue07. Middle separately NOT RUN.
+F15.5,audio UI -> fullscreen video,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F02.4,network -> local -> Back -> local mini pause/reopen/Close,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+U02.3,установленный APK28 / source ZIP / build-main.log,APK31,NOT RUN,Installed hash+markers+user source claim; build log/supplied APK/test XML unavailable.
+F07.4,repeat/shuffle UI after reopen,APK31,PASS,Repeat all +Shuffle on preserved after full exit/details/Back/reopen02/03. Other paths NOT RUN.
+F07.5,repeat-one actual end,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F07.6,repeat-off actual end single item,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F16.4,MediaSession fast-forward / play-pause,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F06.4,last element engine release,APK31,PASS,Last deletion: no app MediaSession05. UI closure separately FAIL.
+F15.6,network mini after local / Close,APK31,NOT RUN,Не выполнено на APK31; PASS старых APK не переносятся.
+F17.4,mini cleanup after last deletion and Back,APK31,PASS,No stale mini in06. Automatic host return still FAIL05.
+F17.5,restart playback after empty queue,APK31,PASS,"New Play all actual video/PLAYING84960ms, then pause85637ms,07/08."
+F07.7,repeat/shuffle initial UI snapshot after reopen,APK31,PASS,Both labels reflect actual selected values02/03. Only this reopen route.

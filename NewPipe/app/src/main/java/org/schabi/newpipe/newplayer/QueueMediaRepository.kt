@@ -28,6 +28,10 @@ internal class QueueMediaRepository(private val network: NetworkMediaRepository,
         @Volatile var startPosition = 0L
 
         @Volatile var forceLoad = false
+
+        @Volatile var videoChoice: String? = null
+
+        @Volatile var audioChoice: String? = null
     }
 
     class Request(val entry: Entry)
@@ -66,7 +70,7 @@ internal class QueueMediaRepository(private val network: NetworkMediaRepository,
                 network.resolve(null, reference.serviceId, reference.url, entry.forceLoad)
             }
             val info = network.info(key)
-            val resolved = network.getMediaItem(key)
+            val resolved = network.mediaItem(key, entry.videoChoice, entry.audioChoice)
             val start = if (entry.resumePending) history.resumePosition(info, entry.explicitPosition ?: reference.recoveryPosition) else 0L
             this@QueueMediaRepository.entry(entry.key) // Reject cancelled account/queue results.
             entry.info = info
@@ -87,11 +91,22 @@ internal class QueueMediaRepository(private val network: NetworkMediaRepository,
             .setArtworkUri(reference.thumbnails.firstOrNull()?.url?.let(Uri::parse)).setIsPlayable(true).build()
     }
 
-    override suspend fun getPreviewThumbnail(item: String, timestampInMs: Long) = null
-    override suspend fun getPreviewThumbnailsInfo(item: String) = MediaRepository.PreviewThumbnailsInfo(0, 1)
-    override suspend fun getChapters(item: String) = emptyList<net.newpipe.newplayer.data.Chapter>()
-    override suspend fun getTimestampLink(item: String, timestampInSeconds: Long): URL? = null
+    private suspend fun info(item: String): StreamInfo {
+        val entry = entry(item)
+        if (entry.info == null) resolve(Request(entry))
+        return checkNotNull(entry(item).info)
+    }
+
+    override suspend fun getPreviewThumbnail(item: String, timestampInMs: Long) = network.details.preview(info(item), timestampInMs)
+    override suspend fun getPreviewThumbnailsInfo(item: String) = network.details.previewInfo(info(item))
+    override suspend fun getChapters(item: String) = network.details.chapters(info(item))
+    override suspend fun getTimestampLink(item: String, timestampInSeconds: Long): URL? = network.details.timestampLink(info(item), timestampInSeconds)
     override suspend fun getLink(item: String): URL = URL(entry(item).reference.url)
+
+    @Synchronized
+    fun retain(keys: Set<String>) {
+        entries.keys.retainAll(keys)
+    }
 
     companion object {
         fun request(item: MediaItem?): Request? = item?.localConfiguration?.tag as? Request

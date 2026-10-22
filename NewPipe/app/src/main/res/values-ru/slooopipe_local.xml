@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="slooopipe_local_source">Локальное</string>
-    <string name="slooopipe_local_title">Локальный просмотр видео</string>
+    <string name="slooopipe_local_title">Локальное воспроизведение</string>
     <string name="slooopipe_local_back">Вернуться в SloooPipe</string>
-    <string name="slooopipe_local_choose">Выбрать видео</string>
-    <string name="slooopipe_local_hint">Выберите видео из хранилища телефона. Воспроизведение через NewPlayer.</string>
+    <string name="slooopipe_local_choose">Выбрать медиа</string>
+    <string name="slooopipe_local_hint">Выберите видео или аудиофайл из хранилища телефона.</string>
     <string name="slooopipe_local_loading">Открываем видео…</string>
     <string name="slooopipe_local_playing">Воспроизведение</string>
     <string name="slooopipe_local_paused">Пауза</string>

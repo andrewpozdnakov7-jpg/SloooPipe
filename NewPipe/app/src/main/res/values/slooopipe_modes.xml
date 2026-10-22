@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="slooopipe_mode_audio">Background</string>
+    <string name="slooopipe_mode_popup">Popup</string>
+    <string name="slooopipe_mode_pip">Picture-in-picture</string>
+    <string name="slooopipe_mode_full">Open player</string>
+    <string name="slooopipe_tracks">Sources</string>
+    <string name="slooopipe_popup_drag">Drag to move</string>
+</resources>

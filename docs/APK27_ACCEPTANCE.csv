@@ -1,0 +1,80 @@
+ID,Сценарий,Кандидат,Статус,Примечание
+F01.1,обычный Play,APK27,PASS,"NewPlayer: VOD и обычный Play live, screenshots05/56; media keys."
+F01.2,другой/повторный Play,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F01.3,быстрые A→B,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F02.1,локальное видео,APK27,PASS,MP4/180s воспроизводится; возврат после network FAIL отдельно F02.3.
+F02.2,локальное аудио,APK27,PASS,M4A/30s playback/pause; mini/reopen/Close после скрытого sheet. Слышимость не подтверждена.
+F02.3,сеть↔локальный repository/история,APK27,FAIL,Network sheet cleanUp освобождает заменивший его local; screenshot42/log13:39:43. Source fix ZIP28.
+F03.1,10 циклов из NewPlayer с/без выбора pause/play,APK27,PASS,10 native cycles; все state/bounds корректны;5 moving pairs отличаются. native-cycle-analysis.json.
+F03.2,10 циклов из мини-панели с/без выбора pause/play,APK27,FAIL,1 mini cycle вернулся в audio UI; возврат к video дал чёрный экран. Остальные9 не выполнены.
+F04.1,embedded↔fullscreen portrait/landscape,APK27,FAIL,"Audio UI -> fullscreen video: видеодорожка disabled, black screen18. Source fix ZIP28."
+F04.2,Home/reopen/поворот,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F04.3,PiP/Surface bounds,APK27,PASS,"PiP pinned bounds864,472–1248,688 внутри1280x720; pause/play/return. screenshot29-34."
+F05.1,Play all с середины,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F05.2,enqueue/next/дубликаты,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F05.3,reorder текущего,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F06.1,delete до текущего,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F06.2,delete текущего,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F06.3,delete последнего/всех,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F07.1,auto-next,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F07.2,repeat off/one/all,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F07.3,shuffle последовательность,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F08.1,длинный playlist lazy loading,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F08.2,pagination после reorder/enqueue/delete,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F09.1,отмена сохраняет сессию,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F09.2,согласие однократно,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F09.3,paused queue после Back,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F09.4,stale dialog после queue/account change,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F10.1,confirmation on/off,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F10.2,resume/enqueue без ложной замены,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F10.3,background/popup replacement,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F11.1,"history on/off, playback-only view",APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F11.2,resume/positions preferences,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F11.3,timestamp/zero/recovery/finished,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F11.4,old/new item event boundary,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F12.1,progressive muxed,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F12.2,split A/V/generated DASH,APK27,PASS,"Split2 parts/inlineDash2; actual720p60/480p, audio selected/advancing."
+F12.3,HLS,APK27,PASS,Current live HLS parts1; изображение и selected audio.
+F12.4,DASH manifest,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F12.5,audio-only/post-live audio,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F12.6,актуальный live/DVR,APK27,PASS,"Current live=true, DVR seek≈2056976ms, offset≈1592079ms then playing. Были buffering transitions; не длительный тест."
+F13.1,качество сохраняет position/play intent,APK27,PASS,"720p60->480p, 21735->21738ms; pause retained; actual854x480. screenshots06-09."
+F13.2,audio track,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F13.3,subtitles,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F13.4,speed/pitch,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F13.5,chapters,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F13.6,preview NONE/LOW/HIGH,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F14.1,source error/Retry,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F14.2,краткая потеря сети,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F14.3,cancel/поздний ответ,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F15.1,фон↔полный/мини,APK27,FAIL,Background/Home работают; встроенный переход audio->video не включает video track.
+F15.2,popup↔полный/фон,APK27,FAIL,Popup playback/return работают; landscape нижние controls обрезаны. Source bounds fix ZIP28.
+F15.3,PiP↔embedded,APK27,PASS,PiP playback/pause/expand/embedded return на этой сессии; другие dismiss paths не проверены.
+F15.4,локальная мини-панель,APK27,FAIL,Первый local после network освобождается при скрытии sheet. Standalone audio mini subset PASS.
+F16.1,notification/MediaSession,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F16.2,гарнитура/noisy,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F16.3,focus/resume preference,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F17.1,Activity recreation,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F17.2,Close/delete-all/reopen,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+F17.3,штатное queue restoration,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+A01.1,ownership/Kotlin,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+A01.2,generic/host boundary,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+A01.3,listeners/controllers/feeds/caches,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+A02.1,51 app/NewPlayer JVM cases (source28),APK27,NOT RUN,51 host JVM declarations в ZIP28; здесь Gradle/JVM не запускались.
+A02.2,auth with build/test/isolation,APK27,BLOCKED,Установленный auth-with APK есть; полные WSL build/test/isolation logs не предоставлены.
+A02.3,auth without build/test/isolation/anonymous runtime,APK27,NOT RUN,Нужен отдельный auth-without build/test/isolation и anonymous runtime.
+U01.1,official refs/refactor compatibility,APK27,PASS,Точные pinned refs/сравнение от22 октября сохранены; внешние refs заново не запрашивались в device-цикле.
+U01.2,portable patches/apply check,APK27,PASS,Обновлённый generic ZIP28 patch: apply-check на свежем official212ca PASS; build/tests NOT RUN.
+U01.3,upstream review/acceptance,APK27,BLOCKED,Upstream acceptance вне нашего контроля; PR не отправлялись.
+U02.1,source/commit/SHA manifest,APK27,NOT RUN,Не выполнено в этом device-цикле; требуется проверка нового APK28.
+U02.2,APK provenance от внешней сборки,APK27,BLOCKED,"Измерен установленный APK SHA; источник ZIP27 подтверждает пользователь, WSL attestation/log отсутствует."
+U02.3,device evidence нового APK,APK27,PASS,Есть отдельные APK27 UI/log/geometry/bytecode evidence; это не полная device-приёмка.
+STARTUP,открытие MainActivity,APK27,PASS,MainActivity cold restart works; старый ACRA report отличён от нового crash. ThemeHelper call в DEX.
+F04.HOME,background Home,APK27,PASS,Состояние PLAYING и позиция продвигаются после Home; screenshot12.
+F05.FIRST,Play all из начала истории,APK27,PASS,"Несколько элементов, выбор первых двух работает; не Play all с середины."
+F16.KEYS,MediaSession play/pause keys,APK27,PASS,Клавиши126/127 управляют текущей сессией. Notification GUI/headset/noisy не проверены.
+F17.LOCAL_CLOSE,local mini Close,APK27,PASS,После Close панели и MediaSession нет; screenshot49.
+F12.AUDIBLE,слышимый звук,APK27,NOT RUN,Есть selected audio и advancing counters; человек подтвердил только APK25.
+PHONE16,физический Android16,APK27,BLOCKED,Телефон не подключён.
+POPUP_PERMISSION,overlay permission,APK27,PASS,"Grant через системный UI; ранее denied, теперь allow."
+UI_LABEL,PiP button wrapping,APK27,FAIL,Четыре строки в четверти ширины; grid fix source28.

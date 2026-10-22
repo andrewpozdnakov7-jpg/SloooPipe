@@ -20,6 +20,13 @@ class NetworkStreamSelectorTest {
         assertSame(preferred, selected.streams.single())
     }
 
+    @Test
+    fun endedAudioLiveStillUsesItsAudioSource() {
+        val audio = audio("post-live")
+        val selection = NetworkStreamSelector.select(info(StreamType.POST_LIVE_AUDIO_STREAM), emptyList(), listOf(audio))
+        assertSame(audio, selection.streams.single())
+    }
+
     @Test(expected = UnsupportedOperationException::class)
     fun videoWithoutVideoSourceDoesNotSilentlyBecomeAudioOnly() {
         NetworkStreamSelector.select(info(), emptyList(), listOf(audio("sound")))

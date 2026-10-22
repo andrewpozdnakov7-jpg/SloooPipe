@@ -1,16 +1,23 @@
-# Текущий результат SloooPipe
+# Текущий результат SloooPipe — 2026-10-22
 
-APK22 проверен в LDPlayer14/Android14: обычный Play запускает NewPlayer,
-YouTube VOD играет с изображением и аудиопотоком, pause/seek/play работают.
-Back сохраняет паузу и мини-панель. История записывает просмотр и восстанавливает
-позицию после перезапуска приложения. «Добавить следующим» и MEDIA_NEXT работают.
+APK31 проверен в LDPlayer14/Android14. Repeat/shuffle snapshot после reopen исправлен;
+после last deletion движок освобождается, старая mini скрывается при Back. Новый
+Play all после empty queue воспроизводит видео и сохраняет паузу. [Доказательства](docs/APK31_DEVICE_CHECKPOINT.md),
+[матрица](docs/APK31_ACCEPTANCE.csv).
 
-Найден вылет при открытии native UI очереди: метаданные не содержали длительность,
-а NewPlayer требовал её у каждого элемента. Этап очереди полностью не принят.
-ZIP23 передаёт известную длительность и поддерживает неизвестную/live без исключений
-в суммарной длительности и позиции. Исправление проверено статически; новый APK ещё нужен.
+FAIL: пустой NewPlayerActivity после last deletion сам не закрывается. Причина — null
+текущего item приходит до release, а повторное null не эмитится. ZIP32 наблюдает
+терминальный engine flow; guards loading/local picker/replacement сохранены.
+Новый APK32 ещё не собран/проверен. Production delta — только NewPlayerActivity.kt.
 
-[Доказательства, причина, исправление и оставшаяся приёмка](docs/MAIN_PLAY_QUEUE_HISTORY_DEVICE_CHECKPOINT.md).
-[Архитектура этапа](docs/MAIN_PLAY_QUEUE_HISTORY_STAGE3.md).
-Здесь Gradle/APK и JVM-тесты не запускались. Человек звук не прослушивал;
-физический Android16 и полная матрица сценариев не проверены. Исходники этого снимка опубликованы в публичном репозитории SloooPipe.
+| Часть | Реализовано | Проверено | Осталось |
+| --- | --- | --- | --- |
+| Интеграция | Общая сессия/режимы/очередь | APK31 reopen settings, partial empty cleanup/restart | ZIP32 closure и остальная matrix |
+| Kotlin/архитектура | Coordinator/hosts/flows | Причина порядка событий разобрана; host static PASS | WSL tests/both auth, lifecycle/device retest |
+| Upstream reuse | Pinned generic/embedding patches | Generic patch ZIP31 apply-check PASS, ZIP32 не меняет generic | Library/demo/refactor compilation/review |
+
+Host ktlint/diff PASS; локальных Gradle/JVM/build не было. APK31 build log/test XML не
+переданы; две серии10+10 APK31 не выполнялись, старые PASS не переносятся. Builder09,
+dependencies/signing/auth неизменны. Физический Android16 и слышимый звук не проверены.
+Исходники подготовлены к обновлению публичного GitHub; это не стабильный релиз и не приёмка.
+PR/сообщения разработчикам не отправлялись. Границы публикации: [SOURCE_PUBLICATION](docs/SOURCE_PUBLICATION.md).

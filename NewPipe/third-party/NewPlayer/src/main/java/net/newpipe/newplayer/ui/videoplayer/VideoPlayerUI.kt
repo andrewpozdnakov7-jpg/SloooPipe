@@ -31,7 +31,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -112,8 +112,11 @@ internal fun VideoPlayerUi(viewModel: InternalNewPlayerViewModel, uiState: NewPl
         modifier = Modifier
             .then(
                 if (uiState.uiMode.fullscreen) Modifier.fillMaxSize()
+                // The Android host may impose an exact width but leave little height below its
+                // header. Release minimum bounds before fitting the ratio, keeping both video
+                // and controls inside the available height and centering any horizontal gap.
                 else Modifier
-                    .fillMaxWidth()
+                    .wrapContentSize(Alignment.TopCenter)
                     .aspectRatio(uiState.embeddedUiRatio)
             ), color = Color.Black
     ) {

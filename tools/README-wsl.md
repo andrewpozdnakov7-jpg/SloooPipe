@@ -1,13 +1,15 @@
 # Сборка SloooPipe из ZIP в WSL
 
-Для новой основы ZIP 13 используйте builder revision 08. Главный NewPipe теперь
+Для текущего снимка ZIP32 используйте builder revision 09 (совместим с архивами для08). Главный NewPipe
 использует Gradle 9.8.2 / AGP 9.4.1 / Kotlin 2.4.21; подробности —
 [текущая основа](../docs/CURRENT_UPSTREAM_BASE.md). Нижняя планка ниже сохранена
 для совместимости скрипта со старыми архивами и отдельным NewPlayer.
 
 Скрипт `build-slooopipe-from-source-zip-wsl.sh` запускается на основном компьютере
 в Ubuntu WSL. Здесь он подготовлен по статическому анализу исходников;
-сборки, unit-тесты и воспроизведение на этом компьютере не запускались.
+Gradle, сборки и проектные unit-тесты на этой машине не запускались. Установленные
+пользователем APK проверялись отдельно через ADB/LDPlayer; текущие результаты — в
+[корневом README](../README.ru.md).
 
 ## Размещение
 
@@ -78,20 +80,30 @@ key.password=пароль-ключа
 AGP 9.4.0, compileSdk 37 и Build Tools 36.0.0. Более новые версии в исходниках
 допускаются; понижения или скрытого переписывания настроек скриптом нет.
 
-В подготовленных рабочих копиях:
+Версии текущих компонентов (нижняя планка скрипта не заменяет эти pins):
 
 | Проект | Gradle | AGP | Kotlin |
 | --- | --- | --- | --- |
-| NewPipe (основа refactor) | 9.6.1 | 9.4.0 | 2.3.21 |
+| NewPipe (основа dev, включая embedded NewPlayer) | 9.8.2 | 9.4.1 | 2.4.21 |
 | NewPlayer | 9.6.1 | 9.4.0 | 2.3.21 |
 
-Kotlin/Compose-компилятор, KSP 2.3.8 и Hilt 2.59.2 NewPlayer выровнены с
-NewPipe-refactor. Slooop в рассмотренном checkout не задаёт версию Kotlin Gradle
-Plugin, поэтому для Kotlin использована существующая версия основного NewPipe.
-Зависимости, не относящиеся к этой миграции, пока имеют версии своих проектов.
+Строка NewPlayer относится к независимому demo в корне, а не к библиотеке
+`:newplayer-local` основного APK. Исторические разделы про ZIP01/02 ниже описывают
+ранние исправления; для текущей сборки используйте актуальный снимок.
 
 Исходные ZIP из `01 start` имеют более старые Gradle/AGP и не пройдут новую
-проверку. Для сборки используйте подготовленный ZIP из папки `03 delivery`.
+проверку. Для сборки используйте подготовленный ZIP или создайте его из публичного checkout:
+
+```bash
+mkdir -p "$HOME/projects/slooopipe-src/sources"
+git archive --format=zip --prefix=SloooPipe/ --output="$HOME/projects/slooopipe-src/sources/SloooPipe-sources-checkout.zip" HEAD
+cp tools/build-slooopipe-from-source-zip-wsl.sh "$HOME/projects/slooopipe-src/"
+bash "$HOME/projects/slooopipe-src/build-slooopipe-from-source-zip-wsl.sh" --component main --operation build-test --auth with --newpipe-zip "$HOME/projects/slooopipe-src/sources/SloooPipe-sources-checkout.zip"
+```
+
+Эти команды выполняются из корня Git checkout. Сначала подготовьте SDK, зависимости
+и существующий внешний ключ `signing/`, как описано выше. Git archive включает
+только коммит HEAD; незакоммиченные изменения в архив не попадут.
 
 Первый запуск Wrapper/Gradle обычно требует доступ к репозиториям зависимостей.
 NDK, ABI-меню, сборка FFmpeg, dav1d и расширений Dashchan в этот скрипт не перенесены:
@@ -312,3 +324,31 @@ Android-ресурсов и запуска `shared:jvmTest`. Из семи JVM-�
 исходный ZIP **02**. Его новый SHA-256 создаст отдельную рабочую распаковку.
 
 В Windows-примерах `<linux-user>` замените именем пользователя своего WSL-дистрибутива.
+
+## Освобождение файлового кэша RAM после сборки (revision09)
+
+После сохранения APK/отчётов, при успехе и ошибке сборки, builder выполняет
+`sync && echo 3 > /proc/sys/vm/drop_caches` с правами root. Это освобождает чистый
+Linux page cache и освобождаемые dentries/inodes. Это общесистемный кэш Linux,
+а не только файлы этого проекта; параллельная сборка может повторно читать их с диска.
+
+В WSL используется `wsl.exe --distribution "$WSL_DISTRO_NAME" --user root --exec ...`
+(тайм-аут45с); при недоступности interop — `sudo -n`, затем интерактивный sudo,
+если у скрипта есть терминал. Возможен запрос Linux-пароля. Root-настройки/sudoers
+скрипт не меняет. Без прав очистка помечается FAILED, а результат сборки сохраняется.
+
+Проверка памяти до/после и результат: `out/run-*/memory-cleanup.log`;
+краткий статус — в `STATUS.txt`. Для пропуска добавьте `--no-memory-cleanup`.
+`--help`/`--version`, отказ блокировки и отмена выбора до создания run-папки
+очистку не запускают. Принудительное завершение через SIGKILL не обрабатывается.
+
+Зависимости `.gradle`, incremental caches, work, APK, ZIP, signing и логи сохраняются.
+Java/Kotlin-процессы других сборок и старые Kotlin daemons не останавливаются.
+Используется прежний `--no-daemon`; стратегия компилятора и heap не меняются.
+Очистка не освобождает память живых процессов/swap и не гарантирует немедленного
+уменьшения памяти WSL в диспетчере задач Windows. WSL не выключается.
+
+Источники механизма: [Linux kernel drop_caches](https://docs.kernel.org/admin-guide/sysctl/vm.html#drop-caches),
+[Microsoft WSL commands](https://learn.microsoft.com/en-us/windows/wsl/basic-commands).
+Синтаксис и изолированные ветки cleanup проверены заглушками; реальная очистка
+RAM/сборка на внешнем WSL здесь не выполнялась.

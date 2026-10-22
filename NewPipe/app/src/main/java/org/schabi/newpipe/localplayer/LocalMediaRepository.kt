@@ -37,8 +37,11 @@ internal class LocalMediaRepository(private val resolver: ContentResolver) : Med
         }
         val document = Document(uri, title, resolver.getType(uri), size)
         documents[uri.toString()] = document
+        while (documents.size > 8) documents.keys.firstOrNull { it != uri.toString() }?.let(documents::remove)
         document
     }
+
+    fun isAudio(uri: Uri): Boolean = documents[uri.toString()]?.mime?.startsWith("audio/") == true
 
     private fun document(item: String) = documents[item] ?: error("Document has not been selected")
 
@@ -51,7 +54,7 @@ internal class LocalMediaRepository(private val resolver: ContentResolver) : Med
         val document = document(item)
         return MediaItem.Builder()
             .setUri(document.uri)
-            .apply { document.mime?.takeIf { it.startsWith("video/") && !it.contains('*') }?.let { setMimeType(it) } }
+            .apply { document.mime?.takeIf { (it.startsWith("video/") || it.startsWith("audio/")) && !it.contains('*') }?.let { setMimeType(it) } }
             .build()
     }
 

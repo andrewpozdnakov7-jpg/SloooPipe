@@ -1,0 +1,91 @@
+ID,Сценарий,Кандидат,Статус,Примечание
+F01.1,обычный Play,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F01.2,другой/повторный Play,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F01.3,быстрые A→B,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F02.1,локальное видео,APK29,PASS,"MP4/180s -> local mini playing,04. Audible sound unverified."
+F02.2,локальное аудио,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F02.3,сеть↔локальный repository/история,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F03.1,10 циклов из NewPlayer с/без выбора pause/play,APK29,PASS,10 native +extra recovered selected/playing.5 image pairs changed; native06 transient buffering recovered.
+F03.2,10 циклов из мини-панели с/без выбора pause/play,APK29,PASS,10 mini +extra PLAYING/video recovered;5 image pairs changed; mini10 transient buffering recovered.
+F04.1,embedded↔fullscreen portrait/landscape,APK29,NOT RUN,PASS subset: audio/fullscreen/embedded landscape; portrait series not tested separately.
+F04.2,Home/reopen/поворот,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F04.3,PiP/Surface bounds,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F05.1,Play all с середины,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F05.2,enqueue/next/дубликаты,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F05.3,reorder текущего,APK29,PASS,"Current item1->0->1 retained paused11351ms,15/16."
+F06.1,delete до текущего,APK29,PASS,"Delete before current retained title, paused11351ms, index1->0,17."
+F06.2,delete текущего,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F06.3,delete последнего/всех,APK29,FAIL,"Last deletion releases engine but leaves empty host and stale mini with Pause,30/31. ZIP30 fix pending."
+F07.1,auto-next,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F07.2,repeat off/one/all,APK29,NOT RUN,PASS subset repeat-one actual end21/22 and Off STOPPED25/26. Repeat-all transitions not tested; reopen icon FAIL separately.
+F07.3,shuffle последовательность,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F08.1,длинный playlist lazy loading,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F08.2,pagination после reorder/enqueue/delete,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F09.1,отмена сохраняет сессию,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F09.2,согласие однократно,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F09.3,paused queue после Back,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F09.4,stale dialog после queue/account change,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F10.1,confirmation on/off,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F10.2,resume/enqueue без ложной замены,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F10.3,background/popup replacement,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F11.1,"history on/off, playback-only view",APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F11.2,resume/positions preferences,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F11.3,timestamp/zero/recovery/finished,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F11.4,old/new item event boundary,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F12.1,progressive muxed,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F12.2,split A/V/generated DASH,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F12.3,HLS,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F12.4,DASH manifest,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F12.5,audio-only/post-live audio,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F12.6,актуальный live/DVR,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F13.1,качество сохраняет position/play intent,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F13.2,audio track,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F13.3,subtitles,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F13.4,speed/pitch,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F13.5,chapters,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F13.6,preview NONE/LOW/HIGH,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F14.1,source error/Retry,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F14.2,краткая потеря сети,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F14.3,cancel/поздний ответ,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F15.1,фон↔полный/мини,APK29,NOT RUN,"PASS subset background/mini/video04-10,cycles. Full remaining paths not tested."
+F15.2,popup↔полный/фон,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F15.3,PiP↔embedded,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F15.4,локальная мини-панель,APK29,PASS,"Local playback/Back/Close followed by network Play all and background mini,04-07."
+F16.1,notification/MediaSession,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F16.2,гарнитура/noisy,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F16.3,focus/resume preference,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F17.1,Activity recreation,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F17.2,Close/delete-all/reopen,APK29,FAIL,Network Close06 PASS; last/delete-all leaves stale host/mini30/31 FAIL. ZIP30 fix pending.
+F17.3,штатное queue restoration,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+A01.1,ownership/Kotlin,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+A01.2,generic/host boundary,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+A01.3,listeners/controllers/feeds/caches,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+A02.1,51 app/NewPlayer JVM cases (source28),APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+A02.2,auth with build/test/isolation,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+A02.3,auth without build/test/isolation/anonymous runtime,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+U01.1,official refs/refactor compatibility,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+U01.2,portable patches/apply check,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+U01.3,upstream review/acceptance,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+U02.1,source/commit/SHA manifest,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+U02.2,APK provenance от внешней сборки,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+U02.3,device evidence нового APK,APK29,NOT RUN,Installed hash matches supplied APK29; source claim+DEX marker. Build log/test XML not supplied.
+STARTUP,открытие MainActivity,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F04.HOME,background Home,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F05.FIRST,Play all из начала истории,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F16.KEYS,MediaSession play/pause keys,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F17.LOCAL_CLOSE,local mini Close,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F12.AUDIBLE,слышимый звук,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+PHONE16,физический Android16,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+POPUP_PERMISSION,overlay permission,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+UI_LABEL,PiP button wrapping,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F01.4,VOD через сведения с автозапуском,APK29,NOT RUN,Не выполнено на APK29; старые PASS не переносятся.
+F05.4,Play all из начала истории,APK29,PASS,"Play all from beginning of history,05. Middle not tested."
+F15.5,audio UI -> fullscreen video,APK29,PASS,"Audio UI->fullscreen video->embedded actual image08-10,20cycles."
+F02.4,network -> local -> Back -> local mini pause/reopen/Close,APK29,PASS,Network->local MP4->Back/Close->history network mini04-07.
+U02.3,установленный APK28 / source ZIP / build-main.log,APK29,NOT RUN,Installed hash matches supplied APK29; source claim+DEX marker. Build log/test XML not supplied.
+F07.4,repeat/shuffle UI after reopen,APK29,FAIL,All27 -> reopen No repeat28 -> click One29. ZIP30 snapshot fix pending. Shuffle not tested separately.
+F07.5,repeat-one actual end,APK29,PASS,"626351/duration634566 -> same item PLAYING3333ms,21/22."
+F07.6,repeat-off actual end single item,APK29,PASS,"STOPPED634626ms,25/26. Auto-next with another item not tested."
+F16.4,MediaSession fast-forward / play-pause,APK29,PASS,Paused11351->26351ms; media keys and state within same session. Full notification/headset not tested.
+F06.4,last element engine release,APK29,PASS,30 no active app MediaSession; UI cleanup FAIL F06.3.
+F15.6,network mini after local / Close,APK29,PASS,04-07 and actual network.mini_restored events.

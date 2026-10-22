@@ -1,107 +1,102 @@
 # SloooPipe
 
-An experimental integration of **NewPipe with NewPlayer**. The goal is to make familiar
-NewPipe workflows work through NewPlayer and provide an implementation that upstream
-developers and other projects can study and reuse.
+An experimental Android integration of **NewPipe with NewPlayer**. The goal is to
+make familiar NewPipe workflows use NewPlayer and provide an implementation that
+other developers can study, adapt and reuse.
 
-[Русский](README.ru.md)
+[Русский](README.ru.md) · [Current results](RESULT.md) · [Architecture](docs/NEWPLAYER_SESSION_INTEGRATION.md)
 
-**Early development.** This repository contains application sources, including the
-ZIP23 queue-duration fix. Its APK has not been tested yet; the latest device evidence
-is from APK22. No stable release is available.
+## Development status
 
-## Verified behavior
+**Source checkpoint: ZIP32, 2026-10-22. This is a development snapshot, not a stable release.**
+The published application code matches local checkpoint
+`d638f97f432d74a89cd1231fba5b7e918bef31ca`; publication updates documentation.
+ZIP numbers identify our source handoffs, not upstream NewPipe releases.
+ZIP32's latest fix has static checks only; its external build and device retest are pending.
 
-On APK22 in LDPlayer / Android 14:
+| Area | Implementation and verification |
+| --- | --- |
+| Network playback | Normal Play, background and popup routes are connected to a Kotlin NewPlayer coordinator. Video, mini-player, fullscreen and PiP share the playback runtime; the complete mode matrix is still pending. |
+| Local media | A Local entry in the service selector opens Android's document picker. Local playback uses the same NewPlayer integration and has a mini-player. |
+| Queue and history | Media3 owns the active queue. The host connects feeds, selection, enqueue, reorder, removal, saved position and NewPipe history. Implementation is broader than the completed device checks. |
+| Latest device check, APK31 | Repeat/shuffle display survives reopening the mini queue. Deleting the last item releases the engine; returning hides the stale mini. Starting a new queue plays visible video and pause works. |
+| Remaining defect and ZIP32 | APK31 leaves an empty player screen after deleting the last item. ZIP32 observes engine release to close it; this fix needs a new APK retest. |
+| Optional YouTube sign-in | Experimental, controlled at build time. Signing in does not guarantee that YouTube will allow every video or network address. |
 
-- Standard Play in a NewPipe video page opens NewPlayer.
-- A YouTube video plays at 1280×720. Decoded video, an AAC audio track and output to
-  Android's audio mixer are confirmed; audio was not assessed by human listening.
-- Pause, seek and play work. Back retains a paused queue and mini-player with the
-  correct title; the mini-player resumes playback.
-- NewPipe history records the view. Reopening after an application restart resumes
-  the saved position.
-- “Add next” adds a second video. Android's MEDIA_NEXT command switches to that item,
-  and the mini-player updates to the new title.
+[APK31 evidence and exact APK hash](docs/APK31_DEVICE_CHECKPOINT.md) ·
+[Current acceptance matrix](docs/APK31_ACCEPTANCE.csv).
+On APK29, 10 native-player and 10 mini-player queue cycles passed within the
+[recorded scope](docs/APK29_DEVICE_CHECKPOINT.md). Audible sound was confirmed by a
+person on APK25. These results do **not** establish acceptance of APK31 or ZIP32.
 
-Earlier APK20 checks covered selected local-file and live-stream playback scenarios.
-They have not all been repeated on the current snapshot.
-[Detailed device checkpoint and remaining acceptance](docs/MAIN_PLAY_QUEUE_HISTORY_DEVICE_CHECKPOINT.md).
-
-## Known issues and limits
-
-- **APK22 crashes when opening the queue UI** because NewPlayer requires duration
-  metadata. ZIP23 supplies known durations and handles unknown/live durations in the
-  queue UI and aggregate progress. This fix has static checks only; an APK retest is pending.
-- Queue editing, repeat/shuffle, automatic next, long-playlist pagination and the full
-  queue lifecycle still need device acceptance.
-- Optional YouTube sign-in and authenticated playback are experimental. A captured
-  browser session does not establish that a particular video can be played. Full
-  SABR and PoToken support are not implemented.
-- Background and popup playback still use the legacy player. Full PiP/background
-  migration and complete queue restoration after process death are unfinished.
-- Physical Android 16 testing and the full lifecycle/source matrix are pending.
-- Debug builds contain extensive diagnostics. Auth diagnostics use redaction and are
-  disabled in release builds. Inspect logs before sharing them publicly.
+Still required: the full queue/source/mode/lifecycle matrix on the new APK, both auth
+builds with test reports, live/DVR checks and physical Android 16 validation. Legacy
+player/media-browser classes remain; Android Auto interoperability is unverified.
+Explicit external-player and Kodi actions remain external. Full SABR/PoToken support
+and a complete port to upstream's refactor branch are outside this checkpoint.
 
 ## Source layout
 
 | Path | Purpose |
 | --- | --- |
-| [`NewPipe/`](NewPipe) | Main SloooPipe application on a pinned NewPipe `dev` snapshot |
-| [`NewPipe/third-party/NewPlayer/`](NewPipe/third-party/NewPlayer) | Embedded library, module `:newplayer-local` |
-| [`NewPipe/app/src/main/java/org/schabi/newpipe/newplayer/`](NewPipe/app/src/main/java/org/schabi/newpipe/newplayer) | Host, lazy sources, queue and history |
-| [`NewPipe/youtube-auth-api/`](NewPipe/youtube-auth-api) | Optional auth API and sanitized diagnostics |
-| [`NewPipe/third-party/NewPipeExtractor-auth/`](NewPipe/third-party/NewPipeExtractor-auth) | Extractor with optional auth hooks |
-| [`NewPlayer/`](NewPlayer) | Separate upstream demo, independent from the embedded library |
-| [`tools/`](tools) | WSL ZIP builder and dependency helpers |
-| [`docs/`](docs) | Architecture, implementation notes and acceptance evidence |
+| `NewPipe/` | Main SloooPipe app on a pinned NewPipe dev snapshot |
+| `NewPipe/third-party/NewPlayer/` | Embedded `:newplayer-local` library used by the app |
+| `NewPipe/app/src/main/java/org/schabi/newpipe/newplayer/` | Kotlin playback coordinator, queue, modes, sources, history and UI hosts |
+| `NewPipe/youtube-auth-api/` | Optional account API and diagnostic boundary |
+| `NewPipe/third-party/NewPipeExtractor-auth/` | Extractor with optional auth hooks |
+| `NewPlayer/` | Independent upstream-derived demo; editing it alone does not change the main APK |
+| `tools/`, `docs/` | WSL builder, architecture, provenance and acceptance records |
 
-[Architecture](docs/MAIN_PLAY_QUEUE_HISTORY_STAGE3.md) · [Goal](PROJECT_GOAL.md) ·
-[Upstream revisions](UPSTREAM.json) · [Current status](RESULT.md)
+[Exact upstream pins](UPSTREAM.json) · [Dev/refactor comparison and porting boundaries](docs/UPSTREAM_PORTING_20261022.md).
+Pins are fixed for reproducibility; this repository does not claim to track every new upstream commit automatically.
+Vendored README files describe their components; this root README describes SloooPipe.
 
 ## Build and test
 
-The main application pins JDK 21, Gradle 9.8.2, AGP 9.4.1, Kotlin 2.4.21,
-Android SDK platform 37.0 and Build Tools 36.0.0. The first build requires network
-access to dependency repositories or a prepared local cache.
-
-For Linux/WSL:
+Use Linux/WSL, JDK 21, Android SDK platform 37.0 and Build Tools 36.0.0. The main app
+pins Gradle 9.8.2, AGP 9.4.1, Kotlin 2.4.21 and Media3 1.9.2. Its Gradle wrapper is included.
+Headless shared JVM tests require Xvfb and xauth. SDK packages and dependencies must
+already be installed or reachable; this is not a fully offline source distribution.
 
 ```bash
 git clone https://github.com/andrewpozdnakov7-jpg/SloooPipe.git
 cd SloooPipe/NewPipe
 chmod +x gradlew
-./gradlew :app:testDebugUnitTest :youtube-auth-api:test :shared:jvmTest \
-  :app:verifyAuthIsolation :app:assembleDebug -Pslooopipe.withAuth=false
+# Set JAVA_HOME and ANDROID_HOME for your Linux JDK and SDK.
+xvfb-run -a ./gradlew :app:testDebugUnitTest :youtube-auth-api:test :shared:jvmTest :app:verifyAuthIsolation :app:assembleDebug -Pslooopipe.withAuth=true
 ```
 
-Set `JAVA_HOME` and `ANDROID_HOME` for your installation. `:shared:jvmTest` needs a
-working display; on a headless machine run the Gradle command through `xvfb-run -a`
-with Xvfb/xauth installed. Use `-Pslooopipe.withAuth=true` for experimental sign-in.
-This is a test-build instruction, not a claim that this snapshot passed all tasks.
-The 22 app/NewPlayer JVM cases, including five new duration cases, have not been
-run on this computer.
+Repeat with `-Pslooopipe.withAuth=false` to check the auth-free variant. These are
+validation commands, not a claim that both variants have passed. There are 51
+app/NewPlayer JVM test cases in source; complete current-run XML/counts are pending.
+A normal checkout build writes APKs under `NewPipe/app/build/outputs/apk/` and uses
+its debug signing setup. A different signing certificate cannot update an existing install.
 
-The existing ZIP workflow is described in [`tools/README-wsl.md`](tools/README-wsl.md).
-It requires your own signing configuration in the external build directory. No
-project signing key or account session is distributed here. The upstream build
-derives debug application-ID suffixes from the Git branch; the ZIP builder creates
-local `dev` metadata for a deterministic `.debug` suffix.
+For source-ZIP selection, retained run reports and signing with your existing external
+key, use [the WSL builder workflow](tools/README-wsl.md), revision
+`20261022-09-memory-cleanup`. It requires its own `signing/` inputs, keeps dependency
+caches and attempts to release clean Linux RAM caches after the run. It supports
+`--no-memory-cleanup`. Existing ZIP32 archives remain unchanged by this publication.
 
-## Contributing
+## Contributing and reuse
 
-Start with the device checkpoint and architecture. Report the exact commit,
-Android version and authentication mode. Remove cookies, tokens, account details
-and private URLs from logs before sharing them.
+Start with the [project goal](PROJECT_GOAL.md), [session design](docs/NEWPLAYER_SESSION_INTEGRATION.md)
+and [porting review](docs/UPSTREAM_PORTING_20261022.md). Generic NewPlayer changes and
+NewPipe-specific hosts have separate ownership; portable patches have text-application
+checks, not upstream build or acceptance. No upstream PR has been opened for this work.
+
+When reporting a defect, include the source commit, APK SHA256, Android version,
+auth variant and reproduction steps. Keep source review, compiler/tests, emulator
+observations and human/device checks separate. Debug diagnostics are extensive:
+review logs for credentials and private URLs before sharing. Auth diagnostics are
+redacted and disabled in release; account sessions and signing keys are not distributed.
+[Publication scope and privacy review](docs/SOURCE_PUBLICATION.md).
 
 ## Attribution and license
 
-SloooPipe is an independent experiment. Upstream copyright and license notices are
-preserved. The application and our changes use GPL-3.0-or-later; see [LICENSE](LICENSE)
-and the notices supplied with each component.
-
-- [NewPipe](https://github.com/TeamNewPipe/NewPipe)
-- [NewPlayer](https://codeberg.org/TeamNewPipe/NewPlayer)
-- [NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor)
-- [PipePipe](https://github.com/InfinityLoop1308/PipePipeClient), adapted optional sign-in components
+SloooPipe is an independent experiment, not an official NewPipe release.
+GPL-3.0-or-later; see [LICENSE](LICENSE) and component notices. Upstream copyright
+and provenance are preserved: [NewPipe](https://github.com/TeamNewPipe/NewPipe),
+[NewPlayer](https://codeberg.org/TeamNewPipe/NewPlayer),
+[NewPipeExtractor](https://github.com/TeamNewPipe/NewPipeExtractor), and
+[PipePipe](https://github.com/InfinityLoop1308/PipePipeClient) for adapted optional sign-in.

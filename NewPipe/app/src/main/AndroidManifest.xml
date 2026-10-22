@@ -43,6 +43,7 @@
         tools:ignore="AllowBackup">
         <activity android:name=".auth.YoutubeAccountActivity" android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+        <service android:name=".newplayer.NewPlayerPopupService" android:exported="false" />
         <activity
             android:name=".newplayer.NewPlayerActivity"
             android:exported="false"

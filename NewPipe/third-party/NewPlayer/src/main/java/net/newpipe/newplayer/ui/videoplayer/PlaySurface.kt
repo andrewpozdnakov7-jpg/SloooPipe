@@ -28,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.layout.ContentScale as ComposeContentScale
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.compose.PlayerSurface
@@ -35,7 +36,6 @@ import androidx.media3.ui.compose.SURFACE_TYPE_SURFACE_VIEW
 import androidx.media3.ui.compose.modifiers.resizeWithContentScale
 import net.newpipe.newplayer.ui.ContentScale
 import net.newpipe.newplayer.uiModel.NewPlayerUIState
-import androidx.compose.ui.layout.ContentScale as ComposeContentScale
 
 /**
  * The size handed to [resizeWithContentScale]. Only its aspect ratio matters, the absolute value
@@ -57,22 +57,26 @@ internal fun PlaySurface(
         modifier
             .fillMaxHeight()
             .aspectRatio(contentRatio)
-    } else when (uiState.contentFitMode) {
-        ContentScale.STRETCHED -> modifier.fillMaxSize()
+    } else {
+        when (uiState.contentFitMode) {
+            ContentScale.STRETCHED -> modifier.fillMaxSize()
 
-        ContentScale.FIT_INSIDE -> modifier
-            .aspectRatio(contentRatio)
-            .fillMaxSize()
+            ContentScale.FIT_INSIDE ->
+                modifier
+                    .aspectRatio(contentRatio)
+                    .fillMaxSize()
 
-        ContentScale.CROP -> modifier.resizeWithContentScale(
-            contentScale = ComposeContentScale.Crop,
-            sourceSizeDp = Size(contentRatio * SOURCE_SIZE_BASE, SOURCE_SIZE_BASE)
-        )
+            ContentScale.CROP -> modifier.resizeWithContentScale(
+                contentScale = ComposeContentScale.Crop,
+                sourceSizeDp = Size(contentRatio * SOURCE_SIZE_BASE, SOURCE_SIZE_BASE)
+            )
+        }
     }
 
-    // The view model asks for a new generation when the surface has to be handed over to a
-    // different kind of renderer. Keying it makes Compose destroy and recreate the view.
-    key(uiState.videoSurfaceGeneration) {
+    // Recreate the native surface for renderer handoffs and fullscreen/embedded bounds changes.
+    // Queue selection uses fullscreen bounds: reusing its SurfaceView on return can leave the
+    // holder below the smaller embedded ComposeView, clipping the video while audio continues.
+    key(uiState.videoSurfaceGeneration, uiState.uiMode.fullscreen) {
         PlayerSurface(
             player = player,
             surfaceType = SURFACE_TYPE_SURFACE_VIEW,

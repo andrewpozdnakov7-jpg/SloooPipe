@@ -15,7 +15,6 @@ import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -36,12 +35,10 @@ import net.newpipe.newplayer.uiModel.NewPlayerViewModelImpl
 import net.newpipe.newplayer.uiModel.UIModeState
 import org.schabi.newpipe.R
 import org.schabi.newpipe.extractor.stream.StreamInfo
-import org.schabi.newpipe.fragments.detail.VideoDetailFragment
 import org.schabi.newpipe.player.helper.PlayerHelper
 import org.schabi.newpipe.player.helper.PlayerHolder
 import org.schabi.newpipe.player.playqueue.PlayQueue
 import org.schabi.newpipe.player.playqueue.SinglePlayQueue
-import org.schabi.newpipe.util.SerializedCache
 
 /** A single host and engine for local documents and explicitly selected NewPipe network videos. */
 class NewPlayerActivity : AppCompatActivity() {
@@ -56,16 +53,11 @@ class NewPlayerActivity : AppCompatActivity() {
     private var selection: Job? = null
     private var currentUri: Uri? = null
     private var network = false
-    private var serviceId = -1
-    private var pageUrl: String? = null
-    private var handoff: String? = null
-    private var requestGeneration = 0L
-    private var pendingPosition: Long? = null
-    private var restorePlaying = true
-    private var pendingRestore = false
     private var fullscreen = false
-    private var queueRequest: String? = null
+    private var selectingLocal = false
     private var initialFullscreen = false
+    private var pipWasActive = false
+    private var hadAttachedMedia = false
 
     private val openVideo = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri == null) {
@@ -86,55 +78,74 @@ class NewPlayerActivity : AppCompatActivity() {
         model = ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(application))[NewPlayerViewModelImpl::class.java]
         if (model.newPlayer !== runtime.player) model.newPlayer = runtime.player
         readRequest(intent, savedInstanceState)
-        if (!network && runtime.queue.active) runtime.releasePlayback()
         buildScreen()
         addOnPictureInPictureModeChangedListener { mode ->
+            if (mode.isInPictureInPictureMode) {
+                pipWasActive = true
+            } else if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+                pipWasActive = false
+            }
+            runtime.setPresentation(if (mode.isInPictureInPictureMode) PlaybackPresentation.PIP else PlaybackPresentation.VIDEO)
             model.onPictureInPictureModeChanged(mode.isInPictureInPictureMode)
             Log.i(NewPlayerRuntime.TAG, "screen.pip=${mode.isInPictureInPictureMode}")
         }
         observePlayer()
         Log.i(NewPlayerRuntime.TAG, "screen.create network=$network restored=${savedInstanceState != null}")
-        if ((savedInstanceState != null || !intent.hasExtra(EXTRA_MODE)) && runtime.player.exoPlayer.value != null) {
+        if (!selectingLocal && runtime.player.exoPlayer.value != null) {
             video.visibility = View.VISIBLE
-            videoTitle.text = savedInstanceState?.getString("videoTitle") ?: runtime.player.currentlyPlaying.value?.mediaMetadata?.title
+            videoTitle.text = runtime.player.currentlyPlaying.value?.mediaMetadata?.title
         } else if (network) {
-            loadNetwork(savedInstanceState?.getLong("position") ?: intent.getLongExtra(EXTRA_POSITION, -1), savedInstanceState?.getBoolean("playing") ?: intent.getBooleanExtra(EXTRA_PLAYING, true))
+            NewPlayerRuntime.restoreIfNeeded(application)
         } else {
             currentUri?.let { loadLocal(it, savedInstanceState?.getLong("position") ?: 0, savedInstanceState?.getBoolean("playing") ?: true) }
         }
+        if (!selectingLocal && !intent.getBooleanExtra(EXTRA_ENTER_PIP, false) && !intent.getBooleanExtra(EXTRA_SHOW_QUEUE, false)) runtime.setPresentation(PlaybackPresentation.VIDEO)
         if (intent.getBooleanExtra(EXTRA_RESUME_ACTIVE, false) && runtime.queue.active) runtime.player.play()
-        if (intent.getBooleanExtra(EXTRA_SHOW_QUEUE, false) && runtime.queue.active) model.changeUiMode(UIModeState.EMBEDDED_VIDEO_STREAM_SELECT, null)
+        if (intent.getBooleanExtra(EXTRA_SHOW_QUEUE, false) && runtime.queue.active) model.changeUiMode(queueUiMode(), null)
+        if (intent.getBooleanExtra(EXTRA_ENTER_PIP, false) && Build.VERSION.SDK_INT >= 26) {
+            runtime.setPresentation(PlaybackPresentation.PIP)
+            video.post { model.changeUiMode(UIModeState.PIP, null) }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (Build.VERSION.SDK_INT < 26 || !isInPictureInPictureMode) pipWasActive = false
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        // Notification taps have no request extras: retain the current session.
-        if (!intent.hasExtra(EXTRA_MODE)) {
-            if (intent.getBooleanExtra(EXTRA_RESUME_ACTIVE, false)) runtime.player.play()
-            if (intent.getBooleanExtra(EXTRA_SHOW_QUEUE, false)) model.changeUiMode(UIModeState.EMBEDDED_VIDEO_STREAM_SELECT, null)
+        setIntent(intent)
+        if (intent.getStringExtra(EXTRA_MODE) == "local") {
+            selectingLocal = true
+            network = false
+            currentUri = null
+            video.visibility = View.GONE
+            configureAction()
             return
         }
-        setIntent(intent)
-        selection?.cancel()
-        runtime.releasePlayback()
-        readRequest(intent, null)
-        videoTitle.text = ""
-        video.visibility = View.GONE
-        configureAction()
-        if (network) loadNetwork(intent.getLongExtra(EXTRA_POSITION, -1), intent.getBooleanExtra(EXTRA_PLAYING, true)) else status.setText(R.string.slooopipe_local_hint)
+        selectingLocal = false
+        initialFullscreen = intent.getBooleanExtra(EXTRA_FULLSCREEN, false)
+        network = runtime.queue.active
+        if (!intent.getBooleanExtra(EXTRA_SHOW_QUEUE, false)) runtime.setPresentation(PlaybackPresentation.VIDEO)
+        video.visibility = View.VISIBLE
+        if (intent.getBooleanExtra(EXTRA_RESUME_ACTIVE, false)) runtime.player.play()
+        applyInitialFullscreen()
+        if (intent.getBooleanExtra(EXTRA_SHOW_QUEUE, false)) model.changeUiMode(queueUiMode(), null)
+        if (intent.getBooleanExtra(EXTRA_ENTER_PIP, false) && Build.VERSION.SDK_INT >= 26) {
+            runtime.setPresentation(PlaybackPresentation.PIP)
+            model.changeUiMode(UIModeState.PIP, null)
+        }
     }
 
     private fun readRequest(request: Intent, state: Bundle?) {
-        network = (state?.getString(EXTRA_MODE) ?: request.getStringExtra(EXTRA_MODE)) == "network"
-        serviceId = state?.getInt(EXTRA_SERVICE, -1) ?: request.getIntExtra(EXTRA_SERVICE, -1)
-        pageUrl = state?.getString(EXTRA_PAGE) ?: request.getStringExtra(EXTRA_PAGE)
-        handoff = state?.getString(EXTRA_HANDOFF) ?: request.getStringExtra(EXTRA_HANDOFF)
-        requestGeneration = state?.getLong(EXTRA_GENERATION) ?: request.getLongExtra(EXTRA_GENERATION, org.schabi.newpipe.auth.AuthRuntime.generation())
-        currentUri = state?.getString("localUri")?.let(Uri::parse)
-        queueRequest = request.getStringExtra(EXTRA_QUEUE)
+        selectingLocal = state?.getBoolean("selectingLocal") ?: (request.getStringExtra(EXTRA_MODE) == "local")
+        network = !selectingLocal && (runtime.queue.active || state?.getBoolean("network") == true)
+        currentUri = if (selectingLocal) null else state?.getString("localUri")?.let(Uri::parse) ?: runtime.localUri
         initialFullscreen = request.getBooleanExtra(EXTRA_FULLSCREEN, false) && state == null
-        if (!request.hasExtra(EXTRA_MODE) && runtime.queue.active) network = true
     }
+
+    private fun queueUiMode() = if (runtime.presentation.value == PlaybackPresentation.AUDIO || runtime.isAudioOnly()) UIModeState.AUDIO_STREAM_SELECT else UIModeState.EMBEDDED_VIDEO_STREAM_SELECT
 
     private fun observePlayer() {
         lifecycleScope.launch {
@@ -152,13 +163,23 @@ class NewPlayerActivity : AppCompatActivity() {
                 launch { runtime.player.errorFlow.collect { showError(it) } }
                 launch {
                     runtime.player.currentlyPlaying.collect { item ->
-                        if (network && item != null) {
+                        if (!selectingLocal && item != null) {
+                            hadAttachedMedia = true
+                            network = QueueMediaRepository.request(item) != null
                             videoTitle.text = item.mediaMetadata.title
-                            QueueMediaRepository.request(item)?.entry?.reference?.let { reference ->
-                                serviceId = reference.serviceId
-                                pageUrl = reference.url
-                                handoff = null
-                            }
+                            video.visibility = View.VISIBLE
+                            configureAction()
+                            applyInitialFullscreen()
+                        }
+                    }
+                }
+                launch {
+                    // The last-item transition can emit null before release closes the session.
+                    // Observe the engine's release too; StateFlow will not emit the same null twice.
+                    runtime.player.exoPlayer.collect { engine ->
+                        if (engine == null && hadAttachedMedia && !selectingLocal && selection?.isActive != true && !runtime.queue.active && runtime.localUri == null) {
+                            Log.i(NewPlayerRuntime.TAG, "screen.session_closed")
+                            finish()
                         }
                     }
                 }
@@ -172,12 +193,6 @@ class NewPlayerActivity : AppCompatActivity() {
                                     initialFullscreen = false
                                     model.changeUiMode(UIModeState.FULLSCREEN_VIDEO, null)
                                 }
-                                if (pendingRestore) {
-                                    pendingRestore = false
-                                    pendingPosition?.let(player::seekTo)
-                                    pendingPosition = null
-                                    player.playWhenReady = restorePlaying
-                                }
                                 status.setText(if (player.isPlaying) R.string.slooopipe_local_playing else R.string.slooopipe_local_paused)
                             }
 
@@ -186,6 +201,13 @@ class NewPlayerActivity : AppCompatActivity() {
                     }
                 }
             }
+        }
+    }
+
+    private fun applyInitialFullscreen() {
+        if (initialFullscreen && runtime.player.exoPlayer.value?.playbackState == Player.STATE_READY) {
+            initialFullscreen = false
+            model.changeUiMode(UIModeState.FULLSCREEN_VIDEO, null)
         }
     }
 
@@ -217,14 +239,12 @@ class NewPlayerActivity : AppCompatActivity() {
                         exo.prepare()
                         exo.play()
                     } else {
-                        handoff = null
-                        requestGeneration = org.schabi.newpipe.auth.AuthRuntime.generation()
-                        loadNetwork(forceLoad = true)
+                        status.setText(R.string.slooopipe_newplayer_error)
                     }
                 } else {
                     Log.i(NewPlayerRuntime.TAG, "picker.open")
                     try {
-                        openVideo.launch(arrayOf("video/*"))
+                        openVideo.launch(arrayOf("video/*", "audio/*"))
                     } catch (error: Exception) {
                         showError(error)
                     }
@@ -233,7 +253,49 @@ class NewPlayerActivity : AppCompatActivity() {
         }
         actions.addView(chooseOrRetry, LinearLayout.LayoutParams(0, -2, 1f))
         header.addView(actions)
-        videoTitle = TextView(this).apply { setTextColor(foreground) }
+        lateinit var modes: LinearLayout
+        var modeCount = 0
+        fun modeButton(label: Int, action: () -> Unit) {
+            // Four equal columns split long translated labels into individual syllables.
+            // Two columns keep the PiP action readable at ordinary phone widths.
+            if (modeCount++ % 2 == 0) {
+                modes = LinearLayout(this).apply { isBaselineAligned = false }
+                header.addView(modes)
+            }
+            modes.addView(
+                Button(this).apply {
+                    setText(label)
+                    contentDescription = getString(label)
+                    maxLines = 2
+                    ellipsize = android.text.TextUtils.TruncateAt.END
+                    setOnClickListener { action() }
+                },
+                LinearLayout.LayoutParams(0, -2, 1f)
+            )
+        }
+        modeButton(R.string.slooopipe_tracks) { PlaybackTrackOptions.show(this, runtime) }
+        modeButton(R.string.slooopipe_mode_audio) {
+            runtime.setPresentation(PlaybackPresentation.AUDIO)
+            finish()
+        }
+        modeButton(R.string.slooopipe_mode_popup) {
+            if (org.schabi.newpipe.util.PermissionHelper.isPopupEnabledElseAsk(this)) {
+                runtime.setPresentation(PlaybackPresentation.POPUP)
+                startService(Intent(this, NewPlayerPopupService::class.java))
+                finish()
+            }
+        }
+        if (Build.VERSION.SDK_INT >= 26 && packageManager.hasSystemFeature(android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE)) {
+            modeButton(R.string.slooopipe_mode_pip) {
+                runtime.setPresentation(PlaybackPresentation.PIP)
+                model.changeUiMode(UIModeState.PIP, null)
+            }
+        }
+        videoTitle = TextView(this).apply {
+            setTextColor(foreground)
+            maxLines = 2
+            ellipsize = android.text.TextUtils.TruncateAt.END
+        }
         status = TextView(this).apply {
             setTextColor(foreground)
             setText(if (network) R.string.slooopipe_local_loading else R.string.slooopipe_local_hint)
@@ -264,61 +326,23 @@ class NewPlayerActivity : AppCompatActivity() {
         chooseOrRetry.setText(if (network) R.string.slooopipe_newplayer_retry else R.string.slooopipe_local_choose)
     }
 
-    private fun beginLoad(position: Long, playing: Boolean) {
-        selection?.cancel()
-        runtime.releasePlayback()
-        PlayerHolder.getInstance().stopService()
-        pendingPosition = position.takeIf { it > 0 }
-        pendingRestore = true
-        restorePlaying = playing
-        video.visibility = View.GONE
-        status.setText(R.string.slooopipe_local_loading)
-    }
-
-    private fun play(item: String) {
-        runtime.currentItem = item
-        video.visibility = View.VISIBLE
-        runtime.player.playStream(item, PlayMode.EMBEDDED_VIDEO)
-    }
-
     private fun loadLocal(uri: Uri, position: Long = 0, playing: Boolean = true) {
-        beginLoad(position, playing)
+        selection?.cancel()
         selection = lifecycleScope.launch {
             try {
                 val document = runtime.localRepository.register(uri)
-                currentUri = uri
-                videoTitle.text = document.title
-                Log.i(NewPlayerRuntime.TAG, "document.ready scheme=${uri.scheme} mime=${document.mime} bytes=${document.size}")
-                play("local:$uri")
-            } catch (cancelled: CancellationException) {
-                throw cancelled
-            } catch (error: Exception) {
-                showError(error)
-            }
-        }
-    }
-
-    private fun loadNetwork(position: Long = -1, playing: Boolean = true, forceLoad: Boolean = false) {
-        beginLoad(0, playing)
-        pendingRestore = false // The queue/history bridge restores the selected item once READY.
-        selection = lifecycleScope.launch {
-            try {
-                val page = requireNotNull(pageUrl) { "NEWPLAYER_MISSING_PAGE_URL" }
-                check(requestGeneration == org.schabi.newpipe.auth.AuthRuntime.generation()) { "AUTH_SESSION_CHANGED" }
-                val source = queueRequest?.let { SerializedCache.getInstance().take(it, PlayQueue::class.java) }
-                queueRequest = null
-                val info = if (source == null || handoff != null) {
-                    runtime.networkRepository.info(runtime.networkRepository.resolve(handoff, serviceId, page, forceLoad))
-                } else {
-                    null
-                }
-                check(requestGeneration == org.schabi.newpipe.auth.AuthRuntime.generation()) { "AUTH_SESSION_CHANGED" }
-                val queue = source ?: SinglePlayQueue(checkNotNull(info))
-                videoTitle.text = queue.item?.title
-                video.visibility = View.VISIBLE
-                runtime.currentItem = "queue:loading"
-                runtime.queue.start(queue, info, position.takeIf { it >= 0 }, playing)
-                Log.i(NewPlayerRuntime.TAG, "network.handoff_ready service=$serviceId engine=NewPlayer queued=true")
+                PlaybackConsent.requestLocal(
+                    this@NewPlayerActivity,
+                    Runnable {
+                        PlayerHolder.getInstance().stopService()
+                        selectingLocal = false
+                        network = false
+                        currentUri = uri
+                        videoTitle.text = document.title
+                        video.visibility = View.VISIBLE
+                        runtime.startLocal(uri, position, playing)
+                    }
+                )
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Exception) {
@@ -335,11 +359,8 @@ class NewPlayerActivity : AppCompatActivity() {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putString(EXTRA_MODE, if (network) "network" else "local")
-        outState.putInt(EXTRA_SERVICE, serviceId)
-        outState.putString(EXTRA_PAGE, pageUrl)
-        outState.putString(EXTRA_HANDOFF, handoff)
-        outState.putLong(EXTRA_GENERATION, requestGeneration)
+        outState.putBoolean("network", network)
+        outState.putBoolean("selectingLocal", selectingLocal)
         outState.putString("localUri", currentUri?.toString())
         outState.putString("videoTitle", videoTitle.text.toString())
         outState.putLong("position", runtime.player.currentPosition)
@@ -349,21 +370,32 @@ class NewPlayerActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        if (!isChangingConfigurations && !(Build.VERSION.SDK_INT >= 26 && isInPictureInPictureMode)) {
+        if (!selectingLocal && !isChangingConfigurations && runtime.presentation.value == PlaybackPresentation.VIDEO && !(Build.VERSION.SDK_INT >= 26 && isInPictureInPictureMode)) {
             selection?.cancel()
-            runtime.player.pause()
-            // No late asynchronous getMediaItem may start playback after leaving the screen.
+            when (PlayerHelper.getMinimizeOnExitAction(this)) {
+                PlayerHelper.MinimizeMode.MINIMIZE_ON_EXIT_MODE_BACKGROUND -> runtime.setPresentation(PlaybackPresentation.AUDIO)
+
+                PlayerHelper.MinimizeMode.MINIMIZE_ON_EXIT_MODE_POPUP -> {
+                    if (android.provider.Settings.canDrawOverlays(this)) {
+                        runtime.setPresentation(PlaybackPresentation.POPUP)
+                        startService(Intent(this, NewPlayerPopupService::class.java))
+                    } else {
+                        runtime.player.pause()
+                    }
+                }
+
+                else -> runtime.player.pause()
+            }
             if (runtime.player.exoPlayer.value == null) runtime.releasePlayback()
-            Log.i(NewPlayerRuntime.TAG, "screen.stop paused=true")
+            Log.i(NewPlayerRuntime.TAG, "screen.stop mode=${runtime.presentation.value}")
         }
     }
 
     override fun onDestroy() {
         if (isFinishing) {
             selection?.cancel()
-            // Keep an explicitly paused network queue available while browsing and enqueueing.
-            // Local documents and an incomplete start still release as before.
-            if (!network || runtime.player.exoPlayer.value == null) runtime.releasePlayback()
+            // Returning to browsing retains paused local/network sessions; dismissing PiP closes.
+            if (!selectingLocal && (pipWasActive || runtime.player.exoPlayer.value == null)) runtime.releasePlayback()
         }
         Log.i(NewPlayerRuntime.TAG, "screen.destroy finishing=$isFinishing")
         super.onDestroy()
@@ -371,16 +403,10 @@ class NewPlayerActivity : AppCompatActivity() {
 
     companion object {
         private const val EXTRA_MODE = "newplayer.mode"
-        private const val EXTRA_SERVICE = "newplayer.service"
-        private const val EXTRA_PAGE = "newplayer.page"
-        private const val EXTRA_HANDOFF = "newplayer.handoff"
-        private const val EXTRA_POSITION = "newplayer.position"
-        private const val EXTRA_GENERATION = "newplayer.generation"
-        private const val EXTRA_QUEUE = "newplayer.queue"
-        private const val EXTRA_PLAYING = "newplayer.playing"
         private const val EXTRA_FULLSCREEN = "newplayer.fullscreen"
         private const val EXTRA_RESUME_ACTIVE = "newplayer.resumeActive"
         private const val EXTRA_SHOW_QUEUE = "newplayer.showQueue"
+        private const val EXTRA_ENTER_PIP = "newplayer.enterPip"
 
         @JvmStatic
         fun showQueue(context: Context) {
@@ -398,64 +424,27 @@ class NewPlayerActivity : AppCompatActivity() {
 
         @JvmStatic
         fun openLocal(context: Context) {
-            detachLegacyPlayer(context)
             context.startActivity(Intent(context, NewPlayerActivity::class.java).putExtra(EXTRA_MODE, "local").addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
         }
 
         @JvmStatic
         @JvmOverloads
         fun openNetwork(context: Context, info: StreamInfo, source: PlayQueue? = null, playing: Boolean = true, fullscreen: Boolean = false) {
-            val runtime = NewPlayerRuntime.get(context.applicationContext as android.app.Application)
-            val key = runtime.networkRepository.offer(info)
-            val queueKey = cacheQueue(context, source ?: SinglePlayQueue(info)) ?: return
-            detachLegacyPlayer(context)
-            context.startActivity(
-                Intent(context, NewPlayerActivity::class.java)
-                    .putExtra(EXTRA_MODE, "network")
-                    .putExtra(EXTRA_SERVICE, info.serviceId)
-                    .putExtra(EXTRA_PAGE, info.url)
-                    .putExtra(EXTRA_HANDOFF, key)
-                    .putExtra(EXTRA_QUEUE, queueKey)
-                    .putExtra(EXTRA_PLAYING, playing)
-                    .putExtra(EXTRA_FULLSCREEN, fullscreen)
-                    .putExtra(EXTRA_GENERATION, org.schabi.newpipe.auth.AuthRuntime.generation())
-                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            )
+            PlaybackRequests.play(context, source ?: SinglePlayQueue(info), playing, PlaybackPresentation.VIDEO, info, fullscreen)
         }
 
         @JvmStatic
         @JvmOverloads
         fun openQueue(context: Context, source: PlayQueue, playing: Boolean = true) {
-            val reference = source.item ?: return
-            val key = cacheQueue(context, source) ?: return
-            detachLegacyPlayer(context)
+            PlaybackRequests.play(context, source, playing, PlaybackPresentation.VIDEO, null, PlayerHelper.isStartMainPlayerFullscreenEnabled(context))
+        }
+
+        internal fun showActive(context: Context, playing: Boolean, fullscreen: Boolean = false, pip: Boolean = false) {
             val request = Intent(context, NewPlayerActivity::class.java)
-                .putExtra(EXTRA_MODE, "network").putExtra(EXTRA_SERVICE, reference.serviceId)
-                .putExtra(EXTRA_PAGE, reference.url).putExtra(EXTRA_QUEUE, key)
-                .putExtra(EXTRA_FULLSCREEN, PlayerHelper.isStartMainPlayerFullscreenEnabled(context))
-                .putExtra(EXTRA_POSITION, if (playing) -1L else reference.recoveryPosition.coerceAtLeast(0))
-                .putExtra(EXTRA_PLAYING, playing).putExtra(EXTRA_GENERATION, org.schabi.newpipe.auth.AuthRuntime.generation())
-                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                .putExtra(EXTRA_RESUME_ACTIVE, playing).putExtra(EXTRA_FULLSCREEN, fullscreen)
+                .putExtra(EXTRA_ENTER_PIP, pip).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             if (context !is android.app.Activity) request.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(request)
-        }
-
-        private fun detachLegacyPlayer(context: Context) {
-            val fragment = (context as? AppCompatActivity)?.supportFragmentManager?.findFragmentById(R.id.fragment_player_holder)
-            if (fragment is VideoDetailFragment) {
-                fragment.prepareForNewPlayer()
-            } else {
-                PlayerHolder.getInstance().stopService()
-            }
-        }
-
-        private fun cacheQueue(context: Context, source: PlayQueue): String? {
-            val key = SerializedCache.getInstance().put(source, PlayQueue::class.java)
-            if (key == null) {
-                Log.e(NewPlayerRuntime.TAG, "queue.copy_failed")
-                Toast.makeText(context, R.string.slooopipe_newplayer_error, Toast.LENGTH_LONG).show()
-            }
-            return key
         }
     }
 }

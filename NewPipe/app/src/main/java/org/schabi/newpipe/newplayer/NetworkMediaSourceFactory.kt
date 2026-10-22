@@ -5,6 +5,7 @@ package org.schabi.newpipe.newplayer
 
 import android.content.Context
 import android.net.Uri
+import android.util.Base64
 import android.util.Log
 import androidx.media3.common.MediaItem
 import androidx.media3.datasource.DataSource
@@ -12,8 +13,6 @@ import androidx.media3.datasource.DataSpec
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.datasource.TransferListener
-import androidx.media3.exoplayer.dash.DashMediaSource
-import androidx.media3.exoplayer.dash.manifest.DashManifestParser
 import androidx.media3.exoplayer.drm.DrmSessionManagerProvider
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.LoadEventInfo
@@ -22,7 +21,6 @@ import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.MediaSourceEventListener
 import androidx.media3.exoplayer.source.MergingMediaSource
 import androidx.media3.exoplayer.upstream.LoadErrorHandlingPolicy
-import java.io.ByteArrayInputStream
 import java.io.IOException
 import org.schabi.newpipe.DownloaderImpl
 import org.schabi.newpipe.newplayer.datasource.YoutubeHttpDataSource
@@ -48,22 +46,18 @@ internal class NetworkMediaSourceFactory(private val context: Context, private v
     override fun createMediaSource(mediaItem: MediaItem): MediaSource {
         if (QueueMediaRepository.request(mediaItem) != null) return DeferredNetworkMediaSource(mediaItem, queue, this)
         val plan = mediaItem.localConfiguration?.tag as? NetworkMediaRepository.Plan ?: return local.createMediaSource(mediaItem)
-        val sources = plan.sources.map { part ->
+        val sources = plan.sources.mapIndexed { index, part ->
             val http = DataSource.Factory { RoutedHttpSource(part) }
             val data = DefaultDataSource.Factory(context, http)
             val factory = DefaultMediaSourceFactory(data)
             drmProvider?.let(factory::setDrmSessionManagerProvider)
             errorPolicy?.let(factory::setLoadErrorHandlingPolicy)
-            val item = mediaItem.buildUpon().setUri(part.uri).setMimeType(part.mime).setTag(null).build()
-            val source = if (part.inlineDash != null) {
-                val manifest = DashManifestParser().parse(part.uri, ByteArrayInputStream(part.inlineDash.toByteArray(Charsets.UTF_8)))
-                val dashFactory = DashMediaSource.Factory(data)
-                drmProvider?.let(dashFactory::setDrmSessionManagerProvider)
-                errorPolicy?.let(dashFactory::setLoadErrorHandlingPolicy)
-                dashFactory.createMediaSource(manifest, item)
-            } else {
-                factory.createMediaSource(item)
-            }
+            // Let DefaultMediaSourceFactory attach modern parsed subtitle sources even for
+            // extractor-generated DASH. Its BaseURLs are absolute; only the manifest is inline.
+            val uri = part.inlineDash?.let { Uri.parse("data:application/dash+xml;base64," + Base64.encodeToString(it.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)) } ?: part.uri
+            val subtitles = if (index == 0) mediaItem.localConfiguration?.subtitleConfigurations.orEmpty() else emptyList()
+            val item = mediaItem.buildUpon().setUri(uri).setMimeType(part.mime).setTag(null).setSubtitleConfigurations(subtitles).build()
+            val source = factory.createMediaSource(item)
             source.addEventListener(android.os.Handler(android.os.Looper.getMainLooper()), LoadDiagnostics())
             source
         }

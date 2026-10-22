@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="slooopipe_mode_audio">В фоне</string>
+    <string name="slooopipe_mode_popup">В окне</string>
+    <string name="slooopipe_mode_pip">Картинка в картинке</string>
+    <string name="slooopipe_mode_full">Открыть плеер</string>
+    <string name="slooopipe_tracks">Потоки</string>
+    <string name="slooopipe_popup_drag">Перетащите для перемещения</string>
+</resources>

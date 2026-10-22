@@ -172,10 +172,13 @@ internal class NewPlayerService : MediaSessionService() {
     override fun onDestroy() {
         super.onDestroy()
         serviceScope.cancel()
-        val ownsCurrentPlayer = mediaSession?.player === newPlayer.exoPlayer.value
+        val ownsCurrentPlayer = mediaSession != null && mediaSession?.player === newPlayer.exoPlayer.value
         mediaSession?.release()
         mediaSession = null
-        if (ownsCurrentPlayer) newPlayer.release()
+        if (ownsCurrentPlayer) {
+            val implementation = newPlayer as? net.newpipe.newplayer.NewPlayerImpl
+            if (implementation != null) implementation.releaseFromService() else newPlayer.release()
+        }
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {

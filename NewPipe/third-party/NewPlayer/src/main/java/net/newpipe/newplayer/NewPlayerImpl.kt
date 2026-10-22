@@ -50,11 +50,14 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
-import kotlin.random.Random
+import java.util.concurrent.atomic.AtomicLong
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -69,6 +72,7 @@ import net.newpipe.newplayer.data.PlayMode
 import net.newpipe.newplayer.data.RepeatMode
 import net.newpipe.newplayer.logic.ActionResponse
 import net.newpipe.newplayer.logic.NoResponse
+import net.newpipe.newplayer.logic.PlaybackRequestGate
 import net.newpipe.newplayer.logic.ReplaceItemResponse
 import net.newpipe.newplayer.logic.ReplaceMediaItemResponse
 import net.newpipe.newplayer.logic.StreamExceptionResponse
@@ -77,6 +81,7 @@ import net.newpipe.newplayer.service.NewPlayerService
 import net.newpipe.newplayer.uiModel.InternalNewPlayerViewModel
 
 private const val TAG = "NewPlayerImpl"
+private val nextMediaId = AtomicLong()
 
 /**
  * @param onNewPlayer builds the ExoPlayer instance. Supply your own [MediaSource.Factory] via
@@ -89,7 +94,6 @@ class NewPlayerImpl(
     val onNewPlayer: (Application) -> ExoPlayer = ::defaultBuildNewExoplayer,
     override val playerActivityClass: Class<out Activity>,
     override val repository: MediaRepository,
-    val beforeRelease: () -> Unit = {},
     override val notificationIcon: IconCompat = IconCompat.createWithResource(
         app,
         R.drawable.new_player_tiny_icon
@@ -99,7 +103,9 @@ class NewPlayerImpl(
         mediaItem: MediaItem?,
         exception: Exception,
         repository: MediaRepository
-    ) -> StreamExceptionResponse = { _, _, _, _ -> NoResponse() }
+    ) -> StreamExceptionResponse = { _, _, _, _ -> NoResponse() },
+    val beforeRelease: () -> Unit = {},
+    val beforeServiceRelease: () -> Unit = {}
 ) : NewPlayer {
     private val mutableExoPlayer = MutableStateFlow<ExoPlayer?>(null)
     override val exoPlayer = mutableExoPlayer.asStateFlow()
@@ -116,6 +122,9 @@ class NewPlayerImpl(
 
     private var playerScope = CoroutineScope(Dispatchers.Main + Job())
     private var playbackGeneration = 0L
+    private val replacementGate = PlaybackRequestGate()
+    private var replacementJob: Job? = null
+    private var chapterJob: Job? = null
 
     private var uniqueIdToItemLookup = HashMap<Long, String>()
 
@@ -271,6 +280,14 @@ class NewPlayerImpl(
                 if (pinnedVideoTrack.value != null) selectVideoTrack(null)
                 super.onMediaItemTransition(mediaItem, reason)
                 mutableCurrentlyPlaying.update { mediaItem }
+                chapterJob?.cancel()
+                mutableCurrentChapter.value = emptyList()
+                if (mediaItem != null) {
+                    chapterJob = launchJobAndCollectError {
+                        val chapters = repository.getChapters(getItemFromMediaItem(mediaItem))
+                        if (currentlyPlaying.value?.mediaId == mediaItem.mediaId) mutableCurrentChapter.value = chapters
+                    }
+                }
                 if (mediaItem == null) {
                     mutableCurrentlyAvailableTracks.update { emptyList() }
                 }
@@ -306,18 +323,22 @@ class NewPlayerImpl(
             return
         }
 
-        exoPlayer.value?.pause()
+        val failedPlayer = exoPlayer.value ?: return
+        val failedMedia = failedPlayer.currentMediaItem
+        val revision = replacementGate.snapshot()
+        failedPlayer.pause()
 
         launchJobAndCollectError {
-            val item = exoPlayer.value?.currentMediaItem?.mediaId?.let {
+            val item = failedMedia?.mediaId?.let {
                 uniqueIdToItemLookup[it.toLong()]
             }
             val response = rescueStreamFault(
                 item,
-                exoPlayer.value?.currentMediaItem!!,
+                failedMedia,
                 exception,
                 repository
             )
+            if (!replacementGate.isCurrent(revision) || exoPlayer.value !== failedPlayer || failedPlayer.currentMediaItem?.mediaId != failedMedia?.mediaId) return@launchJobAndCollectError
             when (response) {
                 is ActionResponse -> {
                     response.action()
@@ -337,26 +358,6 @@ class NewPlayerImpl(
                             "Playback Exception happened, but no response was send by rescueStreamFault(). You may consider to implement this function.",
                             exception
                         )
-                    } catch (e: Exception) {
-                        mutableErrorFlow.emit(e)
-                    }
-                }
-            }
-        }
-    }
-
-    init {
-        playerScope.launch {
-            currentlyPlaying.collect { playing ->
-                playing?.let {
-                    try {
-                        mutableCurrentChapter.update {
-                            val chapters = repository.getChapters(
-                                uniqueIdToItemLookup[playing.mediaId.toLong()]!!
-                            )
-
-                            chapters
-                        }
                     } catch (e: Exception) {
                         mutableErrorFlow.emit(e)
                     }
@@ -417,12 +418,16 @@ class NewPlayerImpl(
             prepare()
         }
         launchJobAndCollectError {
-            exoPlayer.value?.addMediaItem(toMediaItem(item))
+            val mediaItem = toMediaItem(item)
+            registerItems(listOf(item), listOf(mediaItem))
+            exoPlayer.value?.addMediaItem(mediaItem)
+            pruneItemLookup()
         }
     }
 
     override fun movePlaylistItem(fromIndex: Int, toIndex: Int) {
-        exoPlayer.value?.moveMediaItem(fromIndex, toIndex)
+        val player = exoPlayer.value ?: return
+        if (fromIndex in 0 until player.mediaItemCount && toIndex in 0 until player.mediaItemCount) player.moveMediaItem(fromIndex, toIndex)
     }
 
     override fun removePlaylistItem(uniqueId: Long) {
@@ -436,41 +441,64 @@ class NewPlayerImpl(
 
         if (exoPlayer.value?.mediaItemCount == 0) {
             release()
+        } else {
+            pruneItemLookup()
         }
     }
 
     @OptIn(UnstableApi::class)
     override fun playStream(item: String, playMode: PlayMode) {
-        val generation = playbackGeneration
-        launchJobAndCollectError {
+        playSingle(item, playMode, 0L, true)
+    }
+
+    fun playSingle(item: String, playMode: PlayMode, position: Long, playing: Boolean) {
+        replacementJob?.cancel()
+        val request = replacementGate.next()
+        replacementJob = launchJobAndCollectError {
             val mediaItem = toMediaItem(item)
-            if (generation == playbackGeneration) internalPlayStream(mediaItem, playMode)
+            if (replacementGate.isCurrent(request)) {
+                registerItems(listOf(item), listOf(mediaItem))
+                internalPlayStream(mediaItem, playMode, position, playing)
+                pruneItemLookup()
+            }
         }
     }
 
     /** Atomically install an ordered queue. Repositories may supply deferred media sources. */
-    fun playQueue(items: List<String>, startIndex: Int, playing: Boolean) {
+    fun playQueue(items: List<String>, startIndex: Int, playing: Boolean): Job {
         require(items.isNotEmpty() && startIndex in items.indices)
-        val generation = playbackGeneration
-        launchJobAndCollectError {
+        replacementJob?.cancel()
+        val request = replacementGate.next()
+        replacementJob = launchJobAndCollectError {
             val mediaItems = items.map { toMediaItem(it) }
-            if (generation != playbackGeneration) return@launchJobAndCollectError
+            if (!replacementGate.isCurrent(request)) return@launchJobAndCollectError
             if (exoPlayer.value == null) setupNewExoplayer()
-            playBackMode.value = PlayMode.EMBEDDED_VIDEO
+            // Queue replacement retains the host's audio/fullscreen mode; only idle needs a default.
+            if (playBackMode.value == PlayMode.IDLE) playBackMode.value = PlayMode.EMBEDDED_VIDEO
+            registerItems(items, mediaItems)
             exoPlayer.value?.setMediaItems(mediaItems, startIndex, C.TIME_UNSET)
             exoPlayer.value?.playWhenReady = playing
             prepare()
+            pruneItemLookup()
         }
+        return checkNotNull(replacementJob)
     }
 
     /** Resolve metadata as one ordered batch, with the same release guard as playStream. */
-    fun insertQueueItems(items: List<String>, index: Int? = null) {
+    fun insertQueueItems(items: List<String>, index: Int? = null, insertion: (() -> Int?)? = null): Job {
         val generation = playbackGeneration
-        launchJobAndCollectError {
+        val replacement = replacementGate.snapshot()
+        val pendingReplacement = replacementJob
+        return launchJobAndCollectError {
+            pendingReplacement?.join()
+            if (!replacementGate.isCurrent(replacement)) return@launchJobAndCollectError
             val mediaItems = items.map { toMediaItem(it) }
-            if (generation != playbackGeneration) return@launchJobAndCollectError
+            if (generation != playbackGeneration || !replacementGate.isCurrent(replacement)) return@launchJobAndCollectError
             val player = exoPlayer.value ?: return@launchJobAndCollectError
-            player.addMediaItems((index ?: player.mediaItemCount).coerceIn(0, player.mediaItemCount), mediaItems)
+            val resolvedIndex = if (insertion != null) insertion() ?: return@launchJobAndCollectError else index ?: player.mediaItemCount
+            registerItems(items, mediaItems)
+            player.addMediaItems(resolvedIndex.coerceIn(0, player.mediaItemCount), mediaItems)
+            pruneItemLookup()
         }
     }
 
@@ -515,6 +543,11 @@ class NewPlayerImpl(
     override fun release() {
         beforeRelease()
         playbackGeneration++
+        replacementGate.invalidate()
+        replacementJob = null
+        chapterJob = null
+        playerScope.cancel()
+        playerScope = CoroutineScope(Dispatchers.Main + Job())
         val pendingController = mediaControllerFuture
         mediaControllerFuture = null
         pendingController?.cancel(true)
@@ -532,7 +565,14 @@ class NewPlayerImpl(
         mutablePinnedVideoTrack.update { null }
         mutablePlaylist.update { emptyList() }
         mutableCurrentlyPlaying.update { null }
+        mutableCurrentChapter.value = emptyList()
         uniqueIdToItemLookup = HashMap()
+    }
+
+    /** Service eviction is distinct from the user's explicit Close command for host recovery. */
+    fun releaseFromService() {
+        beforeServiceRelease()
+        release()
     }
 
     override fun getItemFromMediaItem(mediaItem: MediaItem) = uniqueIdToItemLookup[mediaItem.mediaId.toLong()]
@@ -541,7 +581,9 @@ class NewPlayerImpl(
     @OptIn(UnstableApi::class)
     private fun internalPlayStream(
         mediaItem: MediaItem,
-        playMode: PlayMode
+        playMode: PlayMode,
+        position: Long = 0L,
+        playing: Boolean = true
     ) {
         currentStreamLanguageConstraint = null
         if (exoPlayer.value?.playbackState == Player.STATE_IDLE || exoPlayer.value == null) {
@@ -549,8 +591,9 @@ class NewPlayerImpl(
         }
         this.playBackMode.update { playMode }
 
-        this.exoPlayer.value?.setMediaItem(mediaItem)
-        this.exoPlayer.value?.play()
+        this.exoPlayer.value?.setMediaItem(mediaItem, position.coerceAtLeast(0))
+        this.exoPlayer.value?.playWhenReady = playing
+        prepare()
     }
 
     /**
@@ -559,7 +602,9 @@ class NewPlayerImpl(
      */
     private suspend fun replaceCurrentMediaItem(mediaItem: MediaItem) {
         val item = uniqueIdToItemLookup[this.currentlyPlaying.value?.mediaId?.toLong()]!!
-        replaceCurrentPlaylistEntry(toMediaItem(item, mediaItem))
+        val replacement = toMediaItem(item, mediaItem)
+        registerItems(listOf(item), listOf(replacement))
+        replaceCurrentPlaylistEntry(replacement)
     }
 
     // Removing and re-adding (instead of replaceMediaItem()) makes ExoPlayer build a fresh source.
@@ -578,22 +623,35 @@ class NewPlayerImpl(
     }
 
     private suspend fun replaceCurrentItem(item: String) {
-        replaceCurrentPlaylistEntry(toMediaItem(item))
+        val replacement = toMediaItem(item)
+        registerItems(listOf(item), listOf(replacement))
+        replaceCurrentPlaylistEntry(replacement)
     }
 
     private suspend fun toMediaItem(item: String): MediaItem = toMediaItem(item, repository.getMediaItem(item))
 
     private suspend fun toMediaItem(item: String, mediaItem: MediaItem): MediaItem {
-        val uniqueId = Random.nextLong()
-        uniqueIdToItemLookup[uniqueId] = item
+        val uniqueId = nextMediaId.incrementAndGet()
 
         val builder = mediaItem.buildUpon().setMediaId(uniqueId.toString())
         try {
             builder.setMediaMetadata(repository.getMetaInfo(item))
         } catch (e: Exception) {
+            currentCoroutineContext().ensureActive()
             mutableErrorFlow.emit(e)
         }
+        currentCoroutineContext().ensureActive()
         return builder.build()
+    }
+
+    // Register only committed items: another batch may prune the lookup while metadata suspends.
+    private fun registerItems(items: List<String>, mediaItems: List<MediaItem>) {
+        items.zip(mediaItems).forEach { (item, media) -> uniqueIdToItemLookup[media.mediaId.toLong()] = item }
+    }
+
+    private fun pruneItemLookup() {
+        val ids = playlist.value.map { it.mediaId.toLong() }.toSet()
+        uniqueIdToItemLookup.keys.retainAll(ids)
     }
 
     private fun launchJobAndCollectError(task: suspend () -> Unit): Job {
@@ -603,6 +661,7 @@ class NewPlayerImpl(
             try {
                 task()
             } catch (e: Exception) {
+                currentCoroutineContext().ensureActive()
                 if (generation == playbackGeneration) mutableErrorFlow.emit(e)
             }
         }

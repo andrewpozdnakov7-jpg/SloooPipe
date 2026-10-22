@@ -2,7 +2,7 @@
 # Run on the build computer in WSL. This script does not install tools or SDKs.
 set -Eeuo pipefail
 
-SCRIPT_REVISION="20261021-08-current-upstream"
+SCRIPT_REVISION="20261022-09-memory-cleanup"
 # Minimum baseline taken from the current Slooop checkout; newer inputs stay newer.
 MIN_GRADLE="9.6.1"
 MIN_AGP="9.4.0"
@@ -25,6 +25,7 @@ MAIN_DIR=""
 PLAYER_DIR=""
 MAIN_TESTS_STARTED=0
 PLAYER_TESTS_STARTED=0
+MEMORY_CLEANUP=1
 declare -A EXTRACTED=()
 declare -a SELECTED=()
 
@@ -43,6 +44,7 @@ Usage: bash build-slooopipe-from-source-zip-wsl.sh [options]
   --newplayer-zip FILE           ZIP containing NewPlayer and test-app
   --auth with|without           Main app only; default without
   --fresh                       Extract into a new directory; preserve old work
+  --no-memory-cleanup           Skip the final Linux RAM cache cleanup
   --help / --version
 
 Missing component/operation/archive choices are prompted interactively.
@@ -51,6 +53,9 @@ Each run gets a new BASE/out/run-* directory. Work is retained under BASE/work.
 Both components may use the same combined ZIP or separate ZIPs.
 BASE/offline-maven is used automatically when a validated mirror is present.
 No device tests or playback checks are run by this script.
+After saving reports, sync + drop_caches releases clean Linux RAM caches.
+No files are deleted and no shared Java/Kotlin processes or WSL are stopped.
+Cleanup uses root via WSL interop, or sudo (may prompt on an interactive terminal).
 USAGE
 }
 
@@ -574,9 +579,51 @@ write_system_snapshot() {
 	ulimit -a || true
 }
 
+drop_memory_caches() {
+	# Constant command only: never interpolate project paths or user input as root.
+	local action='sync && echo 3 > /proc/sys/vm/drop_caches'
+	if [[ "$(id -u)" == 0 ]]; then
+		sh -c "$action"
+		return $?
+	fi
+	# WSL interop permits an unattended root command in this same distribution.
+	# Bound a failed interop attempt; never shut down a distribution or VM.
+	if [[ -n "${WSL_DISTRO_NAME:-}" ]] && command -v wsl.exe >/dev/null 2>&1 \
+			&& command -v timeout >/dev/null 2>&1; then
+		if timeout 45s wsl.exe --distribution "$WSL_DISTRO_NAME" --user root --exec sh -c "$action"; then
+			return 0
+		fi
+		printf 'WSL root cleanup failed; trying sudo.\n' >&2
+	fi
+	if command -v sudo >/dev/null 2>&1; then
+		if sudo -n sh -c "$action"; then return 0; fi
+		if [[ -t 0 ]]; then
+			printf 'RAM cache cleanup needs sudo; enter your Linux password if prompted.\n' >&2
+			sudo sh -c "$action"
+			return $?
+		fi
+	fi
+	printf 'RAM cache cleanup unavailable: root access is required (WSL interop or sudo).\n' >&2
+	return 1
+}
+
+cleanup_memory() {
+	printf '\nRAM cache cleanup: sync + drop_caches (page cache, dentries, inodes).\n'
+	printf 'Before cleanup:\n'
+	free -m || true
+	if drop_memory_caches; then
+		printf 'RAM cache cleanup: OK\n'
+	else
+		printf 'RAM cache cleanup: FAILED; build result is unchanged.\n' >&2
+		return 1
+	fi
+	printf 'After cleanup:\n'
+	free -m || true
+}
+
 finish() {
 	local status=$?
-	trap - EXIT ERR
+	trap - EXIT ERR INT TERM
 	if [[ -n "$OUT_DIR" && -d "$OUT_DIR" ]]; then
 		if ! save_reports "$MAIN_DIR" main; then [[ "$status" != 0 ]] || status=1; fi
 		if ! save_reports "$PLAYER_DIR" player; then [[ "$status" != 0 ]] || status=1; fi
@@ -588,6 +635,16 @@ finish() {
 			write_system_snapshot > "$OUT_DIR/system-after-failure.log" 2>&1 || true
 			printf '\nFailed in phase: %s\nLogs: %s\nWork retained under: %s\n' "$BUILD_PHASE" "$OUT_DIR" "$WORK_ROOT" >&2
 		fi
+		if [[ "$MEMORY_CLEANUP" == 1 ]]; then
+			if cleanup_memory 2>&1 | tee "$OUT_DIR/memory-cleanup.log"; then
+				printf 'Memory cleanup: OK\n' >> "$OUT_DIR/STATUS.txt"
+			else
+				printf 'Memory cleanup: FAILED (see memory-cleanup.log)\n' >> "$OUT_DIR/STATUS.txt"
+				printf 'WARNING: RAM cache cleanup failed; see %s/memory-cleanup.log\n' "$OUT_DIR" >&2
+			fi
+		else
+			printf 'Memory cleanup: DISABLED\n' >> "$OUT_DIR/STATUS.txt"
+		fi
 	fi
 	exit "$status"
 }
@@ -598,6 +655,7 @@ main() {
 			--help|-h) usage; return ;;
 			--version) printf '%s\n' "$SCRIPT_REVISION"; return ;;
 			--fresh) FRESH=1; shift ;;
+			--no-memory-cleanup) MEMORY_CLEANUP=0; shift ;;
 			--base-dir|--gradle-user-home|--component|--operation|--newpipe-zip|--newplayer-zip|--auth)
 				[[ $# -ge 2 && -n "$2" ]] || die "Missing value for $1"
 				case "$1" in
@@ -641,6 +699,8 @@ main() {
 	OUT_DIR="$(mktemp -d "$BASE_DIR/out/run-$(date -u '+%Y%m%d-%H%M%S').XXXXXXXX")"
 	trap finish EXIT
 	trap 'printf "Failure at script line %s (phase: %s)\n" "$LINENO" "$BUILD_PHASE" >&2' ERR
+	trap 'exit 130' INT
+	trap 'exit 143' TERM
 	printf 'SloooPipe builder %s\nOperation: %s\nComponent: %s\n' "$SCRIPT_REVISION" "$OPERATION" "$COMPONENT" > "$OUT_DIR/BUILD_INFO.txt"
 	printf 'Gradle user home: %s\nAuth mode: %s\n' "$GRADLE_USER_HOME" "$AUTH_MODE" >> "$OUT_DIR/BUILD_INFO.txt"
 	for component in "${SELECTED[@]}"; do

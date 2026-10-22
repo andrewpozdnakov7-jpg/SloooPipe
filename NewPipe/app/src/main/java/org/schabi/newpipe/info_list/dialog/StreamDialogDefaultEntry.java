@@ -70,13 +70,13 @@ public enum StreamDialogDefaultEntry {
     }),
 
     START_HERE_ON_BACKGROUND(R.string.start_here_on_background, (fragment, item) -> {
-            final Context ctx = fragment.requireContext().getApplicationContext();
+            final Context ctx = fragment.requireContext();
             fetchItemInfoIfSparse(ctx, item, singlePlayQueue ->
                 NavigationHelper.playOnBackgroundPlayer(ctx, singlePlayQueue, true));
     }),
 
     START_HERE_ON_POPUP(R.string.start_here_on_popup, (fragment, item) -> {
-            final Context ctx = fragment.requireContext().getApplicationContext();
+            final Context ctx = fragment.requireContext();
             fetchItemInfoIfSparse(ctx, item, singlePlayQueue ->
                 NavigationHelper.playOnPopupPlayer(ctx, singlePlayQueue, true));
     }),

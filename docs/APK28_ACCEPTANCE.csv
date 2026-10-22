@@ -1,0 +1,85 @@
+ID,Сценарий,Кандидат,Статус,Примечание
+F01.1,обычный Play,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F01.2,другой/повторный Play,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F01.3,быстрые A→B,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F02.1,локальное видео,APK28,PASS,"MP4/180s actual playback,17; audio track/counters alone do not establish audible sound."
+F02.2,локальное аудио,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F02.3,сеть↔локальный repository/история,APK28,NOT RUN,"PASS subset: Network -> local Back retains session; pause/reopen23578ms,17-20. Reverse mini restoration FAIL separately F15.1. Остальная строка не проверена."
+F03.1,10 циклов из NewPlayer с/без выбора pause/play,APK28,PASS,"10 native cycles:5playing/5paused,3 item changes; bounds0,0-720,405;5 moving image pairs."
+F03.2,10 циклов из мини-панели с/без выбора pause/play,APK28,FAIL,"0/10 mini cycles: entry unavailable after local->Close->history Play all; hidden sheet,23/24. ZIP29 source fix pending."
+F04.1,embedded↔fullscreen portrait/landscape,APK28,NOT RUN,PASS subset: Audio UI -> fullscreen video image restored; Back embedded pause102120ms. Only this path. Остальная строка не проверена.
+F04.2,Home/reopen/поворот,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F04.3,PiP/Surface bounds,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F05.1,Play all с середины,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F05.2,enqueue/next/дубликаты,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F05.3,reorder текущего,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F06.1,delete до текущего,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F06.2,delete текущего,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F06.3,delete последнего/всех,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F07.1,auto-next,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F07.2,repeat off/one/all,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F07.3,shuffle последовательность,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F08.1,длинный playlist lazy loading,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F08.2,pagination после reorder/enqueue/delete,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F09.1,отмена сохраняет сессию,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F09.2,согласие однократно,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F09.3,paused queue после Back,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F09.4,stale dialog после queue/account change,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F10.1,confirmation on/off,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F10.2,resume/enqueue без ложной замены,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F10.3,background/popup replacement,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F11.1,"history on/off, playback-only view",APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F11.2,resume/positions preferences,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F11.3,timestamp/zero/recovery/finished,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F11.4,old/new item event boundary,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F12.1,progressive muxed,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F12.2,split A/V/generated DASH,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F12.3,HLS,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F12.4,DASH manifest,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F12.5,audio-only/post-live audio,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F12.6,актуальный live/DVR,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F13.1,качество сохраняет position/play intent,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F13.2,audio track,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F13.3,subtitles,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F13.4,speed/pitch,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F13.5,chapters,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F13.6,preview NONE/LOW/HIGH,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F14.1,source error/Retry,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F14.2,краткая потеря сети,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F14.3,cancel/поздний ответ,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F15.1,фон↔полный/мини,APK28,FAIL,"Audio->video fix PASS subset05-09; network mini absent after local and history queue,23/24."
+F15.2,popup↔полный/фон,APK28,PASS,Landscape popup controls fit; portrait rotation/drag clamps; playback and return.10-14.
+F15.3,PiP↔embedded,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F15.4,локальная мини-панель,APK28,PASS,"First local after network retained; mini pause/reopen/Close,17-20."
+F16.1,notification/MediaSession,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F16.2,гарнитура/noisy,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F16.3,focus/resume preference,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F17.1,Activity recreation,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F17.2,Close/delete-all/reopen,APK28,NOT RUN,"PASS subset: Local Close removes active session,20. Network Close/delete-all/reopen not tested. Остальная строка не проверена."
+F17.3,штатное queue restoration,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+A01.1,ownership/Kotlin,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+A01.2,generic/host boundary,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+A01.3,listeners/controllers/feeds/caches,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+A02.1,51 app/NewPlayer JVM cases (source28),APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+A02.2,auth with build/test/isolation,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+A02.3,auth without build/test/isolation/anonymous runtime,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+U01.1,official refs/refactor compatibility,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+U01.2,portable patches/apply check,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+U01.3,upstream review/acceptance,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+U02.1,source/commit/SHA manifest,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+U02.2,APK provenance от внешней сборки,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+U02.3,device evidence нового APK,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+STARTUP,открытие MainActivity,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F04.HOME,background Home,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F05.FIRST,Play all из начала истории,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F16.KEYS,MediaSession play/pause keys,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F17.LOCAL_CLOSE,local mini Close,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F12.AUDIBLE,слышимый звук,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+PHONE16,физический Android16,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+POPUP_PERMISSION,overlay permission,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+UI_LABEL,PiP button wrapping,APK28,NOT RUN,Не выполнено на APK28; старые PASS не переносятся.
+F01.4,VOD через сведения с автозапуском,APK28,PASS,"NewPlayer actual image/MediaSession,03/04. Manual Play separately NOT RUN."
+F05.4,Play all из начала истории,APK28,PASS,"Actual queue0/2 selection,21/22/native cycles. Middle start separately NOT RUN."
+F15.5,audio UI -> fullscreen video,APK28,PASS,Image restored08; pause/embedded return09.
+F02.4,network -> local -> Back -> local mini pause/reopen/Close,APK28,PASS,"17-20,23578ms retained; reverse network mini FAIL F15.1."
+U02.3,установленный APK28 / source ZIP / build-main.log,APK28,PASS,Hash matches supplied APK; work/SHA matches ZIP28. Full build attestation and XML counts unavailable.
