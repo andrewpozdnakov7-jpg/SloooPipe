@@ -26,11 +26,11 @@
     "archive_sha256": "d3468229bc50266b123579d85b049e5e28c4057561fca1c220cc84ff12836549",
     "directory": "NewPipe/third-party/NewPlayer",
     "module": ":newplayer-local",
-    "scope": "Embedded library coordinated by the Kotlin host for video/audio/background/popup/PiP, queue feeds, consent, sources and history. ZIP32 engine-release host fix is source/static only; root demo is independent.",
+    "scope": "Embedded library and Kotlin host; ZIP33 binds actual speed label and preserves host overlay ownership. Generic patch bundle includes missing new logic/tests and has exact-pin application/completeness checks; upstream build/demo/PR not performed.",
     "live_branch_verified": "2026-10-22"
   },
   "source_branch": "base/newpipe-dev-20261021",
-  "verified": "APK31: repeat/shuffle reopen, engine release after last removal, mini hidden after Back, visible playback/pause after a new queue. Empty host auto-close failed. ZIP32 fix awaits external build/device retest. APK29 10+10 queue cycles and APK25 human sound confirmation are historical, not current acceptance.",
+  "verified": "APK32: 20 queue cycles, ordinary Play, repeat/auto-next, mutations, modes, notification, local media, consent, real HLS live/DVR and saved queue restoration; user confirmed sound. Two UI defects remain. ZIP33 source fixes await build/device retest; full matrix and both auth build/test remain incomplete.",
   "live_refs_20261022": {
     "newpipe_dev": "7436ba1010493515ff1a5f5d60aacdc6168c8500",
     "newpipe_refactor": "455b6f0de6bbc135a51f2a77510863edee8b3cae",

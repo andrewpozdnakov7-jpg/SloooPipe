@@ -1,23 +1,21 @@
 # Текущий результат SloooPipe — 2026-10-22
 
-APK31 проверен в LDPlayer14/Android14. Repeat/shuffle snapshot после reopen исправлен;
-после last deletion движок освобождается, старая mini скрывается при Back. Новый
-Play all после empty queue воспроизводит видео и сохраняет паузу. [Доказательства](docs/APK31_DEVICE_CHECKPOINT.md),
-[матрица](docs/APK31_ACCEPTANCE.csv).
+APK32 прошёл широкую проверку в LDPlayer14/Android14: 20 queue cycles, обычный Play,
+реальные repeat/auto-next, queue mutations, quality, background/popup/PiP, notification,
+local video/audio, consent и saved queue restoration. Звук подтвердил пользователь.
+[Полные доказательства](docs/APK32_DEVICE_CHECKPOINT.md), [матрица](docs/APK32_ACCEPTANCE.csv).
 
-FAIL: пустой NewPlayerActivity после last deletion сам не закрывается. Причина — null
-текущего item приходит до release, а повторное null не эмитится. ZIP32 наблюдает
-терминальный engine flow; guards loading/local picker/replacement сохранены.
-Новый APK32 ещё не собран/проверен. Production delta — только NewPlayerActivity.kt.
+Два дефекта остаются в APK32: постоянная подпись скорости «1x» и старая мини-панель после notification Close
+при просмотре другой detail page/stale consent. ZIP33 исправляет их в исходниках;
+его APK ещё не собран/не проверен. Новые PASS не переносятся на ZIP33 автоматически.
 
-| Часть | Реализовано | Проверено | Осталось |
-| --- | --- | --- | --- |
-| Интеграция | Общая сессия/режимы/очередь | APK31 reopen settings, partial empty cleanup/restart | ZIP32 closure и остальная matrix |
-| Kotlin/архитектура | Coordinator/hosts/flows | Причина порядка событий разобрана; host static PASS | WSL tests/both auth, lifecycle/device retest |
-| Upstream reuse | Pinned generic/embedding patches | Generic patch ZIP31 apply-check PASS, ZIP32 не меняет generic | Library/demo/refactor compilation/review |
+Production changes: отдельное сохранённое overlay ownership в detail fragment и actual
+speed label в generic NewPlayer UI. Checkstyle/diff PASS; TopUI24 legacy ktlint findings,
+новых ошибок нет. Cumulative generic patch дополнен пропущенными logic/test файлами,
+содержит13 файлов/7 contract cases и применён к свежему official pin с Hilt.
+Это не upstream compilation/tests или принятие PR.
 
-Host ktlint/diff PASS; локальных Gradle/JVM/build не было. APK31 build log/test XML не
-переданы; две серии10+10 APK31 не выполнялись, старые PASS не переносятся. Builder09,
-dependencies/signing/auth неизменны. Физический Android16 и слышимый звук не проверены.
-Исходники подготовлены к обновлению публичного GitHub; это не стабильный релиз и не приёмка.
-PR/сообщения разработчикам не отправлялись. Границы публикации: [SOURCE_PUBLICATION](docs/SOURCE_PUBLICATION.md).
+Gradle/сборка/JVM выполняются на внешнем WSL. Полные XML/counts и обе auth-конфигурации
+не предоставлены. Остальная матрица, physical Android16 и новая APK33 regression нужны
+до приёмки. Ключи, зависимости и builder09 не менялись. В GitHub main опубликован код
+ZIP33 с обновлённой документацией; выданный архив ZIP33 не менялся. Стабильного релиза нет.

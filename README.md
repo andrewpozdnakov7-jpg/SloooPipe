@@ -8,29 +8,35 @@ other developers can study, adapt and reuse.
 
 ## Development status
 
-**Source checkpoint: ZIP32, 2026-10-22. This is a development snapshot, not a stable release.**
-The published application code matches local checkpoint
-`d638f97f432d74a89cd1231fba5b7e918bef31ca`; publication updates documentation.
-ZIP numbers identify our source handoffs, not upstream NewPipe releases.
-ZIP32's latest fix has static checks only; its external build and device retest are pending.
+**Published source checkpoint: ZIP33, 2026-10-22.** The application code matches
+development commit `1ca928c3fa2d6ea0cd0e245b13153ef98f652073`. ZIP33 has static checks;
+its new APK has not yet been built or device-tested.
+
+The latest device evidence is APK32 in LDPlayer / Android 14: 20 queue cycles,
+ordinary Play, actual repeat/auto-next, queue mutations, quality, background/popup/PiP,
+notification controls, local media, live HLS/DVR and saved-queue restoration were checked
+in the documented scope. The user confirmed audible sound. Two UI defects were found:
+a speed button fixed at “1x” and a stale mini-player after closing the queue while
+browsing another detail page. ZIP33 contains source fixes for both. APK32 results do
+not establish acceptance of the new APK.
+ZIP numbers identify source handoffs, not upstream releases. No stable release is available.
 
 | Area | Implementation and verification |
 | --- | --- |
 | Network playback | Normal Play, background and popup routes are connected to a Kotlin NewPlayer coordinator. Video, mini-player, fullscreen and PiP share the playback runtime; the complete mode matrix is still pending. |
 | Local media | A Local entry in the service selector opens Android's document picker. Local playback uses the same NewPlayer integration and has a mini-player. |
 | Queue and history | Media3 owns the active queue. The host connects feeds, selection, enqueue, reorder, removal, saved position and NewPipe history. Implementation is broader than the completed device checks. |
-| Latest device check, APK31 | Repeat/shuffle display survives reopening the mini queue. Deleting the last item releases the engine; returning hides the stale mini. Starting a new queue plays visible video and pause works. |
-| Remaining defect and ZIP32 | APK31 leaves an empty player screen after deleting the last item. ZIP32 observes engine release to close it; this fix needs a new APK retest. |
+| Latest device check, APK32 | Empty-host dismissal, 20 queue cycles, actual repeat/auto-next, modes, local media and saved queue restore passed in the documented scope. |
+| ZIP33 source fixes | Bind the speed button to actual state; retain mini-player ownership across detail browsing and close. New APK retest pending. |
 | Optional YouTube sign-in | Experimental, controlled at build time. Signing in does not guarantee that YouTube will allow every video or network address. |
 
-[APK31 evidence and exact APK hash](docs/APK31_DEVICE_CHECKPOINT.md) ·
-[Current acceptance matrix](docs/APK31_ACCEPTANCE.csv).
-On APK29, 10 native-player and 10 mini-player queue cycles passed within the
-[recorded scope](docs/APK29_DEVICE_CHECKPOINT.md). Audible sound was confirmed by a
-person on APK25. These results do **not** establish acceptance of APK31 or ZIP32.
+[APK32 evidence and exact APK hash](docs/APK32_DEVICE_CHECKPOINT.md) ·
+[Current acceptance matrix](docs/APK32_ACCEPTANCE.csv).
+Current results belong to APK32 only; previous checkpoints remain historical evidence.
+The full acceptance matrix is incomplete, and the two source fixes need a new APK.
 
 Still required: the full queue/source/mode/lifecycle matrix on the new APK, both auth
-builds with test reports, live/DVR checks and physical Android 16 validation. Legacy
+builds with test reports, additional source/track/lifecycle checks and physical Android 16 validation. Legacy
 player/media-browser classes remain; Android Auto interoperability is unverified.
 Explicit external-player and Kodi actions remain external. Full SABR/PoToken support
 and a complete port to upstream's refactor branch are outside this checkpoint.
@@ -61,6 +67,7 @@ already be installed or reachable; this is not a fully offline source distributi
 ```bash
 git clone https://github.com/andrewpozdnakov7-jpg/SloooPipe.git
 cd SloooPipe/NewPipe
+# For an existing checkout or extracted source archive, enter its NewPipe directory.
 chmod +x gradlew
 # Set JAVA_HOME and ANDROID_HOME for your Linux JDK and SDK.
 xvfb-run -a ./gradlew :app:testDebugUnitTest :youtube-auth-api:test :shared:jvmTest :app:verifyAuthIsolation :app:assembleDebug -Pslooopipe.withAuth=true
@@ -76,7 +83,9 @@ For source-ZIP selection, retained run reports and signing with your existing ex
 key, use [the WSL builder workflow](tools/README-wsl.md), revision
 `20261022-09-memory-cleanup`. It requires its own `signing/` inputs, keeps dependency
 caches and attempts to release clean Linux RAM caches after the run. It supports
-`--no-memory-cleanup`. Existing ZIP32 archives remain unchanged by this publication.
+`--no-memory-cleanup`. The supplied ZIP33 archive remains unchanged. Public `main`
+contains the same application code with refreshed publication documentation; follow
+the workflow above to create a source ZIP from a checkout.
 
 ## Contributing and reuse
 

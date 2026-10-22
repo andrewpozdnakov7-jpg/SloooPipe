@@ -68,6 +68,7 @@ import net.newpipe.newplayer.uiModel.NewPlayerUIState
 import net.newpipe.newplayer.uiModel.InternalNewPlayerViewModel
 import net.newpipe.newplayer.uiModel.NewPlayerViewModelDummy
 import net.newpipe.newplayer.uiModel.UIModeState
+import net.newpipe.newplayer.ui.common.floatToStringWithoutTrailingZerosTwoDigitsAccuracy
 import net.newpipe.newplayer.ui.common.getEmbeddedUiConfig
 import net.newpipe.newplayer.ui.theme.VideoPlayerDarkTheme
 
@@ -124,7 +125,9 @@ internal fun TopUI(
             },
         ) {
             Text(
-                "1x", fontWeight = FontWeight.Bold, modifier = Modifier.padding(0.dp)
+                "${floatToStringWithoutTrailingZerosTwoDigitsAccuracy(uiState.playbackParameters.speed)}x",
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(0.dp)
             )
         }
         AnimatedVisibility(visible = uiState.chapters.isNotEmpty()) {

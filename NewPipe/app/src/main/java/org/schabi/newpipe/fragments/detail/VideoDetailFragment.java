@@ -207,6 +207,9 @@ public final class VideoDetailFragment
     protected boolean autoPlayEnabled = true;
     @State
     boolean newPlayerSelected = false;
+    // Browsing another detail page does not transfer ownership of the playback overlay.
+    @State
+    boolean newPlayerOverlayOwned = false;
     private boolean hidingReleasedNewPlayer = false;
     private boolean forceFullscreen = false;
 
@@ -377,7 +380,7 @@ public final class VideoDetailFragment
         }
 
         syncNewPlayerItem();
-        if (!newPlayerSelected) {
+        if (!newPlayerSelected && !newPlayerOverlayOwned) {
             activity.sendBroadcast(new Intent(ACTION_VIDEO_FRAGMENT_RESUMED));
         } else {
             Log.i("SloooPipeLocal", "legacy.return resume=false");
@@ -740,7 +743,7 @@ public final class VideoDetailFragment
         }
 
         // Back from the new host should collapse the details, not restore an old legacy queue.
-        if (newPlayerSelected) {
+        if (newPlayerSelected || newPlayerOverlayOwned) {
             Log.i("SloooPipeLocal", "legacy.back collapse=true historyRestore=false");
             return false;
         }
@@ -1384,6 +1387,7 @@ public final class VideoDetailFragment
     /** Detach legacy playback while the caller is still resumed, before opening NewPlayer. */
     public void prepareForNewPlayer() {
         newPlayerSelected = true;
+        newPlayerOverlayOwned = true;
         autoPlayEnabled = false;
         forceFullscreen = false;
         removeVideoPlayerView();
@@ -1396,7 +1400,10 @@ public final class VideoDetailFragment
     }
 
     private void syncNewPlayerItem() {
-        if (newPlayerSelected && !NewPlayerRuntime.hasNetworkSession()) {
+        final boolean collapsedOwnedOverlay = newPlayerOverlayOwned
+                && bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED;
+        if ((newPlayerSelected || collapsedOwnedOverlay)
+                && !NewPlayerRuntime.hasNetworkSession()) {
             setOverlayPlayPauseImage(false);
             if (bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_HIDDEN) {
                 hidingReleasedNewPlayer = true;
@@ -1404,6 +1411,9 @@ public final class VideoDetailFragment
                 Log.i("SloooPipeLocal", "network.mini_hide_released");
             }
             return;
+        }
+        if (collapsedOwnedOverlay && NewPlayerRuntime.hasNetworkSession()) {
+            newPlayerSelected = true;
         }
         if ((!newPlayerSelected && !wasCleared())
                 || !NewPlayerRuntime.isNetworkQueueActive()) {
@@ -1419,6 +1429,7 @@ public final class VideoDetailFragment
             setInitialData(item.getServiceId(), item.getUrl(), item.getTitle(), null);
         }
         newPlayerSelected = true;
+        newPlayerOverlayOwned = true;
         autoPlayEnabled = false;
         forceFullscreen = false;
         if (changed || !item.getTitle().contentEquals(binding.overlayTitleTextView.getText())) {
@@ -2284,6 +2295,8 @@ public final class VideoDetailFragment
      * Remove unneeded information while waiting for a next task
      * */
     private void cleanUp() {
+        newPlayerSelected = false;
+        newPlayerOverlayOwned = false;
         NewPlayerRuntime.stopNetworkPlayback();
         // New beginning
         stack.clear();
@@ -2437,6 +2450,7 @@ public final class VideoDetailFragment
                                     .ifPresent(MainPlayerUi::closeItemsList);
                         }
                         setOverlayLook(binding.appBarLayout, behavior, 0);
+                        syncNewPlayerItem();
                         break;
                     case BottomSheetBehavior.STATE_DRAGGING:
                     case BottomSheetBehavior.STATE_SETTLING:

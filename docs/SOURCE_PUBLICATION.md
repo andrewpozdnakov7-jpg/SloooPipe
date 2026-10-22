@@ -1,4 +1,62 @@
-# Source publication — 2026-10-22
+# Source publication: ZIP33 — 2026-10-22
+
+Public `main` contains the application code from development checkpoint
+`1ca928c3fa2d6ea0cd0e245b13153ef98f652073` (ZIP33), with refreshed EN/RU READMEs
+and publication/status documents. The original source archive remains unchanged:
+`SloooPipe-sources-20261022-33.zip`, SHA256
+`d676bf647d4b1b051700c76c7ff81bdaf588078723d56c2c647adc24cb6d7e5d`.
+The builder remains revision `20261022-09-memory-cleanup`; dependencies are unchanged.
+
+## Changes and verification
+
+The latest installed-device evidence is APK32, SHA256
+`a42439f13958d0b48616d5d7e6ac94bd5f8f92175b60a3ae23fd26d98c6f40b8`, in
+LDPlayer / Android 14. Ordinary Play, 20 queue cycles, actual repeat/auto-next,
+queue mutations, quality, background/popup/PiP, notifications, local video/audio,
+live HLS/DVR and saved-queue restoration were checked in the documented scope.
+The user confirmed audible sound. See the [APK32 checkpoint](APK32_DEVICE_CHECKPOINT.md)
+and [acceptance matrix](APK32_ACCEPTANCE.csv): 53 PASS, 30 NOTRUN, 10 PARTIAL and
+3 FAIL rows. Three FAIL rows describe two unique UI defects; this is not full acceptance.
+
+ZIP33 changes two production files: `VideoDetailFragment.java` retains NewPlayer
+mini-player ownership across detail browsing and suppresses a stale mini after
+session close; embedded NewPlayer `TopUI.kt` shows actual speed instead of a literal
+“1x”. Changed Java passes Checkstyle. The Kotlin file has 24 pre-existing ktlint
+findings, with no new finding or parser error; it is not fully lint-clean.
+The cumulative generic patch was completed and text-applied to the pinned official
+NewPlayer source with Hilt preserved. No upstream compile, demo run or PR is claimed.
+
+ZIP33 has not yet been built or device-tested. Both auth build/test/isolation reports,
+full test XML/counts, new-APK regression and physical Android 16 remain pending.
+APK32 observations do not establish acceptance of ZIP33. Source-to-APK provenance
+for the installed APK is not fully attested. [Current results](../RESULT.md).
+
+## Publication and privacy scope
+
+This is one source-snapshot commit continuing the existing public `main`; private
+development history is not merged. No stable APK, Release, tag or upstream PR is
+created. New commit metadata uses the public GitHub noreply identity.
+
+The full final source snapshot is checked with Gitleaks 8.30.1, including nested
+archives and decoding, and a separate local-path/workstation/email/private-network/
+credential-container scan. Upstream scanner candidates are classified by exact
+Git blob identity against pinned public sources, not blanket vendor exclusions.
+Public attribution, synthetic test inputs and portable placeholders are distinguished
+from private project data. No unresolved project-specific secret or private-data
+finding remains in the reviewed snapshot. Detailed scanner reports stay outside Git.
+
+Signing keys, account sessions, private general logcat, raw APKs, local build
+configuration and device captures containing network identifiers are not published.
+This is a static source-publication review, not a guarantee of anonymity in use or
+an independent security audit. Debug diagnostics remain extensive; review logs before
+sharing. Auth diagnostics redact sensitive data and are disabled in release.
+
+Historical entries below retain their original verification boundaries; their old
+“latest APK” or “not published” statements are not the current repository status.
+
+---
+
+# Historical ZIP32 source publication — 2026-10-22
 
 This update replaces the public ZIP23 snapshot with application code matching
 local ZIP32 checkpoint `d638f97f432d74a89cd1231fba5b7e918bef31ca`.

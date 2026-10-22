@@ -1,0 +1,97 @@
+ID,Сценарий,Кандидат,Статус,Примечание
+F01.1,обычный Play,APK32,PASS,"76: обычная кнопка Play открывает NewPlayer, видимое видео/PLAYING."
+F01.2,другой/повторный Play,APK32,PASS,"75/76/98: запуск, повторный Play без лишнего диалога и другой Play с выключенным подтверждением."
+F01.3,быстрые A→B,APK32,NOT RUN,Не выполнено в этом цикле APK32; предыдущие PASS не переносятся.
+F02.1,локальное видео,APK32,PASS,"63/64: local mp4 180s играет, pause и seek."
+F02.2,локальное аудио,APK32,PASS,"71/72: local m4a 30s PLAYING, pause и seek до20332ms."
+F02.3,сеть↔локальный repository/история,APK32,PARTIAL,"Сеть→local с Cancel/OK, local Close→новая сеть. Полная история/preferences и все прямые переходы не проверены."
+F03.1,10 циклов из NewPlayer с/без выбора pause/play,APK32,PASS,"native01–10; cycles32.json. 10 циклов, с/без выбора, play/pause; позиции паузы drift<=9ms."
+F03.2,10 циклов из мини-панели с/без выбора pause/play,APK32,PASS,mini01–10; cycles32.json. 10 циклов; все10 playing image pairs изменились.
+F04.1,embedded↔fullscreen portrait/landscape,APK32,PASS,33–36: fullscreen/embedded и portrait/landscape сохраняют PAUSED37726ms и изображение.
+F04.2,Home/reopen/поворот,APK32,PASS,"39–42: Home/default background, Main reopen, return video;35/36 rotation. Только текущая minimize preference."
+F04.3,PiP/Surface bounds,APK32,PASS,"47–50c: PiP, actual pinned bounds, visible/moving picture, return fullscreen/embedded."
+F05.1,Play all с середины,APK32,NOT RUN,93a context start-from-here produced a single-item feed; not evidence of Play all from a middle index.
+F05.2,enqueue/next/дубликаты,APK32,PASS,"17/22–24: add next +append, два дубликата сохранены, next/previous сохраняют паузу."
+F05.3,reorder текущего,APK32,PASS,"08/09: current item index1→0→1, PAUSED18045ms."
+F06.1,delete до текущего,APK32,PASS,"10: удаление перед текущим, тот же BBB, PAUSED18045ms."
+F06.2,delete текущего,APK32,PASS,"25: удалён текущий, выбран следующий дубликат, пауза сохранена, позиция0."
+F06.3,delete последнего/всех,APK32,PASS,"03/04: последний удалён, автоматический выход в Main, нет mini/MediaSession."
+F07.1,auto-next,APK32,PASS,"96/97: repeat Off, конец4K634565ms → BBB index1 PLAYING30ms."
+F07.2,repeat off/one/all,APK32,PASS,"13/16/21: actual repeat one wrap, Off STOPPED596520ms, All last→first."
+F07.3,shuffle последовательность,APK32,PARTIAL,"On/off, reopen and saved restore проверены; последовательность shuffle при многих actual transitions не проверена."
+F08.1,длинный playlist lazy loading,APK32,NOT RUN,Не выполнено в этом цикле APK32; предыдущие PASS не переносятся.
+F08.2,pagination после reorder/enqueue/delete,APK32,NOT RUN,Не выполнено в этом цикле APK32; предыдущие PASS не переносятся.
+F09.1,отмена сохраняет сессию,APK32,PASS,"61/62 и77/78: отмена сохраняет paused network queue, index и точную позицию182584/211281ms."
+F09.2,согласие однократно,APK32,PASS,61–63: OK local replacement один раз запускает одну local session. Rapid double-tap не проверен.
+F09.3,paused queue после Back,APK32,PASS,Paused queue после Back учитывается в обоих диалогах61/77.
+F09.4,stale dialog после queue/account change,APK32,PARTIAL,"79–81: stale dialog после Close очереди отклонён, queue.consent_stale. Account change не проверен."
+F10.1,confirmation on/off,APK32,PASS,"55/56/92: исходноOff, временноOn с dialog, восстановленOff;98 другой Play без dialog."
+F10.2,resume/enqueue без ложной замены,APK32,PARTIAL,76 same queue resume без false confirmation. Enqueue17 проверен при Off; enqueue при On отдельно не проверен.
+F10.3,background/popup replacement,APK32,NOT RUN,Не выполнено в этом цикле APK32; предыдущие PASS не переносятся.
+F11.1,"history on/off, playback-only view",APK32,PARTIAL,Playing/viewed и local exclusion наблюдались; preference Off и полный history-on/off цикл не выполнены.
+F11.2,resume/positions preferences,APK32,PARTIAL,"75 resume ранее сохранённой network position,93–95 saved queue position. Все preference combinations не проверены."
+F11.3,timestamp/zero/recovery/finished,APK32,NOT RUN,Не выполнено в этом цикле APK32; предыдущие PASS не переносятся.
+F11.4,old/new item event boundary,APK32,NOT RUN,Не выполнено в этом цикле APK32; предыдущие PASS не переносятся.
+F12.1,progressive muxed,APK32,NOT RUN,Не выполнено в этом цикле APK32; предыдущие PASS не переносятся.
+F12.2,split A/V/generated DASH,APK32,PASS,network.plan parts=2 PROGRESSIVE inlineDash=2; merged A/V играет в текущем VOD.
+F12.3,HLS,APK32,PASS,"86–90: real live plan HLS, parts1, moving video, DVR seek."
+F12.4,DASH manifest,APK32,NOT RUN,Не выполнено в этом цикле APK32; предыдущие PASS не переносятся.
+F12.5,audio-only/post-live audio,APK32,NOT RUN,Не выполнено в этом цикле APK32; предыдущие PASS не переносятся.
+F12.6,актуальный live/DVR,APK32,PASS,"EXILE stream: live=true seekable=true, window3600000ms; pause, rewind5000ms, resume, moving frames. Go-live/long drift not tested."
+F13.1,качество сохраняет position/play intent,APK32,PASS,"27 paused quality change keeps15000ms;28 playing change retainsPlay,720p60."
+F13.2,audio track,APK32,NOT RUN,Не выполнено в этом цикле APK32; предыдущие PASS не переносятся.
+F13.3,subtitles,APK32,NOT RUN,Не выполнено в этом цикле APK32; предыдущие PASS не переносятся.
+F13.4,speed/pitch,APK32,PARTIAL,"29/30/31 speed1.25 actual;37/38 pitch1.25 at speed1, skip silence true survives reopen. Video button remains hardcoded1x (FAIL)."
+F13.5,chapters,APK32,NOT RUN,Не выполнено в этом цикле APK32; предыдущие PASS не переносятся.
+F13.6,preview NONE/LOW/HIGH,APK32,NOT RUN,Не выполнено в этом цикле APK32; предыдущие PASS не переносятся.
+F14.1,source error/Retry,APK32,PARTIAL,"84/85 scheduled live unavailable before player, Retry handled; arbitrary Media3 fault/recovery not tested."
+F14.2,краткая потеря сети,APK32,NOT RUN,Не выполнено в этом цикле APK32; предыдущие PASS не переносятся.
+F14.3,cancel/поздний ответ,APK32,NOT RUN,Не выполнено в этом цикле APK32; предыдущие PASS не переносятся.
+F15.1,фон↔полный/мини,APK32,PASS,"mini cycles and39–42: video↔audio/background/mini, same item/session in running process."
+F15.2,popup↔полный/фон,APK32,PARTIAL,"43–46 popup↔video, movement/Play/Pause; direct popup↔audio replacement not tested."
+F15.3,PiP↔embedded,APK32,PASS,47–50c PiP→fullscreen→embedded; retained item/pause. Also Play/Pause in PiP.
+F15.4,локальная мини-панель,APK32,PASS,65–69 local mini Play/Pause/reopen/Close.
+F16.1,notification/MediaSession,APK32,PASS,"51–54 notification Pause/Play/open,80 Close releases, no active second session observed."
+F16.2,гарнитура/noisy,APK32,NOT RUN,Не выполнено в этом цикле APK32; предыдущие PASS не переносятся.
+F16.3,focus/resume preference,APK32,NOT RUN,Не выполнено в этом цикле APK32; предыдущие PASS не переносятся.
+F17.1,Activity recreation,APK32,NOT RUN,Rotation is handled via configChanges;95 is process restoration. Separate in-process Activity recreation not exercised.
+F17.2,Close/delete-all/reopen,APK32,FAIL,Last-delete/reopen PASS04/05. Close while viewing another detail+stale consent leaves ghost mini83 (no session). ZIP33 source fix pending.
+F17.3,штатное queue restoration,APK32,PASS,"93–95 force-stop/new process:2 entries, selected index1, PAUSED30000ms, Repeat all/Shuffle on restored. No continuity promise after force-stop."
+A01.1,ownership/Kotlin,APK32,NOT RUN,Не выполнено в этом цикле APK32; предыдущие PASS не переносятся.
+A01.2,generic/host boundary,APK32,NOT RUN,Не выполнено в этом цикле APK32; предыдущие PASS не переносятся.
+A01.3,listeners/controllers/feeds/caches,APK32,NOT RUN,Не выполнено в этом цикле APK32; предыдущие PASS не переносятся.
+A02.1,51 app/NewPlayer JVM cases (source28),APK32,NOT RUN,Не выполнено в этом цикле APK32; предыдущие PASS не переносятся.
+A02.2,auth with build/test/isolation,APK32,NOT RUN,Не выполнено в этом цикле APK32; предыдущие PASS не переносятся.
+A02.3,auth without build/test/isolation/anonymous runtime,APK32,NOT RUN,Не выполнено в этом цикле APK32; предыдущие PASS не переносятся.
+U01.1,official refs/refactor compatibility,APK32,NOT RUN,Не выполнено в этом цикле APK32; предыдущие PASS не переносятся.
+U01.2,portable patches/apply check,APK32,NOT RUN,Не выполнено в этом цикле APK32; предыдущие PASS не переносятся.
+U01.3,upstream review/acceptance,APK32,NOT RUN,Не выполнено в этом цикле APK32; предыдущие PASS не переносятся.
+U02.1,source/commit/SHA manifest,APK32,NOT RUN,Не выполнено в этом цикле APK32; предыдущие PASS не переносятся.
+U02.2,APK provenance от внешней сборки,APK32,PARTIAL,Installed hash+user ZIP32 claim+behavior. Build log/test XML and source-to-APK attestation not supplied.
+U02.3,device evidence нового APK,APK32,PASS,Pulled hash a42439f1… unchanged at end; device artifacts. Source attestation separately partial.
+STARTUP,открытие MainActivity,APK32,PASS,01 +94 cold restart; no data clear.
+F04.HOME,background Home,APK32,PASS,40 PLAYING continued in default background mode.
+F05.FIRST,Play all из начала истории,APK32,PASS,05 Play all from start. Middle not covered.
+F16.KEYS,MediaSession play/pause keys,APK32,PASS,MediaSession hardware play/pause and forward/rewind in VOD/local/live.
+F17.LOCAL_CLOSE,local mini Close,APK32,PASS,69/74 no MediaSession after local mini Close.
+F12.AUDIBLE,слышимый звук,APK32,PASS,"User explicitly confirmed current APK32: Да, звук нормальный. Not a physical Android16 test."
+PHONE16,физический Android16,APK32,NOT RUN,Не выполнено в этом цикле APK32; предыдущие PASS не переносятся.
+POPUP_PERMISSION,overlay permission,APK32,PASS,SYSTEM_ALERT_WINDOW already allow; no permission/security settings changed.
+UI_LABEL,PiP button wrapping,APK32,PASS,Portrait720×1280 buttons readable; API34 only.
+F01.4,VOD через сведения с автозапуском,APK32,PASS,75 History→detail/autoplay NewPlayer.
+F05.4,Play all из начала истории,APK32,PASS,"05 Play all from start, restart after empty."
+F15.5,audio UI -> fullscreen video,APK32,PASS,mini cycles/42: AudioUI→fullscreen→embedded.
+F02.4,network -> local -> Back -> local mini pause/reopen/Close,APK32,PASS,57–69: network→picker Cancel→local confirm→Back→mini pause/reopen/Close.
+F07.4,repeat/shuffle UI after reopen,APK32,PASS,18/19 и95: Repeat all/Shuffle on отображаются после reopen/restore.
+F07.5,repeat-one actual end,APK32,PASS,"12/13: возле конца573045ms, затем same item PLAYING4102/7409ms."
+F07.6,repeat-off actual end single item,APK32,PASS,15/16:578718→STOPPED596520ms.
+F16.4,MediaSession fast-forward / play-pause,APK32,PASS,local ff2×15000ms; DVR rewind5000ms; Play/Pause.
+F06.4,last element engine release,APK32,PASS,04: engine/session released после последнего delete.
+F15.6,network mini after local / Close,APK32,PASS,"75/76/98/100 network restored after local Close, current mini while session active."
+F17.4,mini cleanup after last deletion and Back,APK32,PASS,04 no stale mini after last delete automatic return; separate different-detail/notification ghost83 FAIL.
+F17.5,restart playback after empty queue,APK32,PASS,"05 restart after empty, visible video/Play thenPause."
+F07.7,repeat/shuffle initial UI snapshot after reopen,APK32,PASS,"18/19: initial UI repeat/shuffle snapshot,95 после process restart."
+F13.LABEL,actual speed label,APK32,FAIL,TopUI.kt hardcoded1x despite engine speed1.25; ZIP33 binds actual state.
+F17.GHOST,Close + other detail + stale consent mini,APK32,FAIL,"79–83: stale dialog rejects correctly, but collapsed old-title strip remains with no MediaSession; ZIP33 preserves overlay ownership."
+F09.STALE_CLOSED,stale dialog after notification Close,APK32,PASS,"80→81 no session/no unexpected playback, queue.consent_stale."
+F12.SCHEDULED,scheduled live availability error,APK32,PASS,LIVE_STREAM_OFFLINE says event not started. Retry repeats handled unavailable; another live HLS plays. Not universal live acceptance.

@@ -1,3 +1,14 @@
+# Общая интеграция NewPlayer: кандидат ZIP33
+
+APK32 прошёл описанные runtime проверки: [checkpoint](APK32_DEVICE_CHECKPOINT.md),
+[матрица](APK32_ACCEPTANCE.csv). ZIP33 отделяет сохраняемый overlay ownership от
+выбранной detail page и показывает actual speed в generic UI. Expanded preview не
+заменяется старым playing item; collapsed overlay привязывается к active session или
+скрывается после release. Guards pending metadata/late hide сохраняются. Новый APK
+ещё не проверен; нижние разделы — история предыдущих состояний.
+
+---
+
 # Общая интеграция NewPlayer: снимок ZIP32
 
 Текущее состояние: [APK31](APK31_DEVICE_CHECKPOINT.md), [матрица](APK31_ACCEPTANCE.csv).

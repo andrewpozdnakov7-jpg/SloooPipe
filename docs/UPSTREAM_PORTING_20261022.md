@@ -1,3 +1,16 @@
+# Переносимость: уточнение ZIP33
+
+Новый generic cumulative patch содержит13 файлов: к прежним изменениям добавлены
+actual speed label, два пропущенных logic файла и два contract test файла (7 cases).
+Ранее text apply-check не выявлял неполный состав новых файлов; основные app source
+ZIP уже содержали нужную логику и host tests. Новый пакет проверен на свежем exact
+pin212ca: check, actual apply, наличие новых файлов, TopUI text и сохранение Hilt.
+Host overlay ownership — отдельно в NewPipe. Compilation/demo/upstream PR не выполнены.
+Текущие runtime результаты: [APK32](APK32_DEVICE_CHECKPOINT.md). Новый APK33 нужен.
+Ниже сохранена история исследования и предыдущих проверок.
+
+---
+
 # Переносимость: текущее уточнение ZIP32
 
 Generic cumulative patch ZIP31 исправляет initial skip-silence через `newPlayer.skipSilence`
