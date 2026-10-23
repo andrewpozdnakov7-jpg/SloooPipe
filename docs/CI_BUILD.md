@@ -3,8 +3,9 @@
 Run **Actions → Android APK and tests → Run workflow** on the intended source ref.
 Choose `with`, `without` or `both` authentication variants (default: both).
 The workflow is manual; pushing documentation does not automatically start builds.
-The first run remains pending until signing secrets are configured and a linked
-successful result is recorded.
+Both variants passed [run39967867977](https://github.com/andrewpozdnakov7-jpg/SloooPipe/actions/runs/39967867977), including fresh tests, auth isolation
+and existing-key signing. [Verification](CI_PREVIEW_20261023.md) · [Preview](https://github.com/andrewpozdnakov7-jpg/SloooPipe/releases/tag/preview-20261023-01).
+New device regression remains pending; forks need their own signing secrets.
 
 Each variant runs on a separate Ubuntu 24.04 runner with JDK 21, project Gradle
 wrapper, SDK platform 37.0 and Build Tools 36.0.0. Actions are pinned to release

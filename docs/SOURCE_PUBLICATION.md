@@ -1,3 +1,24 @@
+# Signed CI preview publication — 2026-10-23
+
+Both auth variants passed [run39967867977](https://github.com/andrewpozdnakov7-jpg/SloooPipe/actions/runs/39967867977) at source 9050389, including fresh
+XML-verified test totals, auth isolation and existing-key signing. Downloaded APK
+SHA256/certificate identities were checked, and the certificate matches APK35.
+[CI record](CI_PREVIEW_20261023.md) · [Preview release](https://github.com/andrewpozdnakov7-jpg/SloooPipe/releases/tag/preview-20261023-01).
+
+The preview tag targets the exact tested commit. Release assets are two signed
+debug APKs, full source, checksums and aggregate build/test records. Original ZIP36
+and its ChatGPT report remain immutable. The subsequent main update changes only
+documentation/status; application sources, workflow, dependencies, keys and WSL
+builder are unchanged. Static publication checks cover new documents/assets in
+their recorded scope; no private signing inputs or account/device records are
+published. No stable acceptance, upstream PR or automatic update-feed change is
+claimed. New-APK device regression and partial/physical checks remain pending.
+
+The records below are historical; their pending CI/release statements apply to
+their original checkpoint and are superseded by this preview record.
+
+---
+
 # ZIP36 successful-build follow-up — 2026-10-23
 
 The user reports `BUILD SUCCESSFUL in 16m 37s` for the external ZIP36 auth-enabled

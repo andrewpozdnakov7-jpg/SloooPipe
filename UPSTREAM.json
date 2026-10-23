@@ -30,7 +30,7 @@
     "live_branch_verified": "2026-10-22"
   },
   "source_branch": "base/newpipe-dev-20261021",
-  "verified": "APK35 device batch:109 coverage rows,87 PASS,8 PARTIAL,5 FAIL for4 defects,2 NOT VERIFIED,7 DEFERRED. User reports ZIP36 auth-enabled external build/test SUCCESSFUL in16m37s. Full logs/XML/counts/APK hash, auth-free build and ZIP36 device regression are pending.59 app integration tests counted in source, execution count not independently verified. Dependencies and signing unchanged; live refs retain their recorded20261022 date.",
+  "verified": "APK35 device batch retained separately. Both auth variants passed CI run39967867977 at9050389:214 app+15 auth API+31 shared tests per variant, zero failures/errors/skips; all 59 integration cases including8 new passed. Downloaded XML/APK SHA256/certificate identity verified. Existing certificate matches APK35. Signed experimental preview; new-APK device regression, physical Android 16/audio and partial scenarios pending.",
   "live_refs_20261022": {
     "newpipe_dev": "7436ba1010493515ff1a5f5d60aacdc6168c8500",
     "newpipe_refactor": "455b6f0de6bbc135a51f2a77510863edee8b3cae",
@@ -51,5 +51,32 @@
     "APK_sha256_received": false,
     "new_APK_device_regression": "PENDING",
     "details": "docs/ZIP36_BUILD_CHECKPOINT.md"
+  },
+  "latest_ci": {
+    "run_id": 39967867977,
+    "run_attempt": 1,
+    "url": "https://github.com/andrewpozdnakov7-jpg/SloooPipe/actions/runs/39967867977",
+    "source_commit": "9050389f7466faaf5f1dd2719437b40b11bae1e1",
+    "auth_variants": [
+      "with",
+      "without"
+    ],
+    "result": "SUCCESS",
+    "tests_per_variant": {
+      "app": 214,
+      "auth_api": 15,
+      "shared": 31,
+      "integration_in_app": 59,
+      "new_timestamp_in_integration": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "XML_counts_and_APK_hashes_reviewed": true,
+    "signature_and_existing_certificate_verified": true,
+    "release_tag": "preview-20261023-01",
+    "release_url": "https://github.com/andrewpozdnakov7-jpg/SloooPipe/releases/tag/preview-20261023-01",
+    "device_regression": "PENDING",
+    "details": "docs/CI_PREVIEW_20261023.md"
   }
 }

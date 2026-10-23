@@ -1,5 +1,11 @@
 # ZIP36 external build update — 2026-10-23
 
+**Later independently reviewed CI update:** both auth variants passed
+[run39967867977](https://github.com/andrewpozdnakov7-jpg/SloooPipe/actions/runs/39967867977) with260 executions each, signing and matching certificates.
+See [CI verification](CI_PREVIEW_20261023.md) and [preview](https://github.com/andrewpozdnakov7-jpg/SloooPipe/releases/tag/preview-20261023-01). The sections
+below preserve the earlier user-reported WSL result; pending build-evidence claims
+there do not override the later CI record. New-APK device acceptance is still open.
+
 The user reports the following result from the external WSL build computer:
 
 ```text

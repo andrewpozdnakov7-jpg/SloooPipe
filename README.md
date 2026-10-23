@@ -14,9 +14,10 @@ live HLS/DVR, subtitles/chapters, quality/speed and background/popup/PiP were ex
 The paused-recreation fix from ZIP35 passed at font scales 1.3/2.0/default.
 No stable release is available.
 
-**Build update:** the user reports `BUILD SUCCESSFUL in 16m 37s` for ZIP36's
-external WSL auth-enabled build/test run. Full test XML/counts, APK identity and
-device regression are still pending. [Build evidence and limits](docs/ZIP36_BUILD_CHECKPOINT.md).
+**Both auth variants passed [GitHub Actions](https://github.com/andrewpozdnakov7-jpg/SloooPipe/actions/runs/39967867977):** 214 app  + 15 auth API  + 31 shared
+tests per variant, zero failures/errors/skips. Downloaded XML totals, APK hashes and
+existing signing-certificate identity were checked. [Signed preview and source](https://github.com/andrewpozdnakov7-jpg/SloooPipe/releases/tag/preview-20261023-01) ·
+[CI verification record](docs/CI_PREVIEW_20261023.md). New-APK device regression remains pending.
 
 | Area | APK35 evidence and current boundary |
 | --- | --- |
@@ -31,10 +32,10 @@ device regression are still pending. [Build evidence and limits](docs/ZIP36_BUIL
 [Full matrix](docs/APK35_ACCEPTANCE.csv): 109 coverage rows, 87 PASS, 8 PARTIAL,
 5 FAIL, 2 NOT VERIFIED and 7 DEFERRED. Five failing rows describe four unique APK35
 defects. Counts include source checks; they are not a product-readiness percentage.
-**ZIP36 has a user-reported successful build; its fixes still need device retesting.**
+**ZIP36 application sources pass CI for both auth variants; fixes still need device retesting.**
 
-Full acceptance still needs full build/test/isolation evidence for the auth-enabled
-run, the auth-free build/test run, ZIP36 regression and physical Android 16 checks. Audio-language and
+The matrix above preserves the original APK35 batch; later CI evidence is separate.
+Full acceptance still needs new-APK device regression and physical Android 16 checks. Audio-language and
 pitch controls were exercised, but decoded/acoustic results remain partial. Remote
 DASH manifest, scheduled live and post-live audio are unverified; SoundCloud did not
 yield a session in the checked fixture. Audible sound is deferred, at the user's
@@ -63,7 +64,8 @@ Vendored README files describe their components; this root README describes Sloo
 
 [GitHub Actions: build, tests and existing-key signing](docs/CI_BUILD.md).
 The manual workflow supports both auth variants and retains APK/test artifacts.
-One-time repository signing-secret setup is required; the first CI run is pending.
+Existing-key signing is configured for this repository; both variants passed CI.
+Forks require their own signing-secret configuration.
 
 
 Use Linux/WSL, JDK 21, Android SDK platform 37.0 and Build Tools 36.0.0. The main app
@@ -82,7 +84,9 @@ xvfb-run -a ./gradlew :app:testDebugUnitTest :youtube-auth-api:test :shared:jvmT
 
 Repeat with `-Pslooopipe.withAuth=false` to check the auth-free variant. These are
 validation commands, not a claim that both variants have passed. There are 59
-app/NewPlayer JVM test cases in source; complete current-run XML/counts are pending.
+app/NewPlayer integration test cases; all 59 executed successfully per CI variant,
+within 214 app tests. Full CI XML/counts were reviewed; the earlier WSL run remains
+user-reported without its complete reports.
 A normal checkout build writes APKs under `NewPipe/app/build/outputs/apk/` and uses
 its debug signing setup. A different signing certificate cannot update an existing install.
 

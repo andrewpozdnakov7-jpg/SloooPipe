@@ -1,10 +1,15 @@
 # Текущий результат SloooPipe — 2026-10-23, APK35 / ZIP36
 
-Пользователь сообщил об успешной внешней сборке ZIP36 с авторизацией:
-`BUILD SUCCESSFUL in 16m 37s`. В предоставленной командной строке были build/test
-и verifyAuthIsolation. Полного лога, XML/чисел тестов и SHA256 нового APK пока нет;
-проверка исправлений на устройстве ещё не проводилась.
-[Подробности сборки](docs/ZIP36_BUILD_CHECKPOINT.md).
+Оба auth-варианта успешно собраны и подписаны в [GitHub Actions](https://github.com/andrewpozdnakov7-jpg/SloooPipe/actions/runs/39967867977).
+На каждый вариант: 214 app  + 15 auth API  + 31 shared = 260 выполнений, ноль failures/
+errors/skips. Скачанные XML и SHA256 APK сверены. Внутри214 app-тестов прошли все 59
+кейсов интеграции NewPlayer, включая 8 новых. Auth isolation и подпись прошли;
+сертификат обоих APK совпадает с ранее проверенным APK35.
+[Preview-релиз](https://github.com/andrewpozdnakov7-jpg/SloooPipe/releases/tag/preview-20261023-01) · [Подробности CI](docs/CI_PREVIEW_20261023.md).
+
+Ранее пользователь сообщил об успешном WSL-прогоне за 16m 37s; его полные отчёты
+не получены. CI даёт отдельные проверенные build/test/isolation/signing результаты.
+Проверка исправлений на новом APK пока не выполнена.
 
 Основной прогон APK35 завершён: [описание](docs/APK35_DEVICE_CHECKPOINT.md),
 [матрица](docs/APK35_ACCEPTANCE.csv).109 строк покрытия: 87 PASS, 8 PARTIAL, 5 FAIL,
@@ -12,7 +17,7 @@
 а пять FAIL относятся к четырём уникальным дефектам.
 
 Работают в проверенных сценариях: обычный Play через NewPlayer, локальные видео/
-аудио, очередь и318-item restore, repeat/shuffle/auto-next, история и её настройки,
+аудио, очередь из 318-item restore, repeat/shuffle/auto-next, история и её настройки,
 качество/скорость, главы/субтитры/preview, live HLS/DVR, мини-плеер, фон, явный popup,
 PiP, уведомления, ошибка сети/Retry и защита от запоздалых ответов. Исправление ZIP35
 сохраняет паузу при пересоздании на font 1.3/2.0/default. Minimize=None также сохраняет
@@ -27,14 +32,13 @@ ZIP36 содержит исправления четырёх найденных 
 4. Автоматический popup закрывает прежний native host, как явная кнопка popup,
    чтобы возврат создавал новую поверхность вместо чёрного изображения.
 
-Внесены8 JUnit-кейсов для настоящих StreamInfo/PlayQueueItem/SinglePlayQueue и policy;
+Внесены 8 JUnit-кейсов для настоящих StreamInfo/PlayQueueItem/SinglePlayQueue и policy;
 всего 59 интеграционных кейсов в исходниках. Добавлена диагностика языка, pitch и skip
 silence. Ktlint/Checkstyle/diff check прошли; компиляция и JVM-тесты здесь не запускались.
-ZIP36 собран по сообщению пользователя, но ещё не принят на устройстве. Builder09, подпись, зависимости и
+Исходники приложения ZIP36 прошли CI обоих вариантов, но новый APK ещё не принят на устройстве. Builder09, подпись, зависимости и
 generic patch неизменны; текстовое применение generic patch повторно прошло.
 
-Осталось: обе внешние auth build/test/isolation конфигурации с полными XML/counts,
-повтор четырёх исправлений и smoke очереди/режимов, физический Android 16 и звук на
+Осталось: повтор четырёх исправлений и smoke очереди/режимов, физический Android 16 и звук на
 телефоне. Декодированный язык аудио, акустический pitch/skip silence, transient focus,
 физическая гарнитура/звонки, heap/native leaks, scheduled live, remote DASH manifest и
 post-live audio не закрыты. SoundCloud fixture не создал сессию; причина не установлена.

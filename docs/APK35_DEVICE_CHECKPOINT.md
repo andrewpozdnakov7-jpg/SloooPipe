@@ -1,9 +1,10 @@
 # APK35 device checkpoint and ZIP36 source handoff — 2026-10-23
 
-**Later build update:** the user reports a successful external ZIP36 auth-enabled
-build/test run in 16m 37s. [Evidence and limits](ZIP36_BUILD_CHECKPOINT.md).
-The device results and matrix below remain APK35 observations; they do not accept
-the four fixes on a new APK.
+**Later CI update:** both variants passed build/test/isolation/signing in
+[run39967867977](https://github.com/andrewpozdnakov7-jpg/SloooPipe/actions/runs/39967867977); [XML/hash/certificate verification](CI_PREVIEW_20261023.md).
+The device results and original matrix below remain APK35 observations. CI does not
+accept the four fixes on-device; original pending compiler/XML claims are superseded
+by the linked CI evidence only. [Signed preview](https://github.com/andrewpozdnakov7-jpg/SloooPipe/releases/tag/preview-20261023-01).
 
 The installed APK35 was exercised in LDPlayer, Android 14 / API34, 720×1280.
 Package: `org.schabi.newpipe.debug`; SHA256:
@@ -91,16 +92,16 @@ PlayQueueItem, SinglePlayQueue and start/resume policies. Total integration sour
 inventory is 59 `@Test` cases. None were compiled/executed on this Windows host.
 
 Builder revision `20261022-09-memory-cleanup`, signing inputs, dependency pins and
-the generic NewPlayer patch are unchanged. The13-file generic patch was applied
+the generic NewPlayer patch are unchanged. The 13-file generic patch was applied
 again to pristine pinned official NewPlayer, reverse-checked, with Hilt preserved.
-Its7 portable contract cases are separate from the 59 app cases. Text application
+Its 7 portable contract cases are separate from the 59 app cases. Text application
 does not prove an upstream build, demo run or acceptance. No upstream PR exists.
 
 ## Remaining limits and next acceptance
 
-* Build/test both auth variants externally, retain full XML/counts, isolation
-  results and APK hash. ZIP36 has a user-reported auth-enabled build success;
-  full compiler/test reports, the auth-free run and new-APK device results remain pending.
+* Both CI build/test/isolation variants later passed with reviewed XML counts,
+  APK hashes and signatures. See the linked CI record; new-APK device results
+  remain pending. The original matrix retains its pre-CI snapshot.
 * Retest all four fixes together: font 2.0, fresh/reused explicit-zero versus saved
   history and positive timestamps, remember-position ON/OFF plus rotation/clamping,
   automatic popup return while playing and paused. Repeat queue/recreation/mode
