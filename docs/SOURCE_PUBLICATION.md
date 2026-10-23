@@ -1,3 +1,25 @@
+# ZIP36 successful-build follow-up — 2026-10-23
+
+The user reports `BUILD SUCCESSFUL in 16m 37s` for the external ZIP36 auth-enabled
+build/test run. [Build checkpoint](ZIP36_BUILD_CHECKPOINT.md) records the source
+hash, requested tasks and evidence limits. Full logs/XML/counts, the resulting APK
+hash, auth-free validation and new-APK device regression remain pending.
+
+Application sources from public snapshot `c41b6ec4cb15e61e8f047e05441cb85d0b777ff7`
+are unchanged. Both READMEs, RESULT, current provenance/status and the APK35 document
+now link the follow-up. Original ZIP/report artifacts and the APK35 acceptance
+matrix remain unchanged; no APK36 device PASS is inferred from build success.
+The builder, signing inputs and dependencies are unchanged.
+
+This documentation-only commit continues public main without importing private
+history. Changed publication files receive secret/private-data checks; the rest of
+the tree is verified identical to the already-reviewed public snapshot. No stable
+Release, tag, APK asset or upstream PR is created. Earlier records below retain
+status as of their original handoff; this follow-up supersedes their unbuilt claim
+for ZIP36 only to the extent of the user-reported external build result.
+
+---
+
 # ZIP36 source publication — 2026-10-23
 
 Latest device evidence is APK35, SHA256

@@ -1,9 +1,14 @@
 # APK35 device checkpoint and ZIP36 source handoff — 2026-10-23
 
+**Later build update:** the user reports a successful external ZIP36 auth-enabled
+build/test run in 16m 37s. [Evidence and limits](ZIP36_BUILD_CHECKPOINT.md).
+The device results and matrix below remain APK35 observations; they do not accept
+the four fixes on a new APK.
+
 The installed APK35 was exercised in LDPlayer, Android 14 / API34, 720×1280.
 Package: `org.schabi.newpipe.debug`; SHA256:
 `dd75ce32a9ba727b7c814b79e63470fd11919dcef25f4075e616cbc8804f2ae1`;
-45, 426, 082 bytes. The hash was checked again at the end. No APK was compiled or
+45,426,082 bytes. The hash was checked again at the end. No APK was compiled or
 installed during this run. Full WSL build/test XML and source-to-APK attestation
 were not supplied; installed-byte identity does not prove complete build provenance.
 
@@ -12,7 +17,8 @@ Source ZIP35 has SHA256
 Its6, 209 file paths match source checkpoint
 `2239bd622759f74d688f707fac3ec77268269145`: 6, 207 literal Git blobs match, and two
 `.bat` files match after their intentional archive CRLF conversion is normalized.
-ZIP36 below contains subsequent fixes and has not been built/device-tested here.
+ZIP36 contains subsequent fixes. Its external build was later reported successful;
+it has not been device-tested here.
 
 ## Completed batch
 
@@ -93,7 +99,8 @@ does not prove an upstream build, demo run or acceptance. No upstream PR exists.
 ## Remaining limits and next acceptance
 
 * Build/test both auth variants externally, retain full XML/counts, isolation
-  results and APK hash. ZIP36 has no compiler/JVM/device result yet.
+  results and APK hash. ZIP36 has a user-reported auth-enabled build success;
+  full compiler/test reports, the auth-free run and new-APK device results remain pending.
 * Retest all four fixes together: font 2.0, fresh/reused explicit-zero versus saved
   history and positive timestamps, remember-position ON/OFF plus rotation/clamping,
   automatic popup return while playing and paused. Repeat queue/recreation/mode

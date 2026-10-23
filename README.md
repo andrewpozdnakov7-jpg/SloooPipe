@@ -14,6 +14,10 @@ live HLS/DVR, subtitles/chapters, quality/speed and background/popup/PiP were ex
 The paused-recreation fix from ZIP35 passed at font scales 1.3/2.0/default.
 No stable release is available.
 
+**Build update:** the user reports `BUILD SUCCESSFUL in 16m 37s` for ZIP36's
+external WSL auth-enabled build/test run. Full test XML/counts, APK identity and
+device regression are still pending. [Build evidence and limits](docs/ZIP36_BUILD_CHECKPOINT.md).
+
 | Area | APK35 evidence and current boundary |
 | --- | --- |
 | Network and local playback | Moving video, Play/Pause/seek; local audio, muxed progressive, Bandcamp audio and live HLS/DVR checked. Audible sound awaits a physical-phone check. |
@@ -27,10 +31,10 @@ No stable release is available.
 [Full matrix](docs/APK35_ACCEPTANCE.csv): 109 coverage rows, 87 PASS, 8 PARTIAL,
 5 FAIL, 2 NOT VERIFIED and 7 DEFERRED. Five failing rows describe four unique APK35
 defects. Counts include source checks; they are not a product-readiness percentage.
-**ZIP36 fixes remain unbuilt and untested on-device.**
+**ZIP36 has a user-reported successful build; its fixes still need device retesting.**
 
-Full acceptance still needs external builds/tests/isolation for both auth variants,
-full XML/counts, ZIP36 regression and physical Android 16 checks. Audio-language and
+Full acceptance still needs full build/test/isolation evidence for the auth-enabled
+run, the auth-free build/test run, ZIP36 regression and physical Android 16 checks. Audio-language and
 pitch controls were exercised, but decoded/acoustic results remain partial. Remote
 DASH manifest, scheduled live and post-live audio are unverified; SoundCloud did not
 yield a session in the checked fixture. Audible sound is deferred, at the user's

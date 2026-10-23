@@ -26,11 +26,11 @@
     "archive_sha256": "d3468229bc50266b123579d85b049e5e28c4057561fca1c220cc84ff12836549",
     "directory": "NewPipe/third-party/NewPlayer",
     "module": ":newplayer-local",
-    "scope": "Embedded library and Kotlin host. APK35 broad regression documented, including paused recreation. ZIP36 host fixes explicit-zero/position priority, popup geometry, large-font labels and automatic-popup surface lifetime; new APK not built or tested. Generic patch unchanged 13 files/7 contract cases, pristine-pin apply/reverse/Hilt checks repeated; no upstream build/demo/PR.",
+    "scope": "Embedded library and Kotlin host. APK35 broad regression documented, including paused recreation. ZIP36 host fixes explicit-zero/position priority, popup geometry, large-font labels and automatic-popup surface lifetime; ZIP36 auth-enabled external build reported successful by user; new APK device regression pending. Generic patch unchanged 13 files/7 contract cases, pristine-pin apply/reverse/Hilt checks repeated; no upstream build/demo/PR.",
     "live_branch_verified": "2026-10-22"
   },
   "source_branch": "base/newpipe-dev-20261021",
-  "verified": "APK35 device batch: 109 coverage rows, 87 PASS, 8 PARTIAL, 5 FAIL for4 defects, 2 NOT VERIFIED, 7 DEFERRED. ZIP36 source fixes static-only; 59 app integration tests in source, not executed here. Both external auth build/test/isolation, physical Android 16 and audible sound remain pending. Dependency pins unchanged; live refs retain their recorded20261022 date.",
+  "verified": "APK35 device batch:109 coverage rows,87 PASS,8 PARTIAL,5 FAIL for4 defects,2 NOT VERIFIED,7 DEFERRED. User reports ZIP36 auth-enabled external build/test SUCCESSFUL in16m37s. Full logs/XML/counts/APK hash, auth-free build and ZIP36 device regression are pending.59 app integration tests counted in source, execution count not independently verified. Dependencies and signing unchanged; live refs retain their recorded20261022 date.",
   "live_refs_20261022": {
     "newpipe_dev": "7436ba1010493515ff1a5f5d60aacdc6168c8500",
     "newpipe_refactor": "455b6f0de6bbc135a51f2a77510863edee8b3cae",
@@ -38,5 +38,18 @@
     "extractor_dev": "e8f89145a830b4d6cae32412007f24ea8b36c73a",
     "newpipe_ahead_of_pin": "1 translation-only commit; pins unchanged",
     "extractor_ahead_of_pin": "2 commits; pin still matches NewPipe"
+  },
+  "latest_build_update": {
+    "source_checkpoint": "ZIP36",
+    "source_sha256": "3c796688dc421692135843d651f3cb2edca33ee492d5325fb3adcee94eed695c",
+    "auth": "with",
+    "operation": "build-test",
+    "result": "BUILD SUCCESSFUL",
+    "elapsed": "16m 37s",
+    "evidence": "User-provided final summary and preceding Gradle process command",
+    "full_logs_and_test_XML_reviewed": false,
+    "APK_sha256_received": false,
+    "new_APK_device_regression": "PENDING",
+    "details": "docs/ZIP36_BUILD_CHECKPOINT.md"
   }
 }
