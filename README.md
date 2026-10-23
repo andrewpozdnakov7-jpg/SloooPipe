@@ -8,38 +8,38 @@ other developers can study, adapt and reuse.
 
 ## Development status
 
-**Published source checkpoint: ZIP33, 2026-10-22.** The application code matches
-development commit `1ca928c3fa2d6ea0cd0e245b13153ef98f652073`. ZIP33 has static checks;
-its new APK has not yet been built or device-tested.
-
-The latest device evidence is APK32 in LDPlayer / Android 14: 20 queue cycles,
-ordinary Play, actual repeat/auto-next, queue mutations, quality, background/popup/PiP,
-notification controls, local media, live HLS/DVR and saved-queue restoration were checked
-in the documented scope. The user confirmed audible sound. Two UI defects were found:
-a speed button fixed at “1x” and a stale mini-player after closing the queue while
-browsing another detail page. ZIP33 contains source fixes for both. APK32 results do
-not establish acceptance of the new APK.
+**Source checkpoint: ZIP34, 2026-10-23.** Latest device evidence: APK33 in
+LDPlayer / Android 14. The stale mini-player after session close passed its regression;
+the speed label now reflects actual state. A remaining portrait layout defect wraps
+its “x” onto a second line. ZIP34 changes only that button's sizing and single-line
+text; this new source change has static checks and still needs an external APK build.
 ZIP numbers identify source handoffs, not upstream releases. No stable release is available.
 
 | Area | Implementation and verification |
 | --- | --- |
-| Network playback | Normal Play, background and popup routes are connected to a Kotlin NewPlayer coordinator. Video, mini-player, fullscreen and PiP share the playback runtime; the complete mode matrix is still pending. |
-| Local media | A Local entry in the service selector opens Android's document picker. Local playback uses the same NewPlayer integration and has a mini-player. |
-| Queue and history | Media3 owns the active queue. The host connects feeds, selection, enqueue, reorder, removal, saved position and NewPipe history. Implementation is broader than the completed device checks. |
-| Latest device check, APK32 | Empty-host dismissal, 20 queue cycles, actual repeat/auto-next, modes, local media and saved queue restore passed in the documented scope. |
-| ZIP33 source fixes | Bind the speed button to actual state; retain mini-player ownership across detail browsing and close. New APK retest pending. |
-| Optional YouTube sign-in | Experimental, controlled at build time. Signing in does not guarantee that YouTube will allow every video or network address. |
+| Network playback | Normal Play uses the Kotlin NewPlayer coordinator. APK33 rendered network video and preserved Play/Pause in 20 queue cycles. |
+| Queue and mini-player | 10 native and 10 mini-player cycles completed; active-item retention without selection and paused drift up to 17 ms were recorded. Cancel on another detail page returns to the actual current item. |
+| Session close | Notification Close with another detail's replacement dialog open, stale OK and Back leaves no active playback session or stale mini in the checked sequence. |
+| Modes | APK33 popup and PiP displayed video, handled Play/Pause and returned with paused position retained. This is a scoped regression, not the complete mode matrix. |
+| Local media | The Local service entry opens a document-picker host. APK33 mp4 playback, paused seeking, mini-player and Close were checked; picker/replacement Cancel retained the network session. |
+| ZIP34 source fix | Replace the fixed-size speed icon button with a content-sized transparent button and single-line text. New APK verification pending. |
+| Optional YouTube sign-in | Experimental and controlled at build time. Signing in does not guarantee that YouTube will allow every video or network address. |
 
-[APK32 evidence and exact APK hash](docs/APK32_DEVICE_CHECKPOINT.md) ·
-[Current acceptance matrix](docs/APK32_ACCEPTANCE.csv).
-Current results belong to APK32 only; previous checkpoints remain historical evidence.
-The full acceptance matrix is incomplete, and the two source fixes need a new APK.
+[APK33 evidence and APK hash](docs/APK33_DEVICE_CHECKPOINT.md) ·
+[Scoped APK33 matrix](docs/APK33_ACCEPTANCE.csv) ·
+[Historical broader APK32 checks](docs/APK32_DEVICE_CHECKPOINT.md).
+One automation step needed an explicit fullscreen exit before the last mini-player
+cycle; the checkpoint documents that recovery. These device results belong to APK33,
+not ZIP34. Audible sound is deferred, at the user's request, to a separate physical-phone check.
 
-Still required: the full queue/source/mode/lifecycle matrix on the new APK, both auth
-builds with test reports, additional source/track/lifecycle checks and physical Android 16 validation. Legacy
-player/media-browser classes remain; Android Auto interoperability is unverified.
-Explicit external-player and Kodi actions remain external. Full SABR/PoToken support
-and a complete port to upstream's refactor branch are outside this checkpoint.
+A black first frame after selecting an unplayed item while paused at position zero
+remains a documented limitation; subsequent Play displays video. Full acceptance is
+incomplete: both auth build/test/isolation reports and complete XML/counts, source/
+track/history/resume/lifecycle coverage, asynchronous races, network recovery and
+physical Android 16 checks remain pending. Legacy player/media-browser classes remain;
+Android Auto interoperability is unverified. Explicit external-player and Kodi actions
+remain external. Full SABR/PoToken support and a complete refactor-branch port are
+outside this checkpoint.
 
 ## Source layout
 
@@ -83,7 +83,7 @@ For source-ZIP selection, retained run reports and signing with your existing ex
 key, use [the WSL builder workflow](tools/README-wsl.md), revision
 `20261022-09-memory-cleanup`. It requires its own `signing/` inputs, keeps dependency
 caches and attempts to release clean Linux RAM caches after the run. It supports
-`--no-memory-cleanup`. The supplied ZIP33 archive remains unchanged. Public `main`
+`--no-memory-cleanup`. The supplied ZIP34 is the current source handoff; earlier archives remain unchanged. Public `main`
 contains the same application code with refreshed publication documentation; follow
 the workflow above to create a source ZIP from a checkout.
 

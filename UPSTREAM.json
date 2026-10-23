@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-22",
+  "updated": "2026-10-23",
   "newpipe": {
     "repo": "TeamNewPipe/NewPipe",
     "commit": "f46290f28ab44fa514bac0a9f0252fd7d2afb66f",
@@ -26,11 +26,11 @@
     "archive_sha256": "d3468229bc50266b123579d85b049e5e28c4057561fca1c220cc84ff12836549",
     "directory": "NewPipe/third-party/NewPlayer",
     "module": ":newplayer-local",
-    "scope": "Embedded library and Kotlin host; ZIP33 binds actual speed label and preserves host overlay ownership. Generic patch bundle includes missing new logic/tests and has exact-pin application/completeness checks; upstream build/demo/PR not performed.",
+    "scope": "Embedded library and Kotlin host. APK33 confirms actual speed state and overlay ownership in a scoped regression; ZIP34 adjusts only speed-button layout. Complete generic patch: 13 files, exact-pin application/Hilt checks; no upstream build/demo/PR.",
     "live_branch_verified": "2026-10-22"
   },
   "source_branch": "base/newpipe-dev-20261021",
-  "verified": "APK32: 20 queue cycles, ordinary Play, repeat/auto-next, mutations, modes, notification, local media, consent, real HLS live/DVR and saved queue restoration; user confirmed sound. Two UI defects remain. ZIP33 source fixes await build/device retest; full matrix and both auth build/test remain incomplete.",
+  "verified": "APK33: 10+10 queue cycles, stale-overlay/consent regression, paused seek, popup/PiP return and local mp4/cancellation/Close. Speed value correct; label wraps in portrait. ZIP34 layout source fix awaits build/retest. Sound deferred to physical phone by user; full matrix and both auth build/test remain incomplete.",
   "live_refs_20261022": {
     "newpipe_dev": "7436ba1010493515ff1a5f5d60aacdc6168c8500",
     "newpipe_refactor": "455b6f0de6bbc135a51f2a77510863edee8b3cae",

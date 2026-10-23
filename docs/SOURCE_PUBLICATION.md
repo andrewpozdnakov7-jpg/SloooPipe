@@ -1,3 +1,25 @@
+# ZIP34 source publication — 2026-10-23
+
+This snapshot adds the single-line, content-sized speed button in embedded NewPlayer
+`TopUI.kt`, updates both root READMEs and records the scoped APK33 regression.
+[APK33 checkpoint](APK33_DEVICE_CHECKPOINT.md) · [Matrix](APK33_ACCEPTANCE.csv).
+The tested APK hash is
+`3ee2ba78cdfaa35c40e9304e3a152d7a35de24783a7260e5857381755ee2e958`.
+The original ZIP33 and previous handoffs remain unchanged. ZIP34 itself still needs
+an external build and device retest. Sound is deferred to a physical-phone check.
+
+Publication continues public `main` with a source snapshot, without merging private
+development history. No stable Release, tag, APK asset or upstream PR is created.
+The final snapshot and new public commit are checked for secrets/private data;
+unchanged upstream findings retain exact public-blob provenance. Keys, sessions,
+raw APKs/general logcat and system captures with device/network identifiers stay
+outside public Git. This is a static publication review, not a complete security audit.
+
+The entries below are historical; their “latest APK” and publication status refer
+to their respective checkpoint dates.
+
+---
+
 # Source publication: ZIP33 — 2026-10-22
 
 Public `main` contains the application code from development checkpoint

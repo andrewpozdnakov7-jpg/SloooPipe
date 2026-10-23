@@ -118,15 +118,22 @@ internal fun TopUI(
         }
         TrackSelectionMenu(viewModel, uiState)
 
-        IconButton(
+        Button(
             modifier = Modifier.fillMaxHeight(),
             onClick = {
                 showPlaybackSpeedDialog()
             },
+            contentPadding = PaddingValues(horizontal = 8.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent,
+                contentColor = MaterialTheme.colorScheme.onSurface
+            )
         ) {
             Text(
                 "${floatToStringWithoutTrailingZerosTwoDigitsAccuracy(uiState.playbackParameters.speed)}x",
                 fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                softWrap = false,
                 modifier = Modifier.padding(0.dp)
             )
         }

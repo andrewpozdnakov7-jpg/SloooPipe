@@ -1,21 +1,19 @@
-# Текущий результат SloooPipe — 2026-10-22
+# Текущий результат SloooPipe — 2026-10-23
 
-APK32 прошёл широкую проверку в LDPlayer14/Android14: 20 queue cycles, обычный Play,
-реальные repeat/auto-next, queue mutations, quality, background/popup/PiP, notification,
-local video/audio, consent и saved queue restoration. Звук подтвердил пользователь.
-[Полные доказательства](docs/APK32_DEVICE_CHECKPOINT.md), [матрица](docs/APK32_ACCEPTANCE.csv).
+APK33 проверен в LDPlayer14 / Android 14. Исправление старой мини-панели подтвердилось
+в последовательности другой ролик → диалог замены → notification Close → stale OK → Back.
+Cancel при активной сессии сохраняет фактический ролик, очередь и паузу. Выполнены 10
+циклов очереди из NewPlayer и 10 через мини-панель; все сохраняют ожидаемый Play/Pause.
+Проверены перемотка, popup/PiP с возвратом, локальный mp4, отмена выбора/замены и Close.
+[Подробности и границы](docs/APK33_DEVICE_CHECKPOINT.md), [матрица](docs/APK33_ACCEPTANCE.csv).
 
-Два дефекта остаются в APK32: постоянная подпись скорости «1x» и старая мини-панель после notification Close
-при просмотре другой detail page/stale consent. ZIP33 исправляет их в исходниках;
-его APK ещё не собран/не проверен. Новые PASS не переносятся на ZIP33 автоматически.
+Скорость 1,25 отражается в движке и подписи, но «x» переносится вниз. ZIP34 исправляет
+размер кнопки в единственном production-файле TopUI.kt. Новая правка имеет статические
+проверки: ktlint 24 → 23 старых замечания, новых нет; diff check PASS. APK34 здесь
+не собран и не проверен. Builder09, зависимости, ключи и прежние ZIP не менялись.
+Переносимый patch обновлён и проверен на точном upstream pin; upstream build/demo/PR нет.
 
-Production changes: отдельное сохранённое overlay ownership в detail fragment и actual
-speed label в generic NewPlayer UI. Checkstyle/diff PASS; TopUI24 legacy ktlint findings,
-новых ошибок нет. Cumulative generic patch дополнен пропущенными logic/test файлами,
-содержит13 файлов/7 contract cases и применён к свежему official pin с Hilt.
-Это не upstream compilation/tests или принятие PR.
-
-Gradle/сборка/JVM выполняются на внешнем WSL. Полные XML/counts и обе auth-конфигурации
-не предоставлены. Остальная матрица, physical Android16 и новая APK33 regression нужны
-до приёмки. Ключи, зависимости и builder09 не менялись. В GitHub main опубликован код
-ZIP33 с обновлённой документацией; выданный архив ZIP33 не менялся. Стабильного релиза нет.
+Звук по просьбе пользователя отложен до реального телефона. Чёрный первый кадр нового
+ролика при паузе в позиции ноль остаётся ограничением. Полная приёмка, обе auth
+build/test/isolation конфигурации с XML/counts, остальные сценарии и физический
+Android 16 ещё требуются. PASS APK33 не переносится на ZIP34 автоматически.

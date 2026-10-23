@@ -1,0 +1,38 @@
+ID,Scenario,Candidate,Status,Evidence
+native-01,queue open/close; playing=False; selection=False,APK33,PASS,State intent matches; evidence native-01
+native-02,queue open/close; playing=True; selection=False,APK33,PASS,State intent matches; evidence native-02
+native-03,queue open/close; playing=False; selection=True,APK33,PASS,State intent matches; evidence native-03
+native-04,queue open/close; playing=True; selection=False,APK33,PASS,State intent matches; evidence native-04
+native-05,queue open/close; playing=False; selection=False,APK33,PASS,State intent matches; evidence native-05
+native-06,queue open/close; playing=True; selection=True,APK33,PASS,State intent matches; evidence native-06
+native-07,queue open/close; playing=False; selection=False,APK33,PASS,State intent matches; evidence native-07
+native-08,queue open/close; playing=True; selection=False,APK33,PASS,State intent matches; evidence native-08
+native-09,queue open/close; playing=False; selection=True,APK33,PASS,State intent matches; evidence native-09
+native-10,queue open/close; playing=True; selection=False,APK33,PASS,State intent matches; evidence native-10
+mini-01,queue open/close; playing=False; selection=False,APK33,PASS,State intent matches; evidence mini-01
+mini-02,queue open/close; playing=True; selection=False,APK33,PASS,State intent matches; evidence mini-02
+mini-03,queue open/close; playing=False; selection=True,APK33,PASS,State intent matches; evidence mini-03
+mini-04,queue open/close; playing=True; selection=False,APK33,PASS,State intent matches; evidence mini-04
+mini-05,queue open/close; playing=False; selection=False,APK33,PASS,State intent matches; evidence mini-05
+mini-06,queue open/close; playing=True; selection=True,APK33,PASS,State intent matches; evidence mini-06
+mini-07,queue open/close; playing=False; selection=False,APK33,PASS,State intent matches; evidence mini-07
+mini-08,queue open/close; playing=True; selection=False,APK33,PASS,State intent matches; evidence mini-08
+mini-09,queue open/close; playing=False; selection=True,APK33,PASS,State intent matches; evidence mini-09
+mini-10,queue open/close; playing=True; selection=False,APK33,PASS,State intent matches; evidence mini-10. Automation recovery documented.
+SPEED.VALUE,Speed value in label and engine,APK33,PASS,"05–08: 1.25 in engine, localized 1,25x in UI."
+SPEED.LAYOUT,Single-line speed button,APK33,FAIL,08: x wraps on a portrait screen. ZIP34 source fix; new APK pending.
+OVERLAY.CLOSE,Other detail / notification Close / stale consent / Back,APK33,PASS,"21–27: stale consent rejected, no active session or ghost mini."
+OVERLAY.CANCEL,Other detail / Cancel / Back with active queue,APK33,PASS,"33–36: actual Big Buck Bunny, index1, PAUSED178430 preserved."
+SEEK.PAUSED,Seek while paused,APK33,PASS,31: seek retains PAUSED.
+POPUP,Popup Play/Pause and return,APK33,PASS,37–39: picture and session preserved; PAUSED185708 on return.
+PIP,PiP Play/Pause and return,APK33,PASS,40–46: real pinned task; returns fullscreen/embedded at PAUSED220150. Menu timing recovery documented.
+LOCAL.PICKER_CANCEL,Dismiss system picker,APK33,PASS,53b: existing network session PAUSED220150; 53 only navigated to picker parent folder.
+LOCAL.CONSENT_CANCEL,Cancel local replacement,APK33,PASS,54–55: network queue retained.
+LOCAL.PLAY_SEEK,Local mp4 Play/Pause/seek,APK33,PASS,56–57: 180s fixture; PAUSED30510 after seek.
+LOCAL.MINI_CLOSE,Local mini and Close,APK33,PASS,58–59: retains PAUSED30510 then releases; no stale mini.
+PAUSED.FIRST_FRAME,First paused frame after selecting an unplayed item,APK33,PARTIAL,native03/native09/mini09 black at0; subsequent Play renders. Not fixed by ZIP34.
+SOUND.HUMAN,Audible sound,APK33,DEFERRED,User will check separately on a physical phone.
+ZIP34.RUNTIME,Speed button layout fix,ZIP34,NOT RUN,Static checks only; external build/install needed.
+AUTH.BUILD_TEST,Both auth build/test/isolation with full XML counts,ZIP34,NOT RUN,External WSL reports required.
+FULL.MATRIX,Complete project acceptance including physical Android16,APK33/ZIP34,NOT RUN,This checkpoint is a scoped regression; historical APK32 evidence is not transferred.
+NETWORK.RESTART,Network Play all after local Close,APK33,PASS,"62–63: plays again, final network mini PAUSED224702. Settings restored, no data/history clear."
