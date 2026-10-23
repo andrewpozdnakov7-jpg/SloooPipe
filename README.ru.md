@@ -62,6 +62,11 @@ Android Auto, полный SABR/PoToken и перенос всей ветки re
 
 ## Сборка и тесты
 
+[GitHub Actions: сборка, тесты и подпись существующим ключом](docs/CI_BUILD.md).
+Ручной workflow поддерживает оба auth-варианта и сохраняет APK/отчёты.
+Нужно один раз настроить signing secrets; первый CI-прогон ещё ожидается.
+
+
 Нужны Linux/WSL, JDK 21, Android SDK platform 37.0 и Build Tools 36.0.0.
 Для основного приложения зафиксированы Gradle 9.8.2, AGP 9.4.1, Kotlin 2.4.21 и
 Media3 1.9.2. Gradle wrapper включён. Для headless JVM-тестов shared нужны Xvfb/xauth.

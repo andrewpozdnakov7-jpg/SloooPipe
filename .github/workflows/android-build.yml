@@ -1,0 +1,135 @@
+name: Android APK and tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      auth:
+        description: YouTube authentication variant
+        type: choice
+        options:
+          - both
+          - with
+          - without
+        default: both
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-build-${{ github.ref }}-${{ inputs.auth }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Android / auth ${{ matrix.auth }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        auth: ${{ fromJSON(inputs.auth == 'both' && '["with","without"]' || format('["{0}"]', inputs.auth)) }}
+    env:
+      AUTH_VARIANT: ${{ matrix.auth }}
+      CI_ARTIFACT_DIR: ${{ github.workspace }}/ci-artifacts
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Require existing signing configuration
+        env:
+          HAS_SIGNING: ${{ secrets.SLOOOPIPE_KEYSTORE_BASE64 != '' && secrets.SLOOOPIPE_STORE_PASSWORD != '' && secrets.SLOOOPIPE_KEY_ALIAS != '' && secrets.SLOOOPIPE_KEY_PASSWORD != '' && secrets.SLOOOPIPE_CERT_SHA256 != '' }}
+        run: |
+          if [[ "$HAS_SIGNING" != true ]]; then
+            echo 'Configure the existing signing key with tools/ci/upload-signing-secrets.py before running CI.'
+            exit 1
+          fi
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
+        with:
+          cmdline-tools-version: '16111833'
+          packages: 'platform-tools platforms;android-37.0 build-tools;36.0.0'
+          log-accepted-android-sdk-licenses: 'false'
+
+      - name: Set up Gradle cache and wrapper validation
+        uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+        with:
+          cache-provider: basic
+          dependency-graph: disabled
+          build-scan-publish: 'false'
+
+      - name: Install headless test dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install --no-install-recommends -y xvfb xauth libgl1 libfontconfig1 libxrender1 libxtst6 libxi6
+
+      - name: Prepare source and diagnostics
+        run: |
+          mkdir -p "$CI_ARTIFACT_DIR"
+          # Match the WSL builder's local branch and org.schabi.newpipe.debug ID.
+          git checkout -B dev "$GITHUB_SHA"
+          chmod +x NewPipe/gradlew
+          test -f "$ANDROID_HOME/platforms/android-37.0/android.jar"
+          java -version 2> "$CI_ARTIFACT_DIR/java-version.txt"
+          git rev-parse HEAD > "$CI_ARTIFACT_DIR/source-commit.txt"
+
+      - name: Build unsigned debug APK and run fresh tests
+        working-directory: NewPipe
+        run: |
+          with_auth=false
+          if [[ "$AUTH_VARIANT" == with ]]; then with_auth=true; fi
+          xvfb-run -a ./gradlew \
+            :app:testDebugUnitTest :youtube-auth-api:test :shared:jvmTest \
+            :app:verifyAuthIsolation :app:assembleDebug \
+            --no-daemon --no-configuration-cache --console=plain --stacktrace \
+            --max-workers=2 \
+            "-Pslooopipe.withAuth=$with_auth" \
+            -I ../tools/ci/android.gradle \
+            2>&1 | tee "$CI_ARTIFACT_DIR/gradle.log"
+
+      - name: Validate APK, tests and auth isolation
+        run: python3 tools/ci/android-report.py
+
+      - name: Sign with existing key and verify certificate
+        env:
+          SLOOOPIPE_KEYSTORE_BASE64: ${{ secrets.SLOOOPIPE_KEYSTORE_BASE64 }}
+          SLOOOPIPE_STORE_PASSWORD: ${{ secrets.SLOOOPIPE_STORE_PASSWORD }}
+          SLOOOPIPE_KEY_ALIAS: ${{ secrets.SLOOOPIPE_KEY_ALIAS }}
+          SLOOOPIPE_KEY_PASSWORD: ${{ secrets.SLOOOPIPE_KEY_PASSWORD }}
+          SLOOOPIPE_CERT_SHA256: ${{ secrets.SLOOOPIPE_CERT_SHA256 }}
+        run: python3 tools/ci/android-sign.py
+
+      - name: Retain diagnostic reports
+        if: ${{ always() }}
+        run: |
+          mkdir -p "$CI_ARTIFACT_DIR/reports"
+          for module in app youtube-auth-api shared; do
+            for kind in test-results reports; do
+              source="NewPipe/$module/build/$kind"
+              if [[ -d "$source" ]]; then
+                mkdir -p "$CI_ARTIFACT_DIR/reports/$module"
+                cp -R "$source" "$CI_ARTIFACT_DIR/reports/$module/"
+              fi
+            done
+          done
+
+      - name: Upload signed APK and reports
+        if: ${{ always() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: SloooPipe-auth-${{ matrix.auth }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ci-artifacts/
+          if-no-files-found: error
+          retention-days: 14

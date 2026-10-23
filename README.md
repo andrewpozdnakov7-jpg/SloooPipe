@@ -61,6 +61,11 @@ Vendored README files describe their components; this root README describes Sloo
 
 ## Build and test
 
+[GitHub Actions: build, tests and existing-key signing](docs/CI_BUILD.md).
+The manual workflow supports both auth variants and retains APK/test artifacts.
+One-time repository signing-secret setup is required; the first CI run is pending.
+
+
 Use Linux/WSL, JDK 21, Android SDK platform 37.0 and Build Tools 36.0.0. The main app
 pins Gradle 9.8.2, AGP 9.4.1, Kotlin 2.4.21 and Media3 1.9.2. Its Gradle wrapper is included.
 Headless shared JVM tests require Xvfb and xauth. SDK packages and dependencies must
