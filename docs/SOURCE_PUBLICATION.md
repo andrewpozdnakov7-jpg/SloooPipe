@@ -1,3 +1,27 @@
+# ZIP35 source publication — 2026-10-23
+
+APK34 verified the previous speed-button layout fix but exposed a paused-recreation
+defect. [APK34 checkpoint](APK34_DEVICE_CHECKPOINT.md) · [Matrix](APK34_ACCEPTANCE.csv).
+Tested APK SHA256:
+`67367d66d0f47080277ad30076e83250d8242ecc8ffc5a65e18126c7ec0c5b8b`.
+ZIP35 changes only `NewPlayerActivity.kt`: the initial Resume command in `onCreate`
+is gated on a null saved state. Explicit new-intent Play remains unchanged.
+Ktlint0 before/after and diff check pass; the new APK fix is not built/device-tested here.
+
+This source snapshot updates EN/RU READMEs and current status. Previous ZIP34/source/
+report files are immutable. Dependencies, builder09, signing inputs and the generic
+NewPlayer patch are unchanged. Publication continues public main without private
+development history; no stable Release, tag, APK asset or upstream PR is created.
+The final snapshot and new commit receive a static privacy/secret review; unchanged
+upstream findings use exact public-blob provenance. Raw APKs, general logcat, system
+captures with identifiers, keys and account sessions remain outside public Git.
+This is not full device acceptance or an independent security audit.
+
+The records below are historical; “latest APK”, “pending” and publication statements
+refer to their original checkpoint, not the current root README.
+
+---
+
 # ZIP34 source publication — 2026-10-23
 
 This snapshot adds the single-line, content-sized speed button in embedded NewPlayer

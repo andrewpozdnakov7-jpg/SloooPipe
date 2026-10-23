@@ -8,38 +8,40 @@ other developers can study, adapt and reuse.
 
 ## Development status
 
-**Source checkpoint: ZIP34, 2026-10-23.** Latest device evidence: APK33 in
-LDPlayer / Android 14. The stale mini-player after session close passed its regression;
-the speed label now reflects actual state. A remaining portrait layout defect wraps
-its “x” onto a second line. ZIP34 changes only that button's sizing and single-line
-text; this new source change has static checks and still needs an external APK build.
-ZIP numbers identify source handoffs, not upstream releases. No stable release is available.
+**Source checkpoint: ZIP35, 2026-10-23.** Latest device evidence: APK34 in
+LDPlayer / Android 14. ZIP34's speed-button layout fix passed: 1x, 1.25x, 1.5x and
+2x stay on one line in portrait; 1.25x also fits fullscreen and font scale 1.3.
+A further lifecycle defect was reproduced: recreating a paused player after a
+system font change repeats the launch Play action and resumes playback.
+
+ZIP35 gates that initial resume action on a fresh Activity creation. Restored hosts
+retain the live engine's Play/Pause state; explicit new-intent Play handling is
+unchanged. The changed Kotlin file passes ktlint, but this fix still needs an
+external APK build and device retest. No stable release is available.
 
 | Area | Implementation and verification |
 | --- | --- |
-| Network playback | Normal Play uses the Kotlin NewPlayer coordinator. APK33 rendered network video and preserved Play/Pause in 20 queue cycles. |
-| Queue and mini-player | 10 native and 10 mini-player cycles completed; active-item retention without selection and paused drift up to 17 ms were recorded. Cancel on another detail page returns to the actual current item. |
-| Session close | Notification Close with another detail's replacement dialog open, stale OK and Back leaves no active playback session or stale mini in the checked sequence. |
-| Modes | APK33 popup and PiP displayed video, handled Play/Pause and returned with paused position retained. This is a scoped regression, not the complete mode matrix. |
-| Local media | The Local service entry opens a document-picker host. APK33 mp4 playback, paused seeking, mini-player and Close were checked; picker/replacement Cancel retained the network session. |
-| ZIP34 source fix | Replace the fixed-size speed icon button with a content-sized transparent button and single-line text. New APK verification pending. |
-| Optional YouTube sign-in | Experimental and controlled at build time. Signing in does not guarantee that YouTube will allow every video or network address. |
+| Network playback | NewPipe Play uses the Kotlin NewPlayer coordinator. APK34 network video, Play/Pause and paused seeking were checked. |
+| Speed display | APK34 shows actual speed without wrapping in the checked portrait/fullscreen/font1.3 cases. Font2.0 was not verified. |
+| Mini-player and queue | APK34 mini queue open/close and video return retained the item and pause (12 ms drift). APK33's earlier 10+10 cycles remain historical evidence. |
+| Lifecycle | Paused recreation FAIL on APK34; ZIP35 source fix has static checks only. |
+| Local media and other modes | Implemented; APK33 local mp4, popup/PiP and close/consent checks are documented separately and are not transferred to APK34/35. |
+| Optional YouTube sign-in | Experimental and controlled at build time. It cannot guarantee access to every video or network address. |
 
-[APK33 evidence and APK hash](docs/APK33_DEVICE_CHECKPOINT.md) ·
-[Scoped APK33 matrix](docs/APK33_ACCEPTANCE.csv) ·
-[Historical broader APK32 checks](docs/APK32_DEVICE_CHECKPOINT.md).
-One automation step needed an explicit fullscreen exit before the last mini-player
-cycle; the checkpoint documents that recovery. These device results belong to APK33,
-not ZIP34. Audible sound is deferred, at the user's request, to a separate physical-phone check.
+[APK34 evidence and exact APK hash](docs/APK34_DEVICE_CHECKPOINT.md) ·
+[Scoped APK34 matrix](docs/APK34_ACCEPTANCE.csv) ·
+[Earlier APK33 regression](docs/APK33_DEVICE_CHECKPOINT.md).
+These device results belong to APK34, not the ZIP35 fix. Audible sound is deferred,
+at the user's request, to a separate physical-phone check.
 
-A black first frame after selecting an unplayed item while paused at position zero
-remains a documented limitation; subsequent Play displays video. Full acceptance is
-incomplete: both auth build/test/isolation reports and complete XML/counts, source/
-track/history/resume/lifecycle coverage, asynchronous races, network recovery and
-physical Android 16 checks remain pending. Legacy player/media-browser classes remain;
-Android Auto interoperability is unverified. Explicit external-player and Kodi actions
-remain external. Full SABR/PoToken support and a complete refactor-branch port are
-outside this checkpoint.
+Full acceptance remains incomplete: both auth build/test/isolation reports and full
+XML/counts, new-APK recreation regression, source/track/history/resume coverage,
+asynchronous races, network recovery and physical Android 16 checks are pending.
+A black first frame after selecting an unplayed item while paused at zero remains
+a documented limitation. Legacy player/media-browser classes remain; Android Auto
+is unverified. External-player and Kodi actions stay external. Full SABR/PoToken
+support and a complete refactor-branch port are outside this checkpoint.
+ZIP numbers identify source handoffs, not upstream releases.
 
 ## Source layout
 
@@ -83,7 +85,7 @@ For source-ZIP selection, retained run reports and signing with your existing ex
 key, use [the WSL builder workflow](tools/README-wsl.md), revision
 `20261022-09-memory-cleanup`. It requires its own `signing/` inputs, keeps dependency
 caches and attempts to release clean Linux RAM caches after the run. It supports
-`--no-memory-cleanup`. The supplied ZIP34 is the current source handoff; earlier archives remain unchanged. Public `main`
+`--no-memory-cleanup`. The supplied ZIP35 is the current source handoff; earlier archives remain unchanged. Public `main`
 contains the same application code with refreshed publication documentation; follow
 the workflow above to create a source ZIP from a checkout.
 

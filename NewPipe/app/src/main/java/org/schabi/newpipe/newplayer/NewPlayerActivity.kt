@@ -100,7 +100,8 @@ class NewPlayerActivity : AppCompatActivity() {
             currentUri?.let { loadLocal(it, savedInstanceState?.getLong("position") ?: 0, savedInstanceState?.getBoolean("playing") ?: true) }
         }
         if (!selectingLocal && !intent.getBooleanExtra(EXTRA_ENTER_PIP, false) && !intent.getBooleanExtra(EXTRA_SHOW_QUEUE, false)) runtime.setPresentation(PlaybackPresentation.VIDEO)
-        if (intent.getBooleanExtra(EXTRA_RESUME_ACTIVE, false) && runtime.queue.active) runtime.player.play()
+        // Resume is a one-shot launch action; recreation retains the live engine's play/pause intent.
+        if (savedInstanceState == null && intent.getBooleanExtra(EXTRA_RESUME_ACTIVE, false) && runtime.queue.active) runtime.player.play()
         if (intent.getBooleanExtra(EXTRA_SHOW_QUEUE, false) && runtime.queue.active) model.changeUiMode(queueUiMode(), null)
         if (intent.getBooleanExtra(EXTRA_ENTER_PIP, false) && Build.VERSION.SDK_INT >= 26) {
             runtime.setPresentation(PlaybackPresentation.PIP)

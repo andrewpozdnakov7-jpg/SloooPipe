@@ -1,0 +1,17 @@
+ID,Scenario,Candidate,Status,Evidence
+IDENTITY,Installed APK34 identity,APK34,PASS,SHA256 recorded; classes2.dex differs from APK33; full build attestation unavailable.
+SPEED.125,Portrait1.25 label and actual speed,APK34,PASS,"03/06:1,25x is71x40px; engine speed1.25."
+SPEED.150,Portrait1.5 label and actual speed,APK34,PASS,"04:1,5x, one line, engine1.5."
+SPEED.200,Portrait2 label and actual speed,APK34,PASS,"05:2x, one line, engine2.0."
+FULLSCREEN,Fullscreen and embedded return,APK34,PASS,07/08:1.25 and PAUSED227089 retained.
+FONT130.LABEL,Speed label at font1.3,APK34,PASS,"09:94x54px, one line. Playback preservation FAIL is separate."
+FONT200.LABEL,Speed label at font2,APK34,NOT VERIFIED,Automation could not locate controls after geometry changed; not an app-failure verdict.
+LIFECYCLE.PAUSED,Paused activity recreation from font change,APK34,FAIL,12/13: PAUSED271677 becomes PLAYING271691; no UI taps. screen.create restored=true.
+SPEED.RESET,Restore normal font and speed1,APK34,PASS,"15/16: default font label, engine speed1.0."
+SEEK,Paused seek,APK34,PASS,17: PAUSED291210 after seek.
+PLAY,Network Play/Pause,APK34,PASS,18: actual network picture/PLAYING then pause.
+SOUND,Audible sound,APK34,DEFERRED,User will check separately on a physical phone.
+ZIP35.RECREATE,One-shot resume guard,ZIP35,NOT RUN,Static-only fix; external build/install/retest required.
+AUTH.BUILD_TEST,Both auth builds/tests with full XML counts,ZIP35,NOT RUN,External WSL reports pending.
+FULL.MATRIX,Complete project/device acceptance,APK34/ZIP35,NOT RUN,This is a targeted layout/lifecycle regression; earlier results remain historical.
+MINI.QUEUE_RETURN,Mini queue open/close and video return,APK34,PASS,"20–23: index0 retained; PAUSED296644 to296656; final mini paused, speed1/font1 restored."
