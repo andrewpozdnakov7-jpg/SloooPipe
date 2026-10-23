@@ -19,6 +19,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.media3.common.Player
 import androidx.media3.ui.PlayerView
+import androidx.preference.PreferenceManager
 import org.schabi.newpipe.R
 
 /** A surface/controller for the existing NewPlayer session, with no second engine or session. */
@@ -68,7 +69,12 @@ class NewPlayerPopupService : Service() {
         }
         val density = resources.displayMetrics.density
         val (availableWidth, availableHeight) = viewportSize()
-        val width = (availableWidth * .75f).toInt().coerceAtMost((480 * density).toInt()).coerceAtLeast(1)
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val remember = prefs.getBoolean(getString(R.string.popup_remember_size_pos_key), true)
+        val defaultWidth = (availableWidth * .75f).toInt().coerceAtMost((480 * density).toInt()).coerceAtLeast(1)
+        val storedWidth = if (remember) prefs.getFloat(getString(R.string.popup_saved_width_key), defaultWidth.toFloat()) else defaultWidth.toFloat()
+        val minimumWidth = resources.getDimensionPixelSize(R.dimen.popup_minimum_width).coerceIn(1, availableWidth)
+        val width = (storedWidth.takeIf { it.isFinite() && it > 0 }?.toInt() ?: defaultWidth).coerceIn(minimumWidth, availableWidth)
         val layout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setBackgroundColor(android.graphics.Color.BLACK)
@@ -83,6 +89,7 @@ class NewPlayerPopupService : Service() {
         actions.addView(
             Button(this).apply {
                 setText(R.string.slooopipe_mode_full)
+                isAllCaps = false
                 setOnClickListener {
                     val playing = runtime.player.playWhenReady
                     runtime.setPresentation(PlaybackPresentation.VIDEO)
@@ -94,6 +101,7 @@ class NewPlayerPopupService : Service() {
         actions.addView(
             Button(this).apply {
                 setText(R.string.close)
+                isAllCaps = false
                 setOnClickListener {
                     runtime.releasePlayback()
                     stopSelf()
@@ -103,7 +111,9 @@ class NewPlayerPopupService : Service() {
         )
         layout.addView(actions)
         layout.measure(View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED))
-        val bounds = PopupBounds.fit(width, availableHeight, layout.measuredHeight, (48 * density).toInt())
+        val defaultTop = (48 * density).toInt()
+        val preferredTop = if (remember) prefs.getInt(getString(R.string.popup_saved_y_key), defaultTop) else defaultTop
+        val bounds = PopupBounds.fit(width, availableHeight, layout.measuredHeight, preferredTop)
         video = PlayerView(this).apply {
             player = exo
             useController = true
@@ -117,7 +127,8 @@ class NewPlayerPopupService : Service() {
         }
         val params = WindowManager.LayoutParams(width, -2, type, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSLUCENT).apply {
             gravity = Gravity.TOP or Gravity.START
-            x = (availableWidth - width) / 2
+            val centerX = (availableWidth - width) / 2
+            x = (if (remember) prefs.getInt(getString(R.string.popup_saved_x_key), centerX) else centerX).coerceIn(0, availableWidth - width)
             y = bounds.top
         }
         var downX = 0f
@@ -142,6 +153,11 @@ class NewPlayerPopupService : Service() {
                 }
 
                 MotionEvent.ACTION_UP -> {
+                    prefs.edit()
+                        .putFloat(getString(R.string.popup_saved_width_key), params.width.toFloat())
+                        .putInt(getString(R.string.popup_saved_x_key), params.x)
+                        .putInt(getString(R.string.popup_saved_y_key), params.y)
+                        .apply()
                     handle.performClick()
                     true
                 }

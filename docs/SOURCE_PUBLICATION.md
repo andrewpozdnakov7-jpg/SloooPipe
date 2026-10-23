@@ -1,3 +1,35 @@
+# ZIP36 source publication — 2026-10-23
+
+Latest device evidence is APK35, SHA256
+`dd75ce32a9ba727b7c814b79e63470fd11919dcef25f4075e616cbc8804f2ae1`.
+[Checkpoint](APK35_DEVICE_CHECKPOINT.md) · [Matrix](APK35_ACCEPTANCE.csv).
+The109 coverage rows contain87 PASS, 8 PARTIAL, 5 FAIL (four unique APK35 defects),
+2 NOT VERIFIED and 7 DEFERRED. These include source checks, not109 independent tests.
+
+ZIP36 fixes explicit-zero preservation/position priority, popup geometry preferences,
+large-font labels and automatic-popup native surface ownership. Eight new app JUnit
+cases bring the source inventory to 59; language/pitch/silence diagnostic fields aid
+the next run. Changed Kotlin/Java static checks pass, but no APK36 compile/JVM/device
+result is claimed. Both external auth configurations and physical checks remain open.
+
+Both root READMEs, RESULT and provenance/status records describe these boundaries.
+The WSL builder09, signing setup, dependencies and 13-file generic NewPlayer patch
+are unchanged. Generic patch pristine-pin application/reverse/Hilt checks passed
+again; upstream compile/test/demo/acceptance is not claimed. Old source/report
+archives remain immutable. No stable Release, tag, APK asset or upstream PR is made.
+
+Publication continues public main using a source-snapshot commit, without importing
+private development history. The final snapshot and new commit receive static
+secret/private-data checks; unchanged upstream scanner candidates require exact
+public blob provenance. Keys, sessions, APKs, raw databases, general logcat and
+identifier-bearing system captures are excluded. This source-publication review
+does not establish device acceptance or an independent security audit.
+
+The entries below are historical; their current/pending claims apply to the original
+checkpoint. They do not override the APK35/ZIP36 status above.
+
+---
+
 # ZIP35 source publication — 2026-10-23
 
 APK34 verified the previous speed-button layout fix but exposed a paused-recreation
@@ -119,7 +151,7 @@ their dates; their old “not published” statements are not the current reposi
 
 ## Functional scope
 
-The latest installed-device evidence is APK31 in LDPlayer14 / Android14. Repeat and
+The latest installed-device evidence is APK31 in LDPlayer14 / Android 14. Repeat and
 shuffle state after queue reopen, release after last-item removal, mini removal after
 Back, new-queue visible playback and pause were checked. Automatic dismissal of the
 empty player screen failed. ZIP32 addresses the release-event ordering in that host;
@@ -133,7 +165,7 @@ Both auth variants, complete test XML/counts and full device acceptance are pend
 ## Source privacy review
 
 The full publication snapshot is scanned with Gitleaks 8.30.1, with archive traversal
-and decoding. Its 1,840 candidates in 148 files are classified by exact Git blob
+and decoding. Its 1, 840 candidates in 148 files are classified by exact Git blob
 identity against the pinned public upstream files reviewed at the first publication:
 147 extractor fixture files and one file containing public YouTube client constants.
 No project-specific secret finding remains unresolved. Vendored directories are not
@@ -165,7 +197,7 @@ rules excluding local credentials and diagnostics.
 
 - Reviewed the complete source snapshot, filenames and nested archive contents.
 - Scanned with Gitleaks 8.30.1, including archive traversal and decoding. The scanner
-  reported 1,840 candidates in 148 files. All candidate-containing files match the
+  reported 1, 840 candidates in 148 files. All candidate-containing files match the
   pinned public NewPipe or NewPipeExtractor Git blobs byte for byte: 147 fixture
   files and one upstream file containing public YouTube client constants.
 - Checked local paths, email-like strings, machine identifiers and private-network

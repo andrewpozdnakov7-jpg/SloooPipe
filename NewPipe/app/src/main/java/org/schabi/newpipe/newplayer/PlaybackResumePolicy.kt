@@ -5,6 +5,11 @@ import org.schabi.newpipe.database.stream.model.StreamStateEntity
 
 /** Explicit positions (including zero) take precedence over timestamps and unfinished history. */
 internal object PlaybackResumePolicy {
+    fun requestedPosition(durationSeconds: Long, explicitMillis: Long, timestampSeconds: Long): Long? {
+        if (explicitMillis < 0 && timestampSeconds <= 0) return null
+        return position(durationSeconds, explicitMillis, timestampSeconds, null)
+    }
+
     fun position(durationSeconds: Long, explicitMillis: Long, timestampSeconds: Long, history: StreamStateEntity?): Long {
         val requested = when {
             explicitMillis >= 0 -> explicitMillis

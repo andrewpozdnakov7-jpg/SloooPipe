@@ -26,11 +26,11 @@
     "archive_sha256": "d3468229bc50266b123579d85b049e5e28c4057561fca1c220cc84ff12836549",
     "directory": "NewPipe/third-party/NewPlayer",
     "module": ":newplayer-local",
-    "scope": "Embedded library and Kotlin host. APK34 speed-button layout is verified in the documented cases. ZIP35 changes only the NewPipe host one-shot resume gate on Activity recreation; generic patch remains ZIP34, 13 files/7 contract cases, exact-pin application/Hilt checks; no upstream build/demo/PR.",
+    "scope": "Embedded library and Kotlin host. APK35 broad regression documented, including paused recreation. ZIP36 host fixes explicit-zero/position priority, popup geometry, large-font labels and automatic-popup surface lifetime; new APK not built or tested. Generic patch unchanged 13 files/7 contract cases, pristine-pin apply/reverse/Hilt checks repeated; no upstream build/demo/PR.",
     "live_branch_verified": "2026-10-22"
   },
   "source_branch": "base/newpipe-dev-20261021",
-  "verified": "APK34: speed values/layout in portrait/fullscreen/font1.3, network Play/Pause/seek and mini queue return. Paused recreation after font change FAIL; ZIP35 guard has static checks only. Font2.0 not verified. Sound deferred to physical phone; full matrix and both auth build/test remain incomplete.",
+  "verified": "APK35 device batch: 109 coverage rows, 87 PASS, 8 PARTIAL, 5 FAIL for4 defects, 2 NOT VERIFIED, 7 DEFERRED. ZIP36 source fixes static-only; 59 app integration tests in source, not executed here. Both external auth build/test/isolation, physical Android 16 and audible sound remain pending. Dependency pins unchanged; live refs retain their recorded20261022 date.",
   "live_refs_20261022": {
     "newpipe_dev": "7436ba1010493515ff1a5f5d60aacdc6168c8500",
     "newpipe_refactor": "455b6f0de6bbc135a51f2a77510863edee8b3cae",

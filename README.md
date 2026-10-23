@@ -8,40 +8,36 @@ other developers can study, adapt and reuse.
 
 ## Development status
 
-**Source checkpoint: ZIP35, 2026-10-23.** Latest device evidence: APK34 in
-LDPlayer / Android 14. ZIP34's speed-button layout fix passed: 1x, 1.25x, 1.5x and
-2x stay on one line in portrait; 1.25x also fits fullscreen and font scale 1.3.
-A further lifecycle defect was reproduced: recreating a paused player after a
-system font change repeats the launch Play action and resumes playback.
+**Source checkpoint: ZIP36, 2026-10-23. Latest device evidence: APK35**, tested in
+LDPlayer / Android 14. Network Play through NewPlayer, local media, queues/history,
+live HLS/DVR, subtitles/chapters, quality/speed and background/popup/PiP were exercised.
+The paused-recreation fix from ZIP35 passed at font scales 1.3/2.0/default.
+No stable release is available.
 
-ZIP35 gates that initial resume action on a fresh Activity creation. Restored hosts
-retain the live engine's Play/Pause state; explicit new-intent Play handling is
-unchanged. The changed Kotlin file passes ktlint, but this fix still needs an
-external APK build and device retest. No stable release is available.
-
-| Area | Implementation and verification |
+| Area | APK35 evidence and current boundary |
 | --- | --- |
-| Network playback | NewPipe Play uses the Kotlin NewPlayer coordinator. APK34 network video, Play/Pause and paused seeking were checked. |
-| Speed display | APK34 shows actual speed without wrapping in the checked portrait/fullscreen/font1.3 cases. Font2.0 was not verified. |
-| Mini-player and queue | APK34 mini queue open/close and video return retained the item and pause (12 ms drift). APK33's earlier 10+10 cycles remain historical evidence. |
-| Lifecycle | Paused recreation FAIL on APK34; ZIP35 source fix has static checks only. |
-| Local media and other modes | Implemented; APK33 local mp4, popup/PiP and close/consent checks are documented separately and are not transferred to APK34/35. |
+| Network and local playback | Moving video, Play/Pause/seek; local audio, muxed progressive, Bandcamp audio and live HLS/DVR checked. Audible sound awaits a physical-phone check. |
+| Queue and history |20 native/mini transitions, mutations, repeat/shuffle, 318-item restored queue, history/resume toggles and finished-video restart checked. Fresh `t=0` wrongly restores history. |
+| Controls and modes | Quality, actual speed, chapters, visible subtitles, preview modes, background, explicit popup and PiP checked. Automatic popup return loses video; popup forgets position. |
+| Lifecycle and recovery | Paused/playing recreation and minimize=None return passed; transport error/Retry and late-request cancellation isolation checked. |
+| ZIP36 fixes | Explicit-zero preservation and consistent position priority, popup geometry persistence, large-font labels and automatic popup surface-owner lifetime. Static checks pass; new APK retest pending. |
 | Optional YouTube sign-in | Experimental and controlled at build time. It cannot guarantee access to every video or network address. |
 
-[APK34 evidence and exact APK hash](docs/APK34_DEVICE_CHECKPOINT.md) ·
-[Scoped APK34 matrix](docs/APK34_ACCEPTANCE.csv) ·
-[Earlier APK33 regression](docs/APK33_DEVICE_CHECKPOINT.md).
-These device results belong to APK34, not the ZIP35 fix. Audible sound is deferred,
-at the user's request, to a separate physical-phone check.
+[APK35 checkpoint and exact APK hash](docs/APK35_DEVICE_CHECKPOINT.md) ·
+[Full matrix](docs/APK35_ACCEPTANCE.csv): 109 coverage rows, 87 PASS, 8 PARTIAL,
+5 FAIL, 2 NOT VERIFIED and 7 DEFERRED. Five failing rows describe four unique APK35
+defects. Counts include source checks; they are not a product-readiness percentage.
+**ZIP36 fixes remain unbuilt and untested on-device.**
 
-Full acceptance remains incomplete: both auth build/test/isolation reports and full
-XML/counts, new-APK recreation regression, source/track/history/resume coverage,
-asynchronous races, network recovery and physical Android 16 checks are pending.
-A black first frame after selecting an unplayed item while paused at zero remains
-a documented limitation. Legacy player/media-browser classes remain; Android Auto
-is unverified. External-player and Kodi actions stay external. Full SABR/PoToken
-support and a complete refactor-branch port are outside this checkpoint.
-ZIP numbers identify source handoffs, not upstream releases.
+Full acceptance still needs external builds/tests/isolation for both auth variants,
+full XML/counts, ZIP36 regression and physical Android 16 checks. Audio-language and
+pitch controls were exercised, but decoded/acoustic results remain partial. Remote
+DASH manifest, scheduled live and post-live audio are unverified; SoundCloud did not
+yield a session in the checked fixture. Audible sound is deferred, at the user's
+request, to a physical phone. Cold remote paused-zero first frames may remain black;
+controlled local zero did render. Legacy/media-browser classes remain; Android Auto,
+full SABR/PoToken and a full refactor-branch port are not accepted at this checkpoint.
+External-player/Kodi actions remain external. ZIP numbers identify source handoffs.
 
 ## Source layout
 
@@ -76,7 +72,7 @@ xvfb-run -a ./gradlew :app:testDebugUnitTest :youtube-auth-api:test :shared:jvmT
 ```
 
 Repeat with `-Pslooopipe.withAuth=false` to check the auth-free variant. These are
-validation commands, not a claim that both variants have passed. There are 51
+validation commands, not a claim that both variants have passed. There are 59
 app/NewPlayer JVM test cases in source; complete current-run XML/counts are pending.
 A normal checkout build writes APKs under `NewPipe/app/build/outputs/apk/` and uses
 its debug signing setup. A different signing certificate cannot update an existing install.
@@ -85,7 +81,7 @@ For source-ZIP selection, retained run reports and signing with your existing ex
 key, use [the WSL builder workflow](tools/README-wsl.md), revision
 `20261022-09-memory-cleanup`. It requires its own `signing/` inputs, keeps dependency
 caches and attempts to release clean Linux RAM caches after the run. It supports
-`--no-memory-cleanup`. The supplied ZIP35 is the current source handoff; earlier archives remain unchanged. Public `main`
+`--no-memory-cleanup`. The supplied ZIP36 is the current source handoff; earlier archives remain unchanged. Public `main`
 contains the same application code with refreshed publication documentation; follow
 the workflow above to create a source ZIP from a checkout.
 

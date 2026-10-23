@@ -129,7 +129,7 @@ class NewPlayerRuntime private constructor(private val app: Application) {
                 // Read the real timeline here instead of interpreting dumpsys position=-1 as a stall.
                 val duration = player.duration.takeIf { it != C.TIME_UNSET }
                 val liveOffset = player.currentLiveOffset.takeIf { it != C.TIME_UNSET }
-                Log.i(TAG, "engine.timeline live=${player.isCurrentMediaItemLive} seekable=${player.isCurrentMediaItemSeekable} position=${player.currentPosition} buffered=${player.bufferedPosition} duration=$duration liveOffset=$liveOffset playing=${player.isPlaying} speed=${player.playbackParameters.speed}")
+                Log.i(TAG, "engine.timeline live=${player.isCurrentMediaItemLive} seekable=${player.isCurrentMediaItemSeekable} position=${player.currentPosition} buffered=${player.bufferedPosition} duration=$duration liveOffset=$liveOffset playing=${player.isPlaying} speed=${player.playbackParameters.speed} pitch=${player.playbackParameters.pitch} skipSilence=${(player as? ExoPlayer)?.skipSilenceEnabled}")
             }
         }
 
@@ -158,7 +158,7 @@ class NewPlayerRuntime private constructor(private val app: Application) {
             for (group in tracks.groups) {
                 for (index in 0 until group.length) {
                     val format = group.getTrackFormat(index)
-                    Log.i(TAG, "engine.track type=${group.type} selected=${group.isTrackSelected(index)} supported=${group.isTrackSupported(index)} mime=${format.sampleMimeType} codecs=${format.codecs} size=${format.width}x${format.height}")
+                    Log.i(TAG, "engine.track type=${group.type} selected=${group.isTrackSelected(index)} supported=${group.isTrackSupported(index)} mime=${format.sampleMimeType} codecs=${format.codecs} size=${format.width}x${format.height} language=${format.language}")
                 }
             }
         }
@@ -248,8 +248,11 @@ class NewPlayerRuntime private constructor(private val app: Application) {
         if (existing?.streams == desired && exo != null && exo.mediaItemCount > 0) {
             val index = source.index.coerceIn(0, exo.mediaItemCount - 1)
             if (index != exo.currentMediaItemIndex) exo.seekToDefaultPosition(index)
-            val explicit = info?.startPosition?.takeIf { it > 0 }?.coerceAtMost(Long.MAX_VALUE / 1000)?.times(1000)
-                ?: source.item?.recoveryPosition?.takeIf { it >= 0 }
+            val explicit = PlaybackResumePolicy.requestedPosition(
+                info?.duration ?: source.item?.duration ?: 0,
+                source.item?.recoveryPosition ?: PlayQueueItem.RECOVERY_UNSET,
+                info?.startPosition ?: 0
+            )
             if (explicit != null) exo.seekTo(explicit)
             setPresentation(mode)
             player.playWhenReady = playing

@@ -7,6 +7,7 @@ import org.schabi.newpipe.extractor.Image;
 import org.schabi.newpipe.extractor.stream.StreamInfo;
 import org.schabi.newpipe.extractor.stream.StreamInfoItem;
 import org.schabi.newpipe.extractor.stream.StreamType;
+import org.schabi.newpipe.newplayer.PlaybackStartIntent;
 import org.schabi.newpipe.util.ExtractorHelper;
 
 import java.io.Serializable;
@@ -45,6 +46,8 @@ public class PlayQueueItem implements Serializable {
 
         if (info.getStartPosition() > 0) {
             setRecoveryPosition(info.getStartPosition() * 1000);
+        } else if (PlaybackStartIntent.hasExplicitZeroTimestamp(info.getOriginalUrl())) {
+            setRecoveryPosition(0);
         }
     }
 

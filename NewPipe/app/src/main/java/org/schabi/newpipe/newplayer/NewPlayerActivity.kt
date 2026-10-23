@@ -224,11 +224,13 @@ class NewPlayerActivity : AppCompatActivity() {
         actions.addView(
             Button(this).apply {
                 setText(R.string.slooopipe_local_back)
+                isAllCaps = false
                 setOnClickListener { finish() }
             },
             LinearLayout.LayoutParams(0, -2, 1f)
         )
         chooseOrRetry = Button(this).apply {
+            isAllCaps = false
             setOnClickListener {
                 if (network) {
                     val exo = runtime.player.exoPlayer.value
@@ -266,8 +268,9 @@ class NewPlayerActivity : AppCompatActivity() {
             modes.addView(
                 Button(this).apply {
                     setText(label)
+                    isAllCaps = false
                     contentDescription = getString(label)
-                    maxLines = 2
+                    maxLines = 3
                     ellipsize = android.text.TextUtils.TruncateAt.END
                     setOnClickListener { action() }
                 },
@@ -380,6 +383,9 @@ class NewPlayerActivity : AppCompatActivity() {
                     if (android.provider.Settings.canDrawOverlays(this)) {
                         runtime.setPresentation(PlaybackPresentation.POPUP)
                         startService(Intent(this, NewPlayerPopupService::class.java))
+                        // Match the explicit popup action: destroy this surface owner so returning
+                        // creates a fresh native surface instead of reusing one stolen by PlayerView.
+                        finish()
                     } else {
                         runtime.player.pause()
                     }
