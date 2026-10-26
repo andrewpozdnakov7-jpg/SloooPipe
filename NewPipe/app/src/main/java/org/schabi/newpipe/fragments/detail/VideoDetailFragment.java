@@ -93,6 +93,7 @@ import org.schabi.newpipe.local.history.HistoryRecordManager;
 import org.schabi.newpipe.local.playlist.LocalPlaylistFragment;
 import org.schabi.newpipe.newplayer.NewPlayerActivity;
 import org.schabi.newpipe.newplayer.NewPlayerRuntime;
+import org.schabi.newpipe.newplayer.PlaybackStartIntent;
 import org.schabi.newpipe.player.Player;
 import org.schabi.newpipe.player.PlayerService;
 import org.schabi.newpipe.player.PlayerType;
@@ -898,7 +899,8 @@ public final class VideoDetailFragment
 
     private void runWorker(final boolean forceLoad, final boolean addToBackStack) {
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
-        currentWorker = ExtractorHelper.getStreamInfo(serviceId, url, forceLoad)
+        final String requestedUrl = url;
+        currentWorker = ExtractorHelper.getStreamInfo(serviceId, requestedUrl, forceLoad)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(result -> {
@@ -910,10 +912,10 @@ public final class VideoDetailFragment
                     } else {
                         handleResult(result);
                         showContent();
+                        if (playQueue == null) {
+                            playQueue = PlaybackStartIntent.createQueue(result, requestedUrl);
+                        }
                         if (addToBackStack) {
-                            if (playQueue == null) {
-                                playQueue = new SinglePlayQueue(result);
-                            }
                             if (stack.isEmpty() || !stack.peek().getPlayQueue()
                                     .equalStreams(playQueue)) {
                                 stack.push(new StackItem(serviceId, url, title, playQueue));

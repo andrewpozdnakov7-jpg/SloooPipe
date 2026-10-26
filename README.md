@@ -8,6 +8,13 @@ other developers can study, adapt and reuse.
 
 ## Development status
 
+**2026-10-26 follow-up:** preview1 passed the focused font/popup/local/queue device
+checks. CCC still loses a user's explicit `t=0` when extraction rewrites originalUrl;
+YouTube retest is blocked by a not-bot challenge. New source preserves the raw input
+at fresh-queue creation, with four regression cases. Static checks pass; its CI/APK
+retest is pending. [Evidence and scope](docs/RAW_ZERO_FOLLOWUP_20261026.md).
+
+
 **Source checkpoint: ZIP36, 2026-10-23. Latest device evidence: APK35**, tested in
 LDPlayer / Android 14. Network Play through NewPlayer, local media, queues/history,
 live HLS/DVR, subtitles/chapters, quality/speed and background/popup/PiP were exercised.
@@ -83,8 +90,8 @@ xvfb-run -a ./gradlew :app:testDebugUnitTest :youtube-auth-api:test :shared:jvmT
 ```
 
 Repeat with `-Pslooopipe.withAuth=false` to check the auth-free variant. These are
-validation commands, not a claim that both variants have passed. There are 59
-app/NewPlayer integration test cases; all 59 executed successfully per CI variant,
+validation commands, not a claim that both variants have passed. There are 63 app/NewPlayer integration cases in source (four new cases pending).
+Previous CI 9050389 executed 59 integration cases per variant,
 within 214 app tests. Full CI XML/counts were reviewed; the earlier WSL run remains
 user-reported without its complete reports.
 A normal checkout build writes APKs under `NewPipe/app/build/outputs/apk/` and uses

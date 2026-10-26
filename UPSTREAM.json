@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-23",
+  "updated": "2026-10-26",
   "newpipe": {
     "repo": "TeamNewPipe/NewPipe",
     "commit": "f46290f28ab44fa514bac0a9f0252fd7d2afb66f",
@@ -78,5 +78,19 @@
     "release_url": "https://github.com/andrewpozdnakov7-jpg/SloooPipe/releases/tag/preview-20261023-01",
     "device_regression": "PENDING",
     "details": "docs/CI_PREVIEW_20261023.md"
+  },
+  "pending_followup": {
+    "scope": "Raw incoming explicit-zero request before metadata originalUrl rewriting",
+    "previous_preview_device_matrix": {
+      "PASS": 17,
+      "BLOCKED": 1,
+      "FAIL": 1
+    },
+    "new_JUnit_source_cases": 4,
+    "integration_source_inventory": 63,
+    "static_checks": "PASS",
+    "CI": "PENDING",
+    "new_APK_retest": "PENDING",
+    "details": "docs/RAW_ZERO_FOLLOWUP_20261026.md"
   }
 }

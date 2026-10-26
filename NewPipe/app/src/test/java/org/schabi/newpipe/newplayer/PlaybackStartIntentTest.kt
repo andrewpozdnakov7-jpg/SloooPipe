@@ -14,6 +14,38 @@ import org.schabi.newpipe.player.playqueue.SinglePlayQueue
 
 class PlaybackStartIntentTest {
     @Test
+    fun rawZeroRequestSurvivesRewrittenExtractorOriginalUrl() {
+        for (request in listOf("$URL&t=0", "$URL#t=0", "$URL&start=00")) {
+            val queue = PlaybackStartIntent.createQueue(info(URL), request)
+            val item = queue.item!!
+            assertEquals(URL, item.url)
+            assertEquals(0L, item.recoveryPosition)
+            assertEquals(0L, PlaybackResumePolicy.position(600, item.recoveryPosition, 0, StreamStateEntity(1, 120000)))
+            assertEquals(0L, checkNotNull(PlaybackResumePolicy.requestedPosition(600, item.recoveryPosition, 0)))
+        }
+    }
+
+    @Test
+    fun ordinaryRequestIgnoresAStaleZeroHintInMetadata() {
+        val item = PlaybackStartIntent.createQueue(info("$URL&t=0"), URL).item!!
+        assertEquals(PlayQueueItem.RECOVERY_UNSET, item.recoveryPosition)
+        assertEquals(120000L, PlaybackResumePolicy.position(600, item.recoveryPosition, 0, StreamStateEntity(1, 120000)))
+        assertNull(PlaybackResumePolicy.requestedPosition(600, item.recoveryPosition, 0))
+    }
+
+    @Test
+    fun parsedPositiveTimestampKeepsItsExistingPrecedence() {
+        val item = PlaybackStartIntent.createQueue(info("$URL&t=45", 45), "$URL&t=0").item!!
+        assertEquals(45000L, item.recoveryPosition)
+    }
+
+    @Test
+    fun absentRawRequestKeepsTheMetadataFallback() {
+        assertEquals(0L, PlaybackStartIntent.createQueue(info("$URL&t=0"), null).item!!.recoveryPosition)
+        assertEquals(PlayQueueItem.RECOVERY_UNSET, PlaybackStartIntent.createQueue(info(URL), null).item!!.recoveryPosition)
+    }
+
+    @Test
     fun queryZeroSurvivesCanonicalQueueAndHistoryFallback() {
         val item = PlayQueueItem(info("$URL&t=0"))
         assertEquals(URL, item.url)

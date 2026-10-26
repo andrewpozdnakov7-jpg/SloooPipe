@@ -1,0 +1,20 @@
+id,candidate,status,evidence,note
+IDENTITY_INSTALL,CI9050389 auth-with,PASS,identity.json; initial-state.json; 001-updated-start.png,APK35 updated in place to signed CI9050389; APK re-read/hash verified; selected preferences and known fixture history unchanged.
+YOUTUBE_FRESH,CI9050389 auth-with,BLOCKED,001-updated-start-logcat.txt; 002-network-blocked.png,Saved and fresh YouTube fixture both request not-bot confirmation. Source environment failure; no WiFi/ADB changes.
+FONT20_LABELS,CI9050389 auth-with,PASS,004-font20-paused.png; 004-font20-state.json,All six header actions are readable at font2.0 without word splitting or mode truncation; long video title alone ellipsizes as expected.
+PAUSED_RECREATION,CI9050389 auth-with,PASS,004-font20-state.json; 005-font-default-restored.png,Paused178644 retained exactly through font2.0 and restoration to1.0.
+NETWORK_CCC,CI9050389 auth-with,PASS,003-ccc-fresh.png; 004-font20-paused.png,"Independent network source plays with visible video, pause and history resume; YouTube challenge recorded separately."
+HOME_POPUP_RETURN,CI9050389 auth-with,PASS,006-home-popup-state.json; 007-home-popup-return-paused.png; 008-popup-return-playing.png; 010-popup-paused-return.png; 010-paused-popup-states.json,Automatic popup now destroys old native host; fresh native surface is visible. Playing return works; paused return stays exactly194517ms with image.
+POPUP_REMEMBER_ON,CI9050389 auth-with,PASS,011-popup-moved.png; 012-popup-position-reopened.png; 012-popup-remember-on.json,Dragged window saves existing x/y/width preferences; closing into native and reopening retains exact frame.
+POPUP_REMEMBER_OFF,CI9050389 auth-with,PASS,013-popup-remember-off.json; 013-popup-remember-off.png,Remember OFF uses centered defaults; partial offscreen label in initial automation was scrolled into view before toggling.
+POPUP_ROTATION,CI9050389 auth-with,PASS,014-popup-landscape.png; 015-popup-portrait-restored.png; 015-popup-rotation.json,"Paused popup retains video, clamps to landscape bounds and restores original portrait frame; original rotation settings restored."
+EXPLICIT_ZERO_CCC,CI9050389 auth-with,FAIL,016-explicit-zero-ccc.png; 016-explicit-zero-ccc.json,Explicit t=0 restored an older position through the real fresh-session path with warm metadata cache.
+NO_TIMESTAMP_RESUME,CI9050389 auth-with,PASS,017-no-timestamp-history.json; 017-no-timestamp-history.png,Canonical link without timestamp still resumes saved history around194s.
+LOCAL_CANCEL,CI9050389 auth-with,PASS,018-local-cancel.json,Cancelling Android document picker retains previous network queue and exact paused position.
+LOCAL_VIDEO_TRANSPORT,CI9050389 auth-with,PASS,019-local-video-paused.png; 020-local-paused-seek.png; 021-local-playing-a.png; 021-local-playing-b.png; 021-local-transport.json,"Local180s fixture plays, paused seek advances30s, play/pause works without queue history."
+LOCAL_MINI_TRANSPORT,CI9050389 auth-with,PASS,022-local-mini.png; 023-local-mini-reopened.png; 023-local-mini.json,Local mini Play/Pause and reopen retain local file and paused position.
+LOCAL_CLOSE,CI9050389 auth-with,PASS,024-local-closed.png,Local mini Close releases active playback and removes mini.
+LOCAL_AUDIO,CI9050389 auth-with,PASS,025-local-audio.png; 025-local-audio.json,Local M4A reaches paused ready state; audible sound remains deferred to phone.
+QUEUE_APPEND_SELECT,CI9050389 auth-with,PASS,026-queue-selection.json; 026-queue-duplicate-next.png,Enqueue known CCC duplicate makes queue2; Next selects index1 while retaining pause.
+QUEUE_UI_CYCLES,CI9050389 auth-with,PASS,027-queue-cycles.json; 027-queue-cycles-final.png,3 native and3 mini queue open/close/video-return cycles retain item1 and pause with <=50ms drift.
+NO_FATAL_IN_BATCH,CI9050389 auth-with,PASS,identity.json; continuous-app-local.txt,Same app PID through batch; no Java FATAL EXCEPTION in scoped app log. YouTube source errors are nonfatal and separate.
