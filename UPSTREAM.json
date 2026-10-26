@@ -26,11 +26,11 @@
     "archive_sha256": "d3468229bc50266b123579d85b049e5e28c4057561fca1c220cc84ff12836549",
     "directory": "NewPipe/third-party/NewPlayer",
     "module": ":newplayer-local",
-    "scope": "Embedded library and Kotlin host. APK35 broad regression documented, including paused recreation. ZIP36 host fixes explicit-zero/position priority, popup geometry, large-font labels and automatic-popup surface lifetime; ZIP36 auth-enabled external build reported successful by user; new APK device regression pending. Generic patch unchanged 13 files/7 contract cases, pristine-pin apply/reverse/Hilt checks repeated; no upstream build/demo/PR.",
+    "scope": "Embedded library and Kotlin host. APK35 broad matrix retained. Exact signed CI2c22439 auth-with passed raw-zero/history/router and font/popup/queue/local focused regression; both variants passed CI. Generic patch unchanged, no upstream build/demo/PR. Physical Android16/audio and wider partial cases pending.",
     "live_branch_verified": "2026-10-22"
   },
   "source_branch": "base/newpipe-dev-20261021",
-  "verified": "APK35 device batch retained separately. Both auth variants passed CI run39967867977 at9050389:214 app+15 auth API+31 shared tests per variant, zero failures/errors/skips; all 59 integration cases including8 new passed. Downloaded XML/APK SHA256/certificate identity verified. Existing certificate matches APK35. Signed experimental preview; new-APK device regression, physical Android 16/audio and partial scenarios pending.",
+  "verified": "Both auth variants passed CI40319678374 at2c22439:264 executions each. Exact auth-with APK passed raw-zero/history/non-autoplay routing and font/popup/queue/local smoke in LDPlayer Android14. YouTube challenge and physical Android16/audio remain open. Historical matrices retained.",
   "live_refs_20261022": {
     "newpipe_dev": "7436ba1010493515ff1a5f5d60aacdc6168c8500",
     "newpipe_refactor": "455b6f0de6bbc135a51f2a77510863edee8b3cae",
@@ -53,6 +53,33 @@
     "details": "docs/ZIP36_BUILD_CHECKPOINT.md"
   },
   "latest_ci": {
+    "run_id": 40319678374,
+    "run_attempt": 1,
+    "url": "https://github.com/andrewpozdnakov7-jpg/SloooPipe/actions/runs/40319678374",
+    "source_commit": "2c224398638e5699a5c8c55c29259a41a4d21c53",
+    "auth_variants": [
+      "with",
+      "without"
+    ],
+    "result": "SUCCESS",
+    "tests_per_variant": {
+      "app": 218,
+      "auth_api": 15,
+      "shared": 31,
+      "integration_in_app": 63,
+      "timestamp_in_integration": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "XML_counts_and_APK_hashes_reviewed": true,
+    "signature_and_existing_certificate_verified": true,
+    "release_tag": "preview-20261026-01",
+    "release_url": "https://github.com/andrewpozdnakov7-jpg/SloooPipe/releases/tag/preview-20261026-01",
+    "device_regression": "Focused auth-with batch only; auth-without not installed",
+    "details": "docs/CI_PREVIEW_20261026.md"
+  },
+  "previous_ci": {
     "run_id": 39967867977,
     "run_attempt": 1,
     "url": "https://github.com/andrewpozdnakov7-jpg/SloooPipe/actions/runs/39967867977",
@@ -79,7 +106,7 @@
     "device_regression": "PENDING",
     "details": "docs/CI_PREVIEW_20261023.md"
   },
-  "pending_followup": {
+  "completed_followup": {
     "scope": "Raw incoming explicit-zero request before metadata originalUrl rewriting",
     "previous_preview_device_matrix": {
       "PASS": 17,
@@ -89,8 +116,12 @@
     "new_JUnit_source_cases": 4,
     "integration_source_inventory": 63,
     "static_checks": "PASS",
-    "CI": "PENDING",
-    "new_APK_retest": "PENDING",
+    "CI": "PASS, both variants",
+    "new_APK_retest": {
+      "PASS": 12,
+      "PARTIAL": 1,
+      "BLOCKED": 1
+    },
     "details": "docs/RAW_ZERO_FOLLOWUP_20261026.md"
   }
 }

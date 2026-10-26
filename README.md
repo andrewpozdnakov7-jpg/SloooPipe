@@ -8,48 +8,41 @@ other developers can study, adapt and reuse.
 
 ## Development status
 
-**2026-10-26 follow-up:** preview1 passed the focused font/popup/local/queue device
-checks. CCC still loses a user's explicit `t=0` when extraction rewrites originalUrl;
-YouTube retest is blocked by a not-bot challenge. New source preserves the raw input
-at fresh-queue creation, with four regression cases. Static checks pass; its CI/APK
-retest is pending. [Evidence and scope](docs/RAW_ZERO_FOLLOWUP_20261026.md).
+**Latest checkpoint: signed preview 2026-10-26**, source `2c22439`.
+Both auth variants passed [GitHub Actions](https://github.com/andrewpozdnakov7-jpg/SloooPipe/actions/runs/40319678374): **264 tests per variant**
+(218 app + 15 auth API + 31 shared), zero failures/errors/skips. The app suite
+includes 63 NewPlayer integration cases and all 12 timestamp cases. APK hashes,
+test XML, auth isolation and continuity of the existing signing key were verified.
+[Download signed APKs and exact source](https://github.com/andrewpozdnakov7-jpg/SloooPipe/releases/tag/preview-20261026-01) ·
+[Detailed CI/device results](docs/CI_PREVIEW_20261026.md).
 
+The auth-enabled APK was installed and tested in updated LDPlayer / Android 14.
+The raw incoming `t=0` defect is fixed even when extraction rewrites the URL and
+cached history exists. Canonical links retain normal history/resume behavior.
+The separate non-autoplay routing path also passed. Font 200%, automatic popup
+return with picture, popup position/rotation, queue return and local video/mini
+controls passed the focused regression. The auth-free APK has CI evidence only.
+Paused popup rotation can delay the picture (black at 2 seconds, visible at 8 in
+one repeat); this remains a partial case, separate from passed geometry checks.
 
-**Source checkpoint: ZIP36, 2026-10-23. Latest device evidence: APK35**, tested in
-LDPlayer / Android 14. Network Play through NewPlayer, local media, queues/history,
-live HLS/DVR, subtitles/chapters, quality/speed and background/popup/PiP were exercised.
-The paused-recreation fix from ZIP35 passed at font scales 1.3/2.0/default.
-No stable release is available.
-
-**Both auth variants passed [GitHub Actions](https://github.com/andrewpozdnakov7-jpg/SloooPipe/actions/runs/39967867977):** 214 app  + 15 auth API  + 31 shared
-tests per variant, zero failures/errors/skips. Downloaded XML totals, APK hashes and
-existing signing-certificate identity were checked. [Signed preview and source](https://github.com/andrewpozdnakov7-jpg/SloooPipe/releases/tag/preview-20261023-01) ·
-[CI verification record](docs/CI_PREVIEW_20261023.md). New-APK device regression remains pending.
-
-| Area | APK35 evidence and current boundary |
+| Evidence | Scope |
 | --- | --- |
-| Network and local playback | Moving video, Play/Pause/seek; local audio, muxed progressive, Bandcamp audio and live HLS/DVR checked. Audible sound awaits a physical-phone check. |
-| Queue and history |20 native/mini transitions, mutations, repeat/shuffle, 318-item restored queue, history/resume toggles and finished-video restart checked. Fresh `t=0` wrongly restores history. |
-| Controls and modes | Quality, actual speed, chapters, visible subtitles, preview modes, background, explicit popup and PiP checked. Automatic popup return loses video; popup forgets position. |
-| Lifecycle and recovery | Paused/playing recreation and minimize=None return passed; transport error/Retry and late-request cancellation isolation checked. |
-| ZIP36 fixes | Explicit-zero preservation and consistent position priority, popup geometry persistence, large-font labels and automatic popup surface-owner lifetime. Static checks pass; new APK retest pending. |
-| Optional YouTube sign-in | Experimental and controlled at build time. It cannot guarantee access to every video or network address. |
+| [Current focused matrix](docs/RAW_ZERO_DEVICE_20261026.csv) | Exact signed auth-with CI artifact; update identity, raw-zero/history/router, font/popup, queue and local smoke. |
+| [Preview1 batch](docs/PREVIEW1_RETEST_20261026.csv) | Historical 17 PASS, 1 FAIL, 1 BLOCKED; CCC failure is corrected by the newer APK. |
+| [APK35 batch](docs/APK35_ACCEPTANCE.csv) | Historical broad coverage: 109 rows, 87 PASS, 8 PARTIAL, 5 FAIL, 2 NOT VERIFIED, 7 DEFERRED. Five FAIL represented four unique defects. |
 
-[APK35 checkpoint and exact APK hash](docs/APK35_DEVICE_CHECKPOINT.md) ·
-[Full matrix](docs/APK35_ACCEPTANCE.csv): 109 coverage rows, 87 PASS, 8 PARTIAL,
-5 FAIL, 2 NOT VERIFIED and 7 DEFERRED. Five failing rows describe four unique APK35
-defects. Counts include source checks; they are not a product-readiness percentage.
-**ZIP36 application sources pass CI for both auth variants; fixes still need device retesting.**
+These coverage counts are not a readiness percentage; historical results are not
+silently transferred to a newer APK. Prior checks include live HLS/DVR, subtitles,
+chapters, speed/quality, history settings, large queues, background/popup/PiP and
+network recovery. Details and remaining gaps are in [current results](RESULT.md).
 
-The matrix above preserves the original APK35 batch; later CI evidence is separate.
-Full acceptance still needs new-APK device regression and physical Android 16 checks. Audio-language and
-pitch controls were exercised, but decoded/acoustic results remain partial. Remote
-DASH manifest, scheduled live and post-live audio are unverified; SoundCloud did not
-yield a session in the checked fixture. Audible sound is deferred, at the user's
-request, to a physical phone. Cold remote paused-zero first frames may remain black;
-controlled local zero did render. Legacy/media-browser classes remain; Android Auto,
-full SABR/PoToken and a full refactor-branch port are not accepted at this checkpoint.
-External-player/Kodi actions remain external. ZIP numbers identify source handoffs.
+**No stable release is available.** Debug diagnostics remain enabled. YouTube
+currently hits a not-bot challenge in the checked environment; optional sign-in
+does not guarantee playback. Physical Android 16 and audible sound await phone
+testing. Decoded audio-language/pitch, remote DASH manifests, scheduled/post-live
+cases and SoundCloud remain partial or unverified. Cold remote paused-zero first
+frames can remain black; local zero rendered. Android Auto, full SABR/PoToken and
+a full refactor-branch port are not accepted. External player/Kodi remain external.
 
 ## Source layout
 
@@ -89,11 +82,10 @@ chmod +x gradlew
 xvfb-run -a ./gradlew :app:testDebugUnitTest :youtube-auth-api:test :shared:jvmTest :app:verifyAuthIsolation :app:assembleDebug -Pslooopipe.withAuth=true
 ```
 
-Repeat with `-Pslooopipe.withAuth=false` to check the auth-free variant. These are
-validation commands, not a claim that both variants have passed. There are 63 app/NewPlayer integration cases in source (four new cases pending).
-Previous CI 9050389 executed 59 integration cases per variant,
-within 214 app tests. Full CI XML/counts were reviewed; the earlier WSL run remains
-user-reported without its complete reports.
+Repeat with `-Pslooopipe.withAuth=false` to check the auth-free variant. Both
+variants passed the current CI: 218 app tests, including all 63 NewPlayer integration
+cases, plus 15 auth API and 31 shared tests per variant. Downloaded XML was reviewed.
+The earlier external WSL result remains user-reported without full reports.
 A normal checkout build writes APKs under `NewPipe/app/build/outputs/apk/` and uses
 its debug signing setup. A different signing certificate cannot update an existing install.
 
@@ -101,9 +93,9 @@ For source-ZIP selection, retained run reports and signing with your existing ex
 key, use [the WSL builder workflow](tools/README-wsl.md), revision
 `20261022-09-memory-cleanup`. It requires its own `signing/` inputs, keeps dependency
 caches and attempts to release clean Linux RAM caches after the run. It supports
-`--no-memory-cleanup`. The supplied ZIP36 is the current source handoff; earlier archives remain unchanged. Public `main`
-contains the same application code with refreshed publication documentation; follow
-the workflow above to create a source ZIP from a checkout.
+`--no-memory-cleanup`. Use the current preview source asset for the exact tested CI commit; ZIP36 and
+earlier archives remain historical and unchanged. Public `main` can contain newer
+publication documentation. The release tag identifies the tested source.
 
 ## Contributing and reuse
 

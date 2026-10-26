@@ -45,15 +45,14 @@ the compatibility fallback. No new raw-URL logging or persistence is introduced.
 
 Four new JUnit cases exercise rewritten metadata, ordinary requests with stale-zero
 metadata, positive timestamp precedence and absent-request fallback using real
-SinglePlayQueue objects. There are 63 integration test functions in source; the new
-four have not executed yet. Previous CI 9050389's59 integration cases within214 app
-tests are separate evidence. Static Ktlint/Checkstyle and diff checks pass.
+SinglePlayQueue objects. All 63 integration cases, including the 12 timestamp
+cases, passed in both CI variants. Static Ktlint/Checkstyle and diff checks pass.
 
-## Pending validation
+## Follow-up result
 
-The follow-up has not yet passed CI or device retest. Run both auth variants using
-the existing workflow/key; check full XML, signatures and APK hashes. Then install
-the exact CI auth-with artifact and repeat the failing CCC zero case, no-timestamp
-history, active reuse and non-autoplay routing, followed by brief UI/local smoke.
-YouTube-specific runtime, physical Android16/audio and broader partial cases remain
-open. This is not stable-release acceptance. Original preview1 assets/tag are immutable.
+Both auth variants passed CI at 2c22439. The exact signed auth-with APK passed the
+warm-cache zero reproduction, active zero reuse, ordinary active/fresh history
+and non-autoplay Router checks. Font/popup, queue and local-video smoke also passed.
+Historical preview1 FAIL/BLOCKED rows above remain unchanged.
+See [exact APK, CI/device scope and remaining limits](CI_PREVIEW_20261026.md) and
+the [new focused matrix](RAW_ZERO_DEVICE_20261026.csv).
